@@ -15,13 +15,13 @@ An MCP (Model Context Protocol) server that provides local access to Aztec docum
 ### With npx (recommended)
 
 ```bash
-npx aztec-mcp-server
+npx @aztec/mcp-server
 ```
 
 ### Global install
 
 ```bash
-npm install -g aztec-mcp-server
+npm install -g @aztec/mcp-server
 aztec-mcp
 ```
 
@@ -36,7 +36,7 @@ Add to your `.mcp.json`:
   "mcpServers": {
     "aztec-local": {
       "command": "npx",
-      "args": ["-y", "aztec-mcp-server@latest"]
+      "args": ["-y", "@aztec/mcp-server@latest"]
     }
   }
 }
@@ -135,7 +135,7 @@ Override with the `AZTEC_MCP_REPOS_DIR` environment variable:
   "mcpServers": {
     "aztec-local": {
       "command": "npx",
-      "args": ["-y", "aztec-mcp-server"],
+      "args": ["-y", "@aztec/mcp-server"],
       "env": {
         "AZTEC_MCP_REPOS_DIR": "/custom/path"
       }
@@ -153,7 +153,7 @@ Set the default Aztec version with the `AZTEC_DEFAULT_VERSION` environment varia
   "mcpServers": {
     "aztec-local": {
       "command": "npx",
-      "args": ["-y", "aztec-mcp-server"],
+      "args": ["-y", "@aztec/mcp-server"],
       "env": {
         "AZTEC_DEFAULT_VERSION": "v3.0.0-devnet.6-plugin.1"
       }
@@ -166,8 +166,8 @@ Set the default Aztec version with the `AZTEC_DEFAULT_VERSION` environment varia
 
 ```bash
 # Clone the repo
-git clone https://github.com/critesjosh/aztec-mcp-server
-cd aztec-mcp-server
+git clone https://github.com/aztecprotocol/mcp-server
+cd mcp-server
 
 # Install dependencies
 npm install
