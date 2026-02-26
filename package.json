@@ -1,5 +1,5 @@
 {
-  "name": "aztec-mcp-server",
+  "name": "@aztec/mcp-server",
   "version": "1.6.0",
   "description": "MCP server for Aztec development - clones and searches Aztec documentation and examples",
   "type": "module",
@@ -13,7 +13,7 @@
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepublishOnly": "npm test && npm run build"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "aztec",
@@ -28,7 +28,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/critesjosh/aztec-mcp-server"
+    "url": "https://github.com/aztecprotocol/mcp-server"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
@@ -36,12 +36,18 @@
     "simple-git": "^3.27.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.4.2",
+    "@commitlint/config-conventional": "^20.4.2",
     "@types/node": "^22.10.0",
+    "semantic-release": "^25.0.3",
     "typescript": "^5.7.0",
     "vitest": "^4.0.18"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "dist",
