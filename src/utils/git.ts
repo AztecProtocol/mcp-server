@@ -62,7 +62,7 @@ export async function cloneRepo(
   const git: SimpleGit = simpleGit();
 
   // Determine ref to checkout: commit > tag > branch
-  const ref = config.commit || config.tag || config.branch;
+  const ref = config.commit || config.tag || config.branch || "default";
   const refType = config.commit ? "commit" : config.tag ? "tag" : "branch";
 
   if (config.sparse && config.sparse.length > 0) {
