@@ -26,6 +26,14 @@ describe("AZTEC_REPOS", () => {
     expect(noir!.sparse!.length).toBeGreaterThan(0);
   });
 
+  it("aztec-packages has sparsePathOverrides for docs/docs on next branch", () => {
+    const ap = AZTEC_REPOS.find((r) => r.name === "aztec-packages");
+    expect(ap?.sparse).toContain("docs/docs");
+    expect(ap?.sparsePathOverrides).toEqual([
+      { paths: ["docs/docs"], branch: "next" },
+    ]);
+  });
+
   it('noir and noir-examples have branch: "master"', () => {
     const noir = AZTEC_REPOS.find((r) => r.name === "noir");
     const noirExamples = AZTEC_REPOS.find((r) => r.name === "noir-examples");

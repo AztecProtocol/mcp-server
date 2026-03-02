@@ -90,6 +90,14 @@ export async function cloneRepo(
       await repoGit.raw(["sparse-checkout", "set", ...config.sparse]);
       await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
       await repoGit.checkout(config.tag);
+
+      // Apply sparse path overrides from different branches
+      if (config.sparsePathOverrides) {
+        for (const override of config.sparsePathOverrides) {
+          await repoGit.fetch(["--depth=1", "origin", override.branch]);
+          await repoGit.checkout([`origin/${override.branch}`, "--", ...override.paths]);
+        }
+      }
     } else {
       await git.clone(config.url, repoPath, [
         "--filter=blob:none",

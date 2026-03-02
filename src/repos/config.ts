@@ -22,6 +22,8 @@ export interface RepoConfig {
     code?: string[];
     docs?: string[];
   };
+  /** Override specific sparse paths to come from a different branch instead of the tag */
+  sparsePathOverrides?: { paths: string[]; branch: string }[];
 }
 
 /** Default Aztec version (tag) to use - can be overridden via AZTEC_DEFAULT_VERSION env var */
@@ -42,6 +44,9 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
       "barretenberg/ts/src",
       "boxes",
       "playground",
+    ],
+    sparsePathOverrides: [
+      { paths: ["docs/docs"], branch: "next" },
     ],
     description: "Main Aztec monorepo - documentation, aztec-nr framework, and reference contracts",
     searchPatterns: {

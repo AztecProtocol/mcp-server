@@ -146,6 +146,36 @@ describe("cloneRepo", () => {
     expect(mockGitInstance.checkout).toHaveBeenCalledWith("v1.0.0");
   });
 
+  it("sparse + tag + sparsePathOverrides: fetches override branch and checks out paths", async () => {
+    const overrideConfig: RepoConfig = {
+      ...sparseConfig,
+      sparsePathOverrides: [{ paths: ["docs/docs"], branch: "next" }],
+    };
+    mockExistsSync.mockReturnValue(false);
+    mockGitInstance.clone.mockResolvedValue(undefined);
+    mockGitInstance.raw.mockResolvedValue(undefined);
+    mockGitInstance.fetch.mockResolvedValue(undefined);
+    mockGitInstance.checkout.mockResolvedValue(undefined);
+
+    const result = await cloneRepo(overrideConfig);
+    expect(result).toContain("Cloned aztec-packages");
+
+    // Normal tag checkout happens first
+    expect(mockGitInstance.checkout).toHaveBeenCalledWith("v1.0.0");
+
+    // Then override: fetch the branch and checkout paths from it
+    expect(mockGitInstance.fetch).toHaveBeenCalledWith([
+      "--depth=1",
+      "origin",
+      "next",
+    ]);
+    expect(mockGitInstance.checkout).toHaveBeenCalledWith([
+      "origin/next",
+      "--",
+      "docs/docs",
+    ]);
+  });
+
   it("sparse + commit: clones with sparse flags, fetches commit", async () => {
     const commitConfig: RepoConfig = {
       ...sparseConfig,
