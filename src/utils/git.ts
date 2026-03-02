@@ -90,6 +90,24 @@ export async function cloneRepo(
       await repoGit.raw(["sparse-checkout", "set", ...config.sparse]);
       await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
       await repoGit.checkout(config.tag);
+
+      // Apply sparse path overrides from different branches
+      if (config.sparsePathOverrides) {
+        for (const override of config.sparsePathOverrides) {
+          await repoGit.fetch(["--depth=1", "origin", override.branch]);
+          try {
+            await repoGit.checkout([`origin/${override.branch}`, "--", ...override.paths]);
+          } catch (error) {
+            const repoBase = config.url.replace(/\.git$/, "");
+            const parentDirs = [...new Set(override.paths.map((p) => p.split("/").slice(0, -1).join("/")))];
+            const browseLinks = parentDirs.map((d) => `${repoBase}/tree/${override.branch}/${d}`);
+            throw new Error(
+              `sparsePathOverrides failed for branch "${override.branch}": could not checkout paths [${override.paths.join(", ")}]. ` +
+              `Check the actual folder names at: ${browseLinks.join(" , ")}`,
+            );
+          }
+        }
+      }
     } else {
       await git.clone(config.url, repoPath, [
         "--filter=blob:none",

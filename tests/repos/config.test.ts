@@ -26,6 +26,21 @@ describe("AZTEC_REPOS", () => {
     expect(noir!.sparse!.length).toBeGreaterThan(0);
   });
 
+  it("aztec-packages has sparsePathOverrides for docs/docs on next branch", () => {
+    const ap = AZTEC_REPOS.find((r) => r.name === "aztec-packages");
+    expect(ap?.sparse).toContain("docs");
+    expect(ap?.sparsePathOverrides).toEqual([
+      {
+        paths: [
+          `docs/developer_versioned_docs/version-${DEFAULT_AZTEC_VERSION}`,
+          "docs/static/aztec-nr-api/devnet",
+          "docs/static/typescript-api/devnet",
+        ],
+        branch: "next",
+      },
+    ]);
+  });
+
   it('noir and noir-examples have branch: "master"', () => {
     const noir = AZTEC_REPOS.find((r) => r.name === "noir");
     const noirExamples = AZTEC_REPOS.find((r) => r.name === "noir-examples");
@@ -44,7 +59,7 @@ describe("getAztecRepos", () => {
       (r) => !r.url.includes("AztecProtocol")
     );
 
-    expect(aztecProtocolRepos).toHaveLength(3);
+    expect(aztecProtocolRepos).toHaveLength(5);
     for (const repo of aztecProtocolRepos) {
       expect(repo.tag).toBe(DEFAULT_AZTEC_VERSION);
     }
@@ -64,17 +79,13 @@ describe("getAztecRepos", () => {
     }
   });
 
-  it("does not apply tags to noir-lang or aztec-pioneers repos", () => {
+  it("does not apply tags to noir-lang repos", () => {
     const repos = getAztecRepos("v2.0.0");
     const noirRepos = repos.filter((r) => r.url.includes("noir-lang"));
-    const pioneerRepos = repos.filter((r) =>
-      r.url.includes("aztec-pioneers")
-    );
 
     expect(noirRepos).toHaveLength(2);
-    expect(pioneerRepos).toHaveLength(2);
 
-    for (const repo of [...noirRepos, ...pioneerRepos]) {
+    for (const repo of noirRepos) {
       expect(repo.tag).toBeUndefined();
     }
   });
@@ -102,7 +113,7 @@ describe("getRepoNames", () => {
     expect(names).toContain("noir-examples");
     expect(names).toContain("aztec-examples");
     expect(names).toContain("aztec-starter");
-    expect(names).toContain("aztec-otc-desk");
-    expect(names).toContain("aztec-pay");
+    expect(names).toContain("demo-wallet");
+    expect(names).toContain("gregoswap");
   });
 });
