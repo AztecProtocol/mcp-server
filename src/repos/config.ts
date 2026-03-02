@@ -91,27 +91,7 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
       code: ["*.nr", "*.ts"],
       docs: ["*.md"],
     },
-  },
-  {
-    name: "aztec-otc-desk",
-    url: "https://github.com/aztec-pioneers/aztec-otc-desk",
-    branch: "main",
-    description: "Aztec OTC desk for peer-to-peer trading on Aztec",
-    searchPatterns: {
-      code: ["*.nr", "*.ts"],
-      docs: ["*.md"],
-    },
-  },
-  {
-    name: "aztec-pay",
-    url: "https://github.com/aztec-pioneers/aztec-pay",
-    branch: "main",
-    description: "Aztec Pay - payment solution built on Aztec",
-    searchPatterns: {
-      code: ["*.nr", "*.ts"],
-      docs: ["*.md"],
-    },
-  },
+  }
 ];
 
 /**
