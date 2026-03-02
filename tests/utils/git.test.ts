@@ -132,6 +132,7 @@ describe("cloneRepo", () => {
       expect.stringContaining("aztec-packages"),
       expect.arrayContaining(["--filter=blob:none", "--sparse", "--no-checkout"])
     );
+    expect(mockGitInstance.raw).toHaveBeenCalledWith(["config", "gc.auto", "0"]);
     expect(mockGitInstance.raw).toHaveBeenCalledWith([
       "sparse-checkout",
       "set",
@@ -240,6 +241,7 @@ describe("cloneRepo", () => {
       expect.any(String),
       expect.arrayContaining(["--filter=blob:none", "--sparse", "--no-checkout"])
     );
+    expect(mockGitInstance.raw).toHaveBeenCalledWith(["config", "gc.auto", "0"]);
     expect(mockGitInstance.fetch).toHaveBeenCalledWith(["origin", "abc123def"]);
     expect(mockGitInstance.checkout).toHaveBeenCalledWith("abc123def");
   });
@@ -256,6 +258,7 @@ describe("cloneRepo", () => {
       expect.any(String),
       expect.arrayContaining(["--filter=blob:none", "--sparse", "--depth=1", "-b", "master"])
     );
+    expect(mockGitInstance.raw).toHaveBeenCalledWith(["config", "gc.auto", "0"]);
   });
 
   it("non-sparse + tag: clones without sparse-checkout", async () => {

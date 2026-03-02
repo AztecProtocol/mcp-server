@@ -76,6 +76,7 @@ export async function cloneRepo(
       ]);
 
       const repoGit = simpleGit(repoPath);
+      await repoGit.raw(["config", "gc.auto", "0"]);
       await repoGit.raw(["sparse-checkout", "set", ...config.sparse]);
       await repoGit.fetch(["origin", config.commit]);
       await repoGit.checkout(config.commit);
@@ -87,6 +88,7 @@ export async function cloneRepo(
       ]);
 
       const repoGit = simpleGit(repoPath);
+      await repoGit.raw(["config", "gc.auto", "0"]);
       await repoGit.raw(["sparse-checkout", "set", ...config.sparse]);
       await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
       await repoGit.checkout(config.tag);
@@ -117,6 +119,7 @@ export async function cloneRepo(
       ]);
 
       const repoGit = simpleGit(repoPath);
+      await repoGit.raw(["config", "gc.auto", "0"]);
       await repoGit.raw(["sparse-checkout", "set", ...config.sparse]);
     }
 
