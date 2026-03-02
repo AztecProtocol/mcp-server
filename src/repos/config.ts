@@ -22,6 +22,8 @@ export interface RepoConfig {
     code?: string[];
     docs?: string[];
   };
+  /** Skip applying the version tag to this repo (clone default branch instead) */
+  skipVersionTag?: boolean;
   /** Override specific sparse paths to come from a different branch instead of the tag */
   sparsePathOverrides?: { paths: string[]; branch: string }[];
 }
@@ -116,6 +118,7 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
   {
     name: "gregoswap",
     url: "https://github.com/AztecProtocol/gregoswap",
+    skipVersionTag: true,
     description: "Gregoswap - token swap application built on Aztec",
     searchPatterns: {
       code: ["*.nr", "*.ts"],
@@ -133,8 +136,8 @@ export function getAztecRepos(version?: string): RepoConfig[] {
 
   return BASE_REPOS.map((repo) => ({
     ...repo,
-    // Only apply version tag to Aztec repos, not Noir repos
-    tag: repo.url.includes("AztecProtocol") ? tag : undefined,
+    // Only apply version tag to Aztec repos that don't opt out
+    tag: repo.url.includes("AztecProtocol") && !repo.skipVersionTag ? tag : undefined,
     // Resolve {version} placeholders in sparse path overrides
     sparsePathOverrides: repo.sparsePathOverrides?.map((override) => ({
       ...override,
