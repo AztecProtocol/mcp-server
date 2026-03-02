@@ -28,9 +28,9 @@ describe("AZTEC_REPOS", () => {
 
   it("aztec-packages has sparsePathOverrides for docs/docs on next branch", () => {
     const ap = AZTEC_REPOS.find((r) => r.name === "aztec-packages");
-    expect(ap?.sparse).toContain("docs/docs");
+    expect(ap?.sparse).toContain("docs");
     expect(ap?.sparsePathOverrides).toEqual([
-      { paths: ["docs/docs"], branch: "next" },
+      { paths: ["docs"], branch: "next" },
     ]);
   });
 

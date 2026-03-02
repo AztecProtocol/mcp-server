@@ -37,7 +37,7 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
     name: "aztec-packages",
     url: "https://github.com/AztecProtocol/aztec-packages",
     sparse: [
-      "docs/docs",
+      "docs",
       "noir-projects/aztec-nr",
       "noir-projects/noir-contracts",
       "yarn-project",
@@ -46,7 +46,7 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
       "playground",
     ],
     sparsePathOverrides: [
-      { paths: ["docs/docs"], branch: "next" },
+      { paths: ["docs"], branch: "next" },
     ],
     description: "Main Aztec monorepo - documentation, aztec-nr framework, and reference contracts",
     searchPatterns: {
