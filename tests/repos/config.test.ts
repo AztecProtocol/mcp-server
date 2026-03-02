@@ -8,8 +8,8 @@ import {
 } from "../../src/repos/config.js";
 
 describe("AZTEC_REPOS", () => {
-  it("contains 7 repos, each with name/url/description", () => {
-    expect(AZTEC_REPOS).toHaveLength(7);
+  it("contains 5 repos, each with name/url/description", () => {
+    expect(AZTEC_REPOS).toHaveLength(5);
     for (const repo of AZTEC_REPOS) {
       expect(repo.name).toBeTruthy();
       expect(repo.url).toBeTruthy();
@@ -64,17 +64,13 @@ describe("getAztecRepos", () => {
     }
   });
 
-  it("does not apply tags to noir-lang or aztec-pioneers repos", () => {
+  it("does not apply tags to noir-lang repos", () => {
     const repos = getAztecRepos("v2.0.0");
     const noirRepos = repos.filter((r) => r.url.includes("noir-lang"));
-    const pioneerRepos = repos.filter((r) =>
-      r.url.includes("aztec-pioneers")
-    );
 
     expect(noirRepos).toHaveLength(2);
-    expect(pioneerRepos).toHaveLength(2);
 
-    for (const repo of [...noirRepos, ...pioneerRepos]) {
+    for (const repo of noirRepos) {
       expect(repo.tag).toBeUndefined();
     }
   });
@@ -94,15 +90,13 @@ describe("getRepoConfig", () => {
 });
 
 describe("getRepoNames", () => {
-  it("returns all 7 names", () => {
+  it("returns all 5 names", () => {
     const names = getRepoNames();
-    expect(names).toHaveLength(7);
+    expect(names).toHaveLength(5);
     expect(names).toContain("aztec-packages");
     expect(names).toContain("noir");
     expect(names).toContain("noir-examples");
     expect(names).toContain("aztec-examples");
     expect(names).toContain("aztec-starter");
-    expect(names).toContain("aztec-otc-desk");
-    expect(names).toContain("aztec-pay");
   });
 });
