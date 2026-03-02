@@ -8,6 +8,8 @@ import { join } from "path";
 import { homedir } from "os";
 import { RepoConfig } from "../repos/config.js";
 
+export type Logger = (message: string, level?: "info" | "debug" | "warning" | "error") => void;
+
 /** Base directory for cloned repos */
 export const REPOS_DIR = join(
   process.env.AZTEC_MCP_REPOS_DIR || join(homedir(), ".aztec-mcp"),
@@ -41,7 +43,8 @@ export function isRepoCloned(repoName: string): boolean {
  */
 export async function cloneRepo(
   config: RepoConfig,
-  force: boolean = false
+  force: boolean = false,
+  log?: Logger
 ): Promise<string> {
   ensureReposDir();
   const repoPath = getRepoPath(config.name);
@@ -51,21 +54,32 @@ export async function cloneRepo(
 
   // Remove existing if force is set or version changed
   if ((force || versionMismatch) && existsSync(repoPath)) {
+    log?.(`${config.name}: Removing existing clone (force=${force}, versionMismatch=${versionMismatch})`, "debug");
     rmSync(repoPath, { recursive: true, force: true });
   }
 
   // If already cloned and version matches, just update
   if (isRepoCloned(config.name)) {
-    return await updateRepo(config.name);
+    log?.(`${config.name}: Already cloned, updating`, "debug");
+    return await updateRepo(config.name, log);
   }
-
-  const git: SimpleGit = simpleGit();
 
   // Determine ref to checkout: commit > tag > branch
   const ref = config.commit || config.tag || config.branch || "default";
   const refType = config.commit ? "commit" : config.tag ? "tag" : "branch";
+  const isSparse = config.sparse && config.sparse.length > 0;
 
-  if (config.sparse && config.sparse.length > 0) {
+  log?.(`${config.name}: Cloning @ ${ref} (${refType}${isSparse ? ", sparse" : ""})`, "info");
+
+  const progressHandler = log
+    ? (data: { method: string; stage: string; progress: number }) => {
+        log(`${config.name}: ${data.method} ${data.stage} ${data.progress}%`, "debug");
+      }
+    : undefined;
+
+  const git: SimpleGit = simpleGit({ progress: progressHandler });
+
+  if (isSparse) {
     // Clone with sparse checkout for large repos
     if (config.commit) {
       // For commits, we need full history to fetch the commit
@@ -75,10 +89,13 @@ export async function cloneRepo(
         "--no-checkout",
       ]);
 
-      const repoGit = simpleGit(repoPath);
+      const repoGit = simpleGit({ baseDir: repoPath, progress: progressHandler });
       await repoGit.raw(["config", "gc.auto", "0"]);
-      await repoGit.raw(["sparse-checkout", "set", ...config.sparse]);
+      log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
+      await repoGit.raw(["sparse-checkout", "set", ...config.sparse!]);
+      log?.(`${config.name}: Fetching commit ${config.commit.substring(0, 7)}`, "info");
       await repoGit.fetch(["origin", config.commit]);
+      log?.(`${config.name}: Checking out commit`, "debug");
       await repoGit.checkout(config.commit);
     } else if (config.tag) {
       await git.clone(config.url, repoPath, [
@@ -87,22 +104,28 @@ export async function cloneRepo(
         "--no-checkout",
       ]);
 
-      const repoGit = simpleGit(repoPath);
+      const repoGit = simpleGit({ baseDir: repoPath, progress: progressHandler });
       await repoGit.raw(["config", "gc.auto", "0"]);
-      await repoGit.raw(["sparse-checkout", "set", ...config.sparse]);
+      log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
+      await repoGit.raw(["sparse-checkout", "set", ...config.sparse!]);
+      log?.(`${config.name}: Fetching tag ${config.tag}`, "info");
       await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
+      log?.(`${config.name}: Checking out tag`, "debug");
       await repoGit.checkout(config.tag);
 
       // Apply sparse path overrides from different branches
       if (config.sparsePathOverrides) {
         for (const override of config.sparsePathOverrides) {
+          log?.(`${config.name}: Fetching override branch ${override.branch}`, "debug");
           await repoGit.fetch(["--depth=1", "origin", override.branch]);
           try {
+            log?.(`${config.name}: Checking out override paths from ${override.branch}: ${override.paths.join(", ")}`, "debug");
             await repoGit.checkout([`origin/${override.branch}`, "--", ...override.paths]);
           } catch (error) {
             const repoBase = config.url.replace(/\.git$/, "");
             const parentDirs = [...new Set(override.paths.map((p) => p.split("/").slice(0, -1).join("/")))];
             const browseLinks = parentDirs.map((d) => `${repoBase}/tree/${override.branch}/${d}`);
+            log?.(`${config.name}: sparsePathOverrides failed for branch "${override.branch}"`, "error");
             throw new Error(
               `sparsePathOverrides failed for branch "${override.branch}": could not checkout paths [${override.paths.join(", ")}]. ` +
               `Check the actual folder names at: ${browseLinks.join(" , ")}`,
@@ -118,25 +141,31 @@ export async function cloneRepo(
         ...(config.branch ? ["-b", config.branch] : []),
       ]);
 
-      const repoGit = simpleGit(repoPath);
+      const repoGit = simpleGit({ baseDir: repoPath, progress: progressHandler });
       await repoGit.raw(["config", "gc.auto", "0"]);
-      await repoGit.raw(["sparse-checkout", "set", ...config.sparse]);
+      log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
+      await repoGit.raw(["sparse-checkout", "set", ...config.sparse!]);
     }
 
-    return `Cloned ${config.name} @ ${ref} (${refType}, sparse: ${config.sparse.join(", ")})`;
+    log?.(`${config.name}: Clone complete`, "info");
+    return `Cloned ${config.name} @ ${ref} (${refType}, sparse: ${config.sparse!.join(", ")})`;
   } else {
     // Clone for smaller repos
     if (config.commit) {
       // For commits, clone and checkout specific commit
       await git.clone(config.url, repoPath, ["--no-checkout"]);
-      const repoGit = simpleGit(repoPath);
+      const repoGit = simpleGit({ baseDir: repoPath, progress: progressHandler });
+      log?.(`${config.name}: Fetching commit ${config.commit.substring(0, 7)}`, "info");
       await repoGit.fetch(["origin", config.commit]);
+      log?.(`${config.name}: Checking out commit`, "debug");
       await repoGit.checkout(config.commit);
     } else if (config.tag) {
       // Clone and checkout tag
       await git.clone(config.url, repoPath, ["--no-checkout"]);
-      const repoGit = simpleGit(repoPath);
+      const repoGit = simpleGit({ baseDir: repoPath, progress: progressHandler });
+      log?.(`${config.name}: Fetching tag ${config.tag}`, "info");
       await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
+      log?.(`${config.name}: Checking out tag`, "debug");
       await repoGit.checkout(config.tag);
     } else {
       await git.clone(config.url, repoPath, [
@@ -145,6 +174,7 @@ export async function cloneRepo(
       ]);
     }
 
+    log?.(`${config.name}: Clone complete`, "info");
     return `Cloned ${config.name} @ ${ref} (${refType})`;
   }
 }
@@ -152,25 +182,30 @@ export async function cloneRepo(
 /**
  * Update an existing repository
  */
-export async function updateRepo(repoName: string): Promise<string> {
+export async function updateRepo(repoName: string, log?: Logger): Promise<string> {
   const repoPath = getRepoPath(repoName);
 
   if (!isRepoCloned(repoName)) {
     throw new Error(`Repository ${repoName} is not cloned`);
   }
 
+  log?.(`${repoName}: Updating`, "info");
   const git = simpleGit(repoPath);
 
   try {
     await git.fetch(["--depth=1"]);
     await git.reset(["--hard", "origin/HEAD"]);
+    log?.(`${repoName}: Update complete`, "info");
     return `Updated ${repoName}`;
   } catch (error) {
+    log?.(`${repoName}: Fetch failed, trying pull`, "warning");
     // If fetch fails, try a simple pull
     try {
       await git.pull();
+      log?.(`${repoName}: Pull complete`, "info");
       return `Updated ${repoName}`;
     } catch (pullError) {
+      log?.(`${repoName}: Update failed: ${pullError}`, "error");
       return `Failed to update ${repoName}: ${pullError}`;
     }
   }

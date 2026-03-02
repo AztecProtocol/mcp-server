@@ -3,7 +3,7 @@
  */
 
 import { AZTEC_REPOS, getAztecRepos, DEFAULT_AZTEC_VERSION, RepoConfig } from "../repos/config.js";
-import { cloneRepo, getReposStatus, getNoirCommitFromAztec, REPOS_DIR } from "../utils/git.js";
+import { cloneRepo, getReposStatus, getNoirCommitFromAztec, REPOS_DIR, Logger } from "../utils/git.js";
 
 export interface SyncResult {
   success: boolean;
@@ -24,8 +24,9 @@ export async function syncRepos(options: {
   force?: boolean;
   repos?: string[];
   version?: string;
+  log?: Logger;
 }): Promise<SyncResult> {
-  const { force = false, repos: repoNames, version } = options;
+  const { force = false, repos: repoNames, version, log } = options;
 
   // Get repos configured for the specified version
   const configuredRepos = version ? getAztecRepos(version) : AZTEC_REPOS;
@@ -45,13 +46,19 @@ export async function syncRepos(options: {
     };
   }
 
+  log?.(`Starting sync: ${reposToSync.length} repos, version=${effectiveVersion}, force=${force}`, "info");
+
   const results: SyncResult["repos"] = [];
+  let syncIndex = 0;
 
   async function syncRepo(config: RepoConfig, statusTransform?: (s: string) => string): Promise<void> {
+    syncIndex++;
+    log?.(`Syncing ${syncIndex}/${reposToSync.length}: ${config.name}`, "info");
     try {
-      const status = await cloneRepo(config, force);
+      const status = await cloneRepo(config, force, log);
       results.push({ name: config.name, status: statusTransform ? statusTransform(status) : status });
     } catch (error) {
+      log?.(`${config.name}: Failed: ${error instanceof Error ? error.message : String(error)}`, "error");
       results.push({
         name: config.name,
         status: `Error: ${error instanceof Error ? error.message : String(error)}`,
@@ -73,6 +80,9 @@ export async function syncRepos(options: {
 
   // Get the Noir commit from aztec-packages (if available)
   const noirCommit = await getNoirCommitFromAztec();
+  if (noirCommit) {
+    log?.(`Resolved Noir commit from aztec-packages: ${noirCommit.substring(0, 7)}`, "info");
+  }
 
   // Clone Noir repos with the commit from aztec-packages
   for (const config of noirRepos) {
@@ -95,6 +105,8 @@ export async function syncRepos(options: {
   const allSuccess = results.every(
     (r) => !r.status.toLowerCase().includes("error")
   );
+
+  log?.(`Sync complete: ${results.length} repos, ${allSuccess ? "all succeeded" : "some failed"}`, "info");
 
   return {
     success: allSuccess,
