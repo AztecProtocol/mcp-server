@@ -91,6 +91,24 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
       code: ["*.nr", "*.ts"],
       docs: ["*.md"],
     },
+  },
+  {
+    name: "demo-wallet",
+    url: "https://github.com/AztecProtocol/demo-wallet",
+    description: "Aztec demo wallet application",
+    searchPatterns: {
+      code: ["*.nr", "*.ts"],
+      docs: ["*.md"],
+    },
+  },
+  {
+    name: "gregoswap",
+    url: "https://github.com/AztecProtocol/gregoswap",
+    description: "Gregoswap - token swap application built on Aztec",
+    searchPatterns: {
+      code: ["*.nr", "*.ts"],
+      docs: ["*.md"],
+    },
   }
 ];
 
