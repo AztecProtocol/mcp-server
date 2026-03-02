@@ -26,9 +26,9 @@ describe("AZTEC_REPOS", () => {
     expect(noir!.sparse!.length).toBeGreaterThan(0);
   });
 
-  it("aztec-packages has sparsePathOverrides for docs/docs on next branch", () => {
+  it("aztec-packages has sparsePathOverrides for versioned docs on next branch", () => {
     const ap = AZTEC_REPOS.find((r) => r.name === "aztec-packages");
-    expect(ap?.sparse).toContain("docs");
+    expect(ap?.sparse).not.toContain("docs");
     expect(ap?.sparsePathOverrides).toEqual([
       {
         paths: [
@@ -50,31 +50,22 @@ describe("AZTEC_REPOS", () => {
 });
 
 describe("getAztecRepos", () => {
-  it("applies version tag only to AztecProtocol repos", () => {
+  it("applies version tag only to AztecProtocol repos without skipVersionTag", () => {
     const repos = getAztecRepos();
-    const aztecProtocolRepos = repos.filter((r) =>
-      r.url.includes("AztecProtocol")
-    );
-    const otherRepos = repos.filter(
-      (r) => !r.url.includes("AztecProtocol")
-    );
-
-    expect(aztecProtocolRepos).toHaveLength(5);
-    for (const repo of aztecProtocolRepos) {
+    const taggedRepos = repos.filter((r) => r.tag !== undefined);
+    expect(taggedRepos).toHaveLength(4);
+    for (const repo of taggedRepos) {
       expect(repo.tag).toBe(DEFAULT_AZTEC_VERSION);
     }
 
-    for (const repo of otherRepos) {
-      expect(repo.tag).toBeUndefined();
-    }
+    const gregoswap = repos.find((r) => r.name === "gregoswap");
+    expect(gregoswap?.tag).toBeUndefined();
   });
 
   it("uses custom version when provided", () => {
     const repos = getAztecRepos("v2.0.0");
-    const aztecProtocolRepos = repos.filter((r) =>
-      r.url.includes("AztecProtocol")
-    );
-    for (const repo of aztecProtocolRepos) {
+    const taggedRepos = repos.filter((r) => r.tag !== undefined);
+    for (const repo of taggedRepos) {
       expect(repo.tag).toBe("v2.0.0");
     }
   });
