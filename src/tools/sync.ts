@@ -55,7 +55,7 @@ export async function syncRepos(options: {
     syncIndex++;
     log?.(`Syncing ${syncIndex}/${reposToSync.length}: ${config.name}`, "info");
     try {
-      const status = await cloneRepo(config, force, log);
+      const status = log ? await cloneRepo(config, force, log) : await cloneRepo(config, force);
       results.push({ name: config.name, status: statusTransform ? statusTransform(status) : status });
     } catch (error) {
       log?.(`${config.name}: Failed: ${error instanceof Error ? error.message : String(error)}`, "error");

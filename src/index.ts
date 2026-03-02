@@ -203,7 +203,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             level: level as "info" | "debug" | "warning" | "error",
             logger: "aztec-sync",
             data: message,
-          });
+          }).catch(() => {});
         };
         const result = await syncRepos({
           version: args?.version as string | undefined,
