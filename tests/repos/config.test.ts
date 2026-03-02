@@ -30,7 +30,14 @@ describe("AZTEC_REPOS", () => {
     const ap = AZTEC_REPOS.find((r) => r.name === "aztec-packages");
     expect(ap?.sparse).toContain("docs");
     expect(ap?.sparsePathOverrides).toEqual([
-      { paths: ["docs"], branch: "next" },
+      {
+        paths: [
+          `docs/developer_versioned_docs/version-${DEFAULT_AZTEC_VERSION}`,
+          "docs/static/aztec-nr-api/devnet",
+          "docs/static/typescript-api/devnet",
+        ],
+        branch: "next",
+      },
     ]);
   });
 

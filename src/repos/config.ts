@@ -27,7 +27,7 @@ export interface RepoConfig {
 }
 
 /** Default Aztec version (tag) to use - can be overridden via AZTEC_DEFAULT_VERSION env var */
-export const DEFAULT_AZTEC_VERSION = process.env.AZTEC_DEFAULT_VERSION || "v3.0.0-devnet.6-patch.1";
+export const DEFAULT_AZTEC_VERSION = process.env.AZTEC_DEFAULT_VERSION || "v4.0.0-devnet.2-patch.1";
 
 /**
  * Base Aztec repository configurations (without version)
@@ -46,7 +46,14 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
       "playground",
     ],
     sparsePathOverrides: [
-      { paths: ["docs"], branch: "next" },
+      {
+        paths: [
+          "docs/developer_versioned_docs/version-{version}",
+          "docs/static/aztec-nr-api/devnet",
+          "docs/static/typescript-api/devnet",
+        ],
+        branch: "next",
+      },
     ],
     description: "Main Aztec monorepo - documentation, aztec-nr framework, and reference contracts",
     searchPatterns: {
@@ -128,6 +135,11 @@ export function getAztecRepos(version?: string): RepoConfig[] {
     ...repo,
     // Only apply version tag to Aztec repos, not Noir repos
     tag: repo.url.includes("AztecProtocol") ? tag : undefined,
+    // Resolve {version} placeholders in sparse path overrides
+    sparsePathOverrides: repo.sparsePathOverrides?.map((override) => ({
+      ...override,
+      paths: override.paths.map((p) => p.replace("{version}", tag)),
+    })),
   }));
 }
 

@@ -149,7 +149,15 @@ describe("cloneRepo", () => {
   it("sparse + tag + sparsePathOverrides: fetches override branch and checks out paths", async () => {
     const overrideConfig: RepoConfig = {
       ...sparseConfig,
-      sparsePathOverrides: [{ paths: ["docs/docs"], branch: "next" }],
+      sparsePathOverrides: [
+        {
+          paths: [
+            "docs/developer_versioned_docs/version-v1.0.0",
+            "docs/static/api",
+          ],
+          branch: "next",
+        },
+      ],
     };
     mockExistsSync.mockReturnValue(false);
     mockGitInstance.clone.mockResolvedValue(undefined);
@@ -172,8 +180,44 @@ describe("cloneRepo", () => {
     expect(mockGitInstance.checkout).toHaveBeenCalledWith([
       "origin/next",
       "--",
-      "docs/docs",
+      "docs/developer_versioned_docs/version-v1.0.0",
+      "docs/static/api",
     ]);
+  });
+
+  it("sparse + tag + sparsePathOverrides: throws descriptive error with GitHub links on failure", async () => {
+    const overrideConfig: RepoConfig = {
+      ...sparseConfig,
+      sparsePathOverrides: [
+        {
+          paths: [
+            "docs/developer_versioned_docs/version-v1.0.0",
+            "docs/static/aztec-nr-api/devnet",
+            "docs/static/typescript-api/devnet",
+          ],
+          branch: "next",
+        },
+      ],
+    };
+    mockExistsSync.mockReturnValue(false);
+    mockGitInstance.clone.mockResolvedValue(undefined);
+    mockGitInstance.raw.mockResolvedValue(undefined);
+    mockGitInstance.fetch.mockResolvedValue(undefined);
+    // Tag checkout succeeds, override checkout fails
+    mockGitInstance.checkout
+      .mockResolvedValueOnce(undefined) // tag checkout
+      .mockRejectedValueOnce(new Error("pathspec did not match"));
+
+    try {
+      await cloneRepo(overrideConfig);
+      expect.unreachable("should have thrown");
+    } catch (e: any) {
+      expect(e.message).toMatch(/sparsePathOverrides failed for branch "next"/);
+      expect(e.message).toContain("docs/developer_versioned_docs/version-v1.0.0");
+      expect(e.message).toContain("https://github.com/AztecProtocol/aztec-packages/tree/next/docs/developer_versioned_docs");
+      expect(e.message).toContain("https://github.com/AztecProtocol/aztec-packages/tree/next/docs/static/aztec-nr-api");
+      expect(e.message).toContain("https://github.com/AztecProtocol/aztec-packages/tree/next/docs/static/typescript-api");
+    }
   });
 
   it("sparse + commit: clones with sparse flags, fetches commit", async () => {
