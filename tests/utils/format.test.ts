@@ -76,6 +76,31 @@ describe("formatStatus", () => {
     });
     expect(result).toContain("No repositories cloned");
   });
+
+  it("displays sync metadata when present", () => {
+    const result = formatStatus({
+      reposDir: "/repos",
+      repos: [],
+      syncMetadata: {
+        mcpVersion: "1.5.0",
+        syncedAt: "2025-01-01T00:00:00.000Z",
+        aztecVersion: "v1.0.0",
+      },
+    });
+    expect(result).toContain("Last synced: 2025-01-01T00:00:00.000Z");
+    expect(result).toContain("MCP server version: 1.5.0");
+    expect(result).toContain("Aztec version: v1.0.0");
+  });
+
+  it("omits sync metadata lines when not present", () => {
+    const result = formatStatus({
+      reposDir: "/repos",
+      repos: [],
+    });
+    expect(result).not.toContain("Last synced");
+    expect(result).not.toContain("MCP server version");
+    expect(result).not.toContain("Aztec version");
+  });
 });
 
 describe("formatSearchResults", () => {

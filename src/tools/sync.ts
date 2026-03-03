@@ -2,8 +2,11 @@
  * Repository sync tool - clones and updates Aztec repositories
  */
 
+import { existsSync } from "fs";
+import { join } from "path";
 import { AZTEC_REPOS, getAztecRepos, DEFAULT_AZTEC_VERSION, RepoConfig } from "../repos/config.js";
 import { cloneRepo, getReposStatus, getNoirCommitFromAztec, REPOS_DIR, Logger } from "../utils/git.js";
+import { writeSyncMetadata, readSyncMetadata, SyncMetadata } from "../utils/sync-metadata.js";
 
 export interface SyncResult {
   success: boolean;
@@ -133,11 +136,34 @@ export async function syncRepos(options: {
     parallelBatch.map((item) => syncRepo(item.config, item.index, totalRepos, item.statusTransform))
   );
 
+  // Warn if versioned docs paths don't exist after clone
+  for (const repo of syntheticRepos) {
+    const result = results.find((r) => r.name === repo.name);
+    if (!result || result.status.toLowerCase().includes("error")) continue;
+
+    for (const sparsePath of repo.sparse || []) {
+      if (!sparsePath.includes(effectiveVersion)) continue;
+      const fullPath = join(REPOS_DIR, repo.name, sparsePath);
+      if (!existsSync(fullPath)) {
+        result.status += `. Note: docs not found for ${effectiveVersion} in aztec-packages`;
+        break;
+      }
+    }
+  }
+
   const allSuccess = results.every(
     (r) => !r.status.toLowerCase().includes("error")
   );
 
   log?.(`Sync complete: ${results.length} repos, ${allSuccess ? "all succeeded" : "some failed"}`, "info");
+
+  if (allSuccess && !repoNames) {
+    try {
+      writeSyncMetadata(effectiveVersion);
+    } catch {
+      // Non-fatal: don't fail the sync if metadata write fails
+    }
+  }
 
   return {
     success: allSuccess,
@@ -160,6 +186,7 @@ export async function getStatus(): Promise<{
     cloned: boolean;
     commit?: string;
   }[];
+  syncMetadata: SyncMetadata | null;
 }> {
   const statusMap = await getReposStatus(AZTEC_REPOS);
 
@@ -176,5 +203,6 @@ export async function getStatus(): Promise<{
   return {
     reposDir: REPOS_DIR,
     repos,
+    syncMetadata: readSyncMetadata(),
   };
 }

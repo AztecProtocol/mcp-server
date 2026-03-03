@@ -3,6 +3,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockCloneRepo = vi.fn();
 const mockGetReposStatus = vi.fn();
 const mockGetNoirCommitFromAztec = vi.fn();
+const mockWriteSyncMetadata = vi.fn();
+const mockReadSyncMetadata = vi.fn();
+const mockExistsSync = vi.fn();
 
 vi.mock("../../src/repos/config.js", () => ({
   AZTEC_REPOS: [
@@ -80,6 +83,20 @@ vi.mock("../../src/utils/git.js", () => ({
   REPOS_DIR: "/fake/repos",
 }));
 
+vi.mock("../../src/utils/sync-metadata.js", () => ({
+  writeSyncMetadata: (...args: any[]) => mockWriteSyncMetadata(...args),
+  readSyncMetadata: () => mockReadSyncMetadata(),
+}));
+
+vi.mock("fs", () => ({
+  existsSync: (...args: any[]) => mockExistsSync(...args),
+}));
+
+vi.mock("path", async () => {
+  const actual = await vi.importActual<typeof import("path")>("path");
+  return actual;
+});
+
 import { getAztecRepos } from "../../src/repos/config.js";
 import { syncRepos, getStatus } from "../../src/tools/sync.js";
 
@@ -89,6 +106,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockCloneRepo.mockResolvedValue("Cloned");
   mockGetNoirCommitFromAztec.mockResolvedValue(null);
+  mockExistsSync.mockReturnValue(true);
 });
 
 describe("syncRepos", () => {
@@ -194,6 +212,68 @@ describe("syncRepos", () => {
       true
     );
   });
+
+  it("writes sync metadata on full sync success", async () => {
+    mockCloneRepo.mockResolvedValue("Cloned");
+    await syncRepos({});
+
+    expect(mockWriteSyncMetadata).toHaveBeenCalledWith("v1.0.0");
+  });
+
+  it("writes sync metadata with custom version on full sync success", async () => {
+    mockCloneRepo.mockResolvedValue("Cloned");
+    await syncRepos({ version: "v2.0.0" });
+
+    expect(mockWriteSyncMetadata).toHaveBeenCalledWith("v2.0.0");
+  });
+
+  it("does not write sync metadata on failure", async () => {
+    mockCloneRepo
+      .mockResolvedValueOnce("Cloned ok")
+      .mockRejectedValueOnce(new Error("fail"))
+      .mockResolvedValue("Cloned ok");
+
+    await syncRepos({});
+
+    expect(mockWriteSyncMetadata).not.toHaveBeenCalled();
+  });
+
+  it("does not write sync metadata on partial sync", async () => {
+    mockCloneRepo.mockResolvedValue("Cloned");
+    await syncRepos({ repos: ["aztec-packages"] });
+
+    expect(mockWriteSyncMetadata).not.toHaveBeenCalled();
+  });
+
+  it("does not fail sync if metadata write throws", async () => {
+    mockCloneRepo.mockResolvedValue("Cloned");
+    mockWriteSyncMetadata.mockImplementation(() => {
+      throw new Error("write failed");
+    });
+
+    const result = await syncRepos({});
+    expect(result.success).toBe(true);
+  });
+
+  it("warns when versioned docs path does not exist after clone", async () => {
+    mockExistsSync.mockReturnValue(false);
+
+    const result = await syncRepos({});
+
+    const docsRepo = result.repos.find((r) => r.name === "aztec-packages-docs");
+    expect(docsRepo).toBeDefined();
+    expect(docsRepo!.status).toContain("docs not found for v1.0.0");
+  });
+
+  it("does not warn when versioned docs path exists", async () => {
+    mockExistsSync.mockReturnValue(true);
+
+    const result = await syncRepos({});
+
+    const docsRepo = result.repos.find((r) => r.name === "aztec-packages-docs");
+    expect(docsRepo).toBeDefined();
+    expect(docsRepo!.status).not.toContain("docs not found");
+  });
 });
 
 describe("getStatus", () => {
@@ -233,5 +313,29 @@ describe("getStatus", () => {
     const examples = status.repos.find((r) => r.name === "aztec-examples");
     expect(examples?.cloned).toBe(false);
     expect(examples?.commit).toBeUndefined();
+  });
+
+  it("includes syncMetadata when available", async () => {
+    mockGetReposStatus.mockResolvedValue(new Map());
+    mockReadSyncMetadata.mockReturnValue({
+      mcpVersion: "1.5.0",
+      syncedAt: "2025-01-01T00:00:00.000Z",
+      aztecVersion: "v1.0.0",
+    });
+
+    const status = await getStatus();
+    expect(status.syncMetadata).toEqual({
+      mcpVersion: "1.5.0",
+      syncedAt: "2025-01-01T00:00:00.000Z",
+      aztecVersion: "v1.0.0",
+    });
+  });
+
+  it("includes null syncMetadata when no file exists", async () => {
+    mockGetReposStatus.mockResolvedValue(new Map());
+    mockReadSyncMetadata.mockReturnValue(null);
+
+    const status = await getStatus();
+    expect(status.syncMetadata).toBeNull();
   });
 });

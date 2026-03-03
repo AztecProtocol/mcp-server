@@ -32,11 +32,13 @@ import {
   formatExampleContent,
   formatFileContent,
 } from "./utils/format.js";
+import { MCP_VERSION } from "./version.js";
+import { needsResync } from "./utils/sync-metadata.js";
 
 const server = new Server(
   {
     name: "aztec-mcp",
-    version: "1.0.0",
+    version: MCP_VERSION,
   },
   {
     capabilities: {
@@ -195,7 +197,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
+  // Auto re-sync if MCP server version changed since last sync
+  const staleMetadata = name !== "aztec_sync_repos" ? needsResync() : null;
+  if (staleMetadata) {
+    const log = (message: string, level: string = "info") => {
+      server.sendLoggingMessage({
+        level: level as "info" | "debug" | "warning" | "error",
+        logger: "aztec-sync",
+        data: message,
+      }).catch(() => {});
+    };
+    log(`Auto-syncing repos for MCP server v${MCP_VERSION} (was v${staleMetadata.mcpVersion})...`, "info");
+    await syncRepos({ version: staleMetadata.aztecVersion, force: true, log });
+    log("Auto-sync complete", "info");
+  }
+
   try {
+    let text: string;
+
     switch (name) {
       case "aztec_sync_repos": {
         const log = (message: string, level: string = "info") => {
@@ -211,26 +230,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           repos: args?.repos as string[] | undefined,
           log,
         });
-        return {
-          content: [
-            {
-              type: "text",
-              text: formatSyncResult(result),
-            },
-          ],
-        };
+        text = formatSyncResult(result);
+        break;
       }
 
       case "aztec_status": {
         const status = await getStatus();
-        return {
-          content: [
-            {
-              type: "text",
-              text: formatStatus(status),
-            },
-          ],
-        };
+        text = formatStatus(status);
+        break;
       }
 
       case "aztec_search_code": {
@@ -243,14 +250,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           repo: args?.repo as string | undefined,
           maxResults: args?.maxResults as number | undefined,
         });
-        return {
-          content: [
-            {
-              type: "text",
-              text: formatSearchResults(result),
-            },
-          ],
-        };
+        text = formatSearchResults(result);
+        break;
       }
 
       case "aztec_search_docs": {
@@ -262,28 +263,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           section: args?.section as string | undefined,
           maxResults: args?.maxResults as number | undefined,
         });
-        return {
-          content: [
-            {
-              type: "text",
-              text: formatSearchResults(result),
-            },
-          ],
-        };
+        text = formatSearchResults(result);
+        break;
       }
 
       case "aztec_list_examples": {
         const result = listAztecExamples({
           category: args?.category as string | undefined,
         });
-        return {
-          content: [
-            {
-              type: "text",
-              text: formatExamplesList(result),
-            },
-          ],
-        };
+        text = formatExamplesList(result);
+        break;
       }
 
       case "aztec_read_example": {
@@ -293,14 +282,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const result = readAztecExample({
           name: args.name as string,
         });
-        return {
-          content: [
-            {
-              type: "text",
-              text: formatExampleContent(result),
-            },
-          ],
-        };
+        text = formatExampleContent(result);
+        break;
       }
 
       case "aztec_read_file": {
@@ -310,19 +293,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const result = readRepoFile({
           path: args.path as string,
         });
-        return {
-          content: [
-            {
-              type: "text",
-              text: formatFileContent(result),
-            },
-          ],
-        };
+        text = formatFileContent(result);
+        break;
       }
 
       default:
         throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }
+
+    return {
+      content: [{ type: "text", text }],
+    };
   } catch (error) {
     if (error instanceof McpError) throw error;
 
