@@ -81,19 +81,26 @@ export function searchDocs(
 ): SearchResult[] {
   const { section, maxResults = 30 } = options;
 
-  // Determine search path based on section
+  // Search versioned docs under developer_versioned_docs, narrowing by section if possible
   let repo: string | undefined;
-  if (section) {
-    const docsPath = join(REPOS_DIR, "aztec-packages", "docs", "docs", section);
-    if (existsSync(docsPath)) {
-      // Search within the specific section by using a narrowed path
-      repo = `aztec-packages/docs/docs/${section}`;
+  const versionedDocsGlob = join(REPOS_DIR, "aztec-packages-docs", "docs", "developer_versioned_docs");
+  const versionDirs = existsSync(versionedDocsGlob) ? globbySync("version-*", { cwd: versionedDocsGlob, onlyDirectories: true }) : [];
+  const versionDir = versionDirs[0];
+
+  if (section && versionDir) {
+    const sectionPath = join(versionedDocsGlob, versionDir, section);
+    if (existsSync(sectionPath)) {
+      repo = `aztec-packages-docs/docs/developer_versioned_docs/${versionDir}/${section}`;
     }
+  }
+
+  if (!repo && versionDir) {
+    repo = `aztec-packages-docs/docs/developer_versioned_docs/${versionDir}`;
   }
 
   return searchCode(query, {
     filePattern: "*.{md,mdx}",
-    repo: repo || "aztec-packages",
+    repo: repo || "aztec-packages-docs",
     maxResults,
   });
 }

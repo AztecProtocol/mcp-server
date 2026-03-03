@@ -73,12 +73,12 @@ export function searchAztecDocs(options: {
 } {
   const { query, section, maxResults = 20 } = options;
 
-  if (!isRepoCloned("aztec-packages")) {
+  if (!isRepoCloned("aztec-packages-docs")) {
     return {
       success: false,
       results: [],
       message:
-        "aztec-packages is not cloned. Run aztec_sync_repos first to get documentation.",
+        "aztec-packages-docs is not cloned. Run aztec_sync_repos first to get documentation.",
     };
   }
 

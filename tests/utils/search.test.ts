@@ -236,15 +236,16 @@ describe("searchDocs", () => {
 
   it("narrows path when section exists", () => {
     mockExistsSync.mockReturnValue(true);
+    mockGlobbySync.mockReturnValue(["version-v1.0.0"] as any);
     mockExecSync.mockReturnValue("");
 
     searchDocs("tutorial", { section: "tutorials" });
 
     const call = mockExecSync.mock.calls[0][0] as string;
-    expect(call).toContain("aztec-packages/docs/docs/tutorials");
+    expect(call).toContain("aztec-packages-docs/docs/developer_versioned_docs/version-v1.0.0/tutorials");
   });
 
-  it("falls back to aztec-packages when section doesn't exist", () => {
+  it("falls back to aztec-packages-docs when section doesn't exist", () => {
     // existsSync: first call for section path returns false, second for search path returns true
     mockExistsSync
       .mockReturnValueOnce(false) // section path doesn't exist
@@ -254,8 +255,8 @@ describe("searchDocs", () => {
     searchDocs("tutorial", { section: "nonexistent" });
 
     const call = mockExecSync.mock.calls[0][0] as string;
-    // Should search in aztec-packages, not the nonexistent section
-    expect(call).toContain("/fake/repos/aztec-packages");
+    // Should search in aztec-packages-docs, not the nonexistent section
+    expect(call).toContain("/fake/repos/aztec-packages-docs");
   });
 });
 

@@ -46,14 +46,35 @@ export async function syncRepos(options: {
     };
   }
 
-  log?.(`Starting sync: ${reposToSync.length} repos, version=${effectiveVersion}, force=${force}`, "info");
+  // Generate synthetic repo configs from sparsePathOverrides
+  const syntheticRepos: RepoConfig[] = [];
+  for (const repo of reposToSync) {
+    if (repo.sparsePathOverrides) {
+      for (const override of repo.sparsePathOverrides) {
+        syntheticRepos.push({
+          name: `${repo.name}-docs`,
+          url: repo.url,
+          branch: override.branch,
+          sparse: override.paths,
+          description: `${repo.description} (docs from ${override.branch})`,
+        });
+      }
+    }
+  }
+
+  // Include synthetic repos in total count
+  const totalRepos = reposToSync.length + syntheticRepos.length;
+  log?.(`Starting sync: ${totalRepos} repos, version=${effectiveVersion}, force=${force}`, "info");
 
   const results: SyncResult["repos"] = [];
-  let syncIndex = 0;
 
-  async function syncRepo(config: RepoConfig, statusTransform?: (s: string) => string): Promise<void> {
-    syncIndex++;
-    log?.(`Syncing ${syncIndex}/${reposToSync.length}: ${config.name}`, "info");
+  async function syncRepo(
+    config: RepoConfig,
+    index: number,
+    total: number,
+    statusTransform?: (s: string) => string,
+  ): Promise<void> {
+    log?.(`Syncing ${index}/${total}: ${config.name}`, "info");
     try {
       const status = log ? await cloneRepo(config, force, log) : await cloneRepo(config, force);
       results.push({ name: config.name, status: statusTransform ? statusTransform(status) : status });
@@ -66,16 +87,11 @@ export async function syncRepos(options: {
     }
   }
 
-  // Sort repos so aztec-packages is cloned first (needed to determine Noir version)
+  // Clone aztec-packages first (blocking - needed to determine Noir version)
   const aztecPackages = reposToSync.find((r) => r.name === "aztec-packages");
-  const noirRepos = reposToSync.filter((r) => r.url.includes("noir-lang"));
-  const otherRepos = reposToSync.filter(
-    (r) => r.name !== "aztec-packages" && !r.url.includes("noir-lang")
-  );
-
-  // Clone aztec-packages first if present
+  let nextIndex = 1;
   if (aztecPackages) {
-    await syncRepo(aztecPackages);
+    await syncRepo(aztecPackages, nextIndex++, totalRepos);
   }
 
   // Get the Noir commit from aztec-packages (if available)
@@ -84,23 +100,38 @@ export async function syncRepos(options: {
     log?.(`Resolved Noir commit from aztec-packages: ${noirCommit.substring(0, 7)}`, "info");
   }
 
-  // Clone Noir repos with the commit from aztec-packages
+  // Build list of all remaining repos to clone in parallel
+  const parallelBatch: { config: RepoConfig; index: number; statusTransform?: (s: string) => string }[] = [];
+
+  const noirRepos = reposToSync.filter((r) => r.url.includes("noir-lang"));
+  const otherRepos = reposToSync.filter(
+    (r) => r.name !== "aztec-packages" && !r.url.includes("noir-lang")
+  );
+
   for (const config of noirRepos) {
     const useAztecCommit = config.name === "noir" && noirCommit;
     const noirConfig: RepoConfig = useAztecCommit
       ? { ...config, commit: noirCommit, branch: undefined }
       : config;
-
-    await syncRepo(
-      noirConfig,
-      useAztecCommit ? (s) => s.replace("(commit", "(commit from aztec-packages") : undefined
-    );
+    parallelBatch.push({
+      config: noirConfig,
+      index: nextIndex++,
+      statusTransform: useAztecCommit ? (s) => s.replace("(commit", "(commit from aztec-packages") : undefined,
+    });
   }
 
-  // Clone other repos
   for (const config of otherRepos) {
-    await syncRepo(config);
+    parallelBatch.push({ config, index: nextIndex++ });
   }
+
+  for (const config of syntheticRepos) {
+    parallelBatch.push({ config, index: nextIndex++ });
+  }
+
+  // Clone all remaining repos in parallel
+  await Promise.all(
+    parallelBatch.map((item) => syncRepo(item.config, item.index, totalRepos, item.statusTransform))
+  );
 
   const allSuccess = results.every(
     (r) => !r.status.toLowerCase().includes("error")

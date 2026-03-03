@@ -58,8 +58,12 @@ export async function cloneRepo(
     rmSync(repoPath, { recursive: true, force: true });
   }
 
-  // If already cloned and version matches, just update
+  // If already cloned and version matches, skip or update
   if (isRepoCloned(config.name)) {
+    if (config.tag || config.commit) {
+      log?.(`${config.name}: Already cloned at correct ${config.tag ? "tag" : "commit"}, skipping`, "debug");
+      return `${config.name} already at ${config.commit || config.tag}`;
+    }
     log?.(`${config.name}: Already cloned, updating`, "debug");
     return await updateRepo(config.name, log);
   }
@@ -112,27 +116,6 @@ export async function cloneRepo(
       await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
       log?.(`${config.name}: Checking out tag`, "debug");
       await repoGit.checkout(config.tag);
-
-      // Apply sparse path overrides from different branches
-      if (config.sparsePathOverrides) {
-        for (const override of config.sparsePathOverrides) {
-          log?.(`${config.name}: Fetching override branch ${override.branch}`, "debug");
-          await repoGit.fetch(["--depth=1", "origin", override.branch]);
-          try {
-            log?.(`${config.name}: Checking out override paths from ${override.branch}: ${override.paths.join(", ")}`, "debug");
-            await repoGit.checkout([`origin/${override.branch}`, "--", ...override.paths]);
-          } catch (error) {
-            const repoBase = config.url.replace(/\.git$/, "");
-            const parentDirs = [...new Set(override.paths.map((p) => p.split("/").slice(0, -1).join("/")))];
-            const browseLinks = parentDirs.map((d) => `${repoBase}/tree/${override.branch}/${d}`);
-            log?.(`${config.name}: sparsePathOverrides failed for branch "${override.branch}"`, "error");
-            throw new Error(
-              `sparsePathOverrides failed for branch "${override.branch}": could not checkout paths [${override.paths.join(", ")}]. ` +
-              `Check the actual folder names at: ${browseLinks.join(" , ")}`,
-            );
-          }
-        }
-      }
     } else {
       await git.clone(config.url, repoPath, [
         "--filter=blob:none",
