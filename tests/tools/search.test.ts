@@ -97,11 +97,11 @@ describe("searchAztecCode", () => {
 });
 
 describe("searchAztecDocs", () => {
-  it("returns failure when aztec-packages not cloned", () => {
+  it("returns failure when aztec-packages-docs not cloned", () => {
     mockIsRepoCloned.mockReturnValue(false);
     const result = searchAztecDocs({ query: "tutorial" });
     expect(result.success).toBe(false);
-    expect(result.message).toContain("aztec-packages is not cloned");
+    expect(result.message).toContain("aztec-packages-docs is not cloned");
   });
 
   it("delegates to searchDocs with correct options", () => {

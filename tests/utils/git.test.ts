@@ -147,80 +147,6 @@ describe("cloneRepo", () => {
     expect(mockGitInstance.checkout).toHaveBeenCalledWith("v1.0.0");
   });
 
-  it("sparse + tag + sparsePathOverrides: fetches override branch and checks out paths", async () => {
-    const overrideConfig: RepoConfig = {
-      ...sparseConfig,
-      sparsePathOverrides: [
-        {
-          paths: [
-            "docs/developer_versioned_docs/version-v1.0.0",
-            "docs/static/api",
-          ],
-          branch: "next",
-        },
-      ],
-    };
-    mockExistsSync.mockReturnValue(false);
-    mockGitInstance.clone.mockResolvedValue(undefined);
-    mockGitInstance.raw.mockResolvedValue(undefined);
-    mockGitInstance.fetch.mockResolvedValue(undefined);
-    mockGitInstance.checkout.mockResolvedValue(undefined);
-
-    const result = await cloneRepo(overrideConfig);
-    expect(result).toContain("Cloned aztec-packages");
-
-    // Normal tag checkout happens first
-    expect(mockGitInstance.checkout).toHaveBeenCalledWith("v1.0.0");
-
-    // Then override: fetch the branch and checkout paths from it
-    expect(mockGitInstance.fetch).toHaveBeenCalledWith([
-      "--depth=1",
-      "origin",
-      "next",
-    ]);
-    expect(mockGitInstance.checkout).toHaveBeenCalledWith([
-      "origin/next",
-      "--",
-      "docs/developer_versioned_docs/version-v1.0.0",
-      "docs/static/api",
-    ]);
-  });
-
-  it("sparse + tag + sparsePathOverrides: throws descriptive error with GitHub links on failure", async () => {
-    const overrideConfig: RepoConfig = {
-      ...sparseConfig,
-      sparsePathOverrides: [
-        {
-          paths: [
-            "docs/developer_versioned_docs/version-v1.0.0",
-            "docs/static/aztec-nr-api/devnet",
-            "docs/static/typescript-api/devnet",
-          ],
-          branch: "next",
-        },
-      ],
-    };
-    mockExistsSync.mockReturnValue(false);
-    mockGitInstance.clone.mockResolvedValue(undefined);
-    mockGitInstance.raw.mockResolvedValue(undefined);
-    mockGitInstance.fetch.mockResolvedValue(undefined);
-    // Tag checkout succeeds, override checkout fails
-    mockGitInstance.checkout
-      .mockResolvedValueOnce(undefined) // tag checkout
-      .mockRejectedValueOnce(new Error("pathspec did not match"));
-
-    try {
-      await cloneRepo(overrideConfig);
-      expect.unreachable("should have thrown");
-    } catch (e: any) {
-      expect(e.message).toMatch(/sparsePathOverrides failed for branch "next"/);
-      expect(e.message).toContain("docs/developer_versioned_docs/version-v1.0.0");
-      expect(e.message).toContain("https://github.com/AztecProtocol/aztec-packages/tree/next/docs/developer_versioned_docs");
-      expect(e.message).toContain("https://github.com/AztecProtocol/aztec-packages/tree/next/docs/static/aztec-nr-api");
-      expect(e.message).toContain("https://github.com/AztecProtocol/aztec-packages/tree/next/docs/static/typescript-api");
-    }
-  });
-
   it("sparse + commit: clones with sparse flags, fetches commit", async () => {
     const commitConfig: RepoConfig = {
       ...sparseConfig,
@@ -303,18 +229,17 @@ describe("cloneRepo", () => {
     );
   });
 
-  it("already cloned + version match delegates to updateRepo", async () => {
+  it("already cloned + version match skips update for tag-pinned repos", async () => {
     // needsReclone: isRepoCloned returns true, tag matches
     mockExistsSync.mockReturnValue(true);
     // getRepoTag needs git.raw to return the tag
     mockGitInstance.raw.mockResolvedValue("v1.0.0\n");
-    // isRepoCloned returns true -> delegates to updateRepo
-    // updateRepo does fetch + reset
-    mockGitInstance.fetch.mockResolvedValue(undefined);
-    mockGitInstance.reset.mockResolvedValue(undefined);
 
     const result = await cloneRepo(sparseConfig);
-    expect(result).toContain("Updated");
+    expect(result).toContain("already at v1.0.0");
+    // Should NOT call fetch/reset (updateRepo not invoked)
+    expect(mockGitInstance.fetch).not.toHaveBeenCalled();
+    expect(mockGitInstance.reset).not.toHaveBeenCalled();
   });
 });
 

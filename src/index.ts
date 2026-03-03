@@ -41,6 +41,7 @@ const server = new Server(
   {
     capabilities: {
       tools: {},
+      logging: {},
     },
   }
 );
@@ -197,10 +198,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     switch (name) {
       case "aztec_sync_repos": {
+        const log = (message: string, level: string = "info") => {
+          server.sendLoggingMessage({
+            level: level as "info" | "debug" | "warning" | "error",
+            logger: "aztec-sync",
+            data: message,
+          }).catch(() => {});
+        };
         const result = await syncRepos({
           version: args?.version as string | undefined,
           force: args?.force as boolean | undefined,
           repos: args?.repos as string[] | undefined,
+          log,
         });
         return {
           content: [
