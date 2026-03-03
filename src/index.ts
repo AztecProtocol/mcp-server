@@ -191,25 +191,57 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
   ],
 }));
 
+function validateToolRequest(name: string, args: Record<string, unknown> | undefined): void {
+  switch (name) {
+    case "aztec_sync_repos":
+    case "aztec_status":
+    case "aztec_list_examples":
+      break;
+    case "aztec_search_code":
+    case "aztec_search_docs":
+      if (!args?.query) throw new McpError(ErrorCode.InvalidParams, "query is required");
+      break;
+    case "aztec_read_example":
+      if (!args?.name) throw new McpError(ErrorCode.InvalidParams, "name is required");
+      break;
+    case "aztec_read_file":
+      if (!args?.path) throw new McpError(ErrorCode.InvalidParams, "path is required");
+      break;
+    default:
+      throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
+  }
+}
+
 /**
  * Handle tool calls
  */
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
+  // Validate tool name and required arguments before any expensive operations
+  validateToolRequest(name, args);
+
   // Auto re-sync if MCP server version changed since last sync
-  const staleMetadata = name !== "aztec_sync_repos" ? needsResync() : null;
-  if (staleMetadata) {
-    const log = (message: string, level: string = "info") => {
-      server.sendLoggingMessage({
-        level: level as "info" | "debug" | "warning" | "error",
-        logger: "aztec-sync",
-        data: message,
-      }).catch(() => {});
-    };
-    log(`Auto-syncing repos for MCP server v${MCP_VERSION} (was v${staleMetadata.mcpVersion})...`, "info");
-    await syncRepos({ version: staleMetadata.aztecVersion, force: true, log });
-    log("Auto-sync complete", "info");
+  if (name !== "aztec_sync_repos") {
+    const staleMetadata = needsResync();
+    if (staleMetadata) {
+      const log = (message: string, level: string = "info") => {
+        server.sendLoggingMessage({
+          level: level as "info" | "debug" | "warning" | "error",
+          logger: "aztec-sync",
+          data: message,
+        }).catch(() => {});
+      };
+      log(`Auto-syncing repos for MCP server v${MCP_VERSION} (was v${staleMetadata.mcpVersion})...`, "info");
+      const syncResult = await syncRepos({ version: staleMetadata.aztecVersion, force: true, log });
+      if (!syncResult.success) {
+        throw new McpError(
+          ErrorCode.InternalError,
+          `Auto-resync failed after MCP upgrade (v${staleMetadata.mcpVersion} → v${MCP_VERSION}): ${syncResult.message}`
+        );
+      }
+      log("Auto-sync complete", "info");
+    }
   }
 
   try {
@@ -241,11 +273,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "aztec_search_code": {
-        if (!args?.query) {
-          throw new McpError(ErrorCode.InvalidParams, "query is required");
-        }
         const result = searchAztecCode({
-          query: args.query as string,
+          query: args!.query as string,
           filePattern: args?.filePattern as string | undefined,
           repo: args?.repo as string | undefined,
           maxResults: args?.maxResults as number | undefined,
@@ -255,11 +284,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "aztec_search_docs": {
-        if (!args?.query) {
-          throw new McpError(ErrorCode.InvalidParams, "query is required");
-        }
         const result = searchAztecDocs({
-          query: args.query as string,
+          query: args!.query as string,
           section: args?.section as string | undefined,
           maxResults: args?.maxResults as number | undefined,
         });
@@ -276,22 +302,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "aztec_read_example": {
-        if (!args?.name) {
-          throw new McpError(ErrorCode.InvalidParams, "name is required");
-        }
         const result = readAztecExample({
-          name: args.name as string,
+          name: args!.name as string,
         });
         text = formatExampleContent(result);
         break;
       }
 
       case "aztec_read_file": {
-        if (!args?.path) {
-          throw new McpError(ErrorCode.InvalidParams, "path is required");
-        }
         const result = readRepoFile({
-          path: args.path as string,
+          path: args!.path as string,
         });
         text = formatFileContent(result);
         break;
