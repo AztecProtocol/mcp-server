@@ -67,7 +67,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           version: {
             type: "string",
             description:
-              "Aztec version tag to clone (e.g., 'v3.0.0-devnet.6-patch.1'). Defaults to latest supported version.",
+              "Aztec version tag to clone (e.g., 'v4.0.0-devnet.2-patch.1'). Defaults to latest supported version.",
           },
           force: {
             type: "boolean",
@@ -223,7 +223,7 @@ function createSyncLog(): Logger {
       level,
       logger: "aztec-sync",
       data: message,
-    }).catch(() => {});
+    }).catch(() => { });
   };
 }
 
@@ -290,7 +290,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   // in-flight sync to finish so read-only tools don't race against filesystem mutations.
   if (name !== "aztec_sync_repos") {
     ensureAutoResync();
-    if (syncInFlight) await syncInFlight.catch(() => {});
+    if (syncInFlight) await syncInFlight.catch(() => { });
   }
 
   try {
@@ -300,7 +300,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     switch (name) {
       case "aztec_sync_repos": {
         // Wait for any in-flight sync (auto or manual) before starting
-        while (syncInFlight) await syncInFlight.catch(() => {});
+        while (syncInFlight) await syncInFlight.catch(() => { });
         const log = createSyncLog();
         const task = syncRepos({
           version: args?.version as string | undefined,
@@ -308,7 +308,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           repos: args?.repos as string[] | undefined,
           log,
         });
-        syncInFlight = task.then(() => {}).finally(() => { syncInFlight = null; });
+        syncInFlight = task.then(() => { }).finally(() => { syncInFlight = null; });
         const result = await task;
         text = formatSyncResult(result);
         break;

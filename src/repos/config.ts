@@ -128,7 +128,7 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
 
 /**
  * Get Aztec repositories configured for a specific version
- * @param version - The Aztec version tag (e.g., "v3.0.0-devnet.6-patch.1")
+ * @param version - The Aztec version tag (e.g., "v4.0.0-devnet.2-patch.1")
  */
 export function getAztecRepos(version?: string): RepoConfig[] {
   const tag = version || DEFAULT_AZTEC_VERSION;
