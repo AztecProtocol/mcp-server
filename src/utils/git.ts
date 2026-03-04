@@ -69,9 +69,7 @@ export async function cloneRepo(
   if (needsForceReclone) {
     log?.(`${config.name}: Safe re-clone (force=${force}, versionMismatch=${versionMismatch})`, "debug");
     // Clean up stale temp dir from any previous failed attempt
-    if (existsSync(clonePath)) {
-      rmSync(clonePath, { recursive: true, force: true });
-    }
+    rmSync(clonePath, { recursive: true, force: true });
   }
 
   // Determine ref to checkout: commit > tag > branch

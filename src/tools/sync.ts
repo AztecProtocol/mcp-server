@@ -5,7 +5,7 @@
 import { existsSync } from "fs";
 import { join } from "path";
 import { AZTEC_REPOS, getAztecRepos, DEFAULT_AZTEC_VERSION, RepoConfig } from "../repos/config.js";
-import { cloneRepo, getReposStatus, getNoirCommitFromAztec, REPOS_DIR, Logger } from "../utils/git.js";
+import { cloneRepo, getReposStatus, getNoirCommitFromAztec, getRepoPath, REPOS_DIR, Logger } from "../utils/git.js";
 import { writeSyncMetadata, stampMetadataMcpVersion, readSyncMetadata, SyncMetadata } from "../utils/sync-metadata.js";
 
 export interface SyncResult {
@@ -163,7 +163,7 @@ export async function syncRepos(options: {
 
     for (const sparsePath of repo.sparse || []) {
       if (!sparsePath.includes(effectiveVersion)) continue;
-      const fullPath = join(REPOS_DIR, repo.name, sparsePath);
+      const fullPath = join(getRepoPath(repo.name), sparsePath);
       if (!existsSync(fullPath)) {
         result.status += `. Note: docs not found for ${effectiveVersion} in aztec-packages`;
         versionedDocsMissing = true;

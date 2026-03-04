@@ -214,12 +214,10 @@ describe("cloneRepo", () => {
     // existsSync calls:
     // 1) needsReclone -> isRepoCloned(.git) -> false (needs reclone)
     // 2) existsSync(repoPath) for needsForceReclone -> true (repo exists)
-    // 3) existsSync(clonePath .tmp) for stale cleanup -> false (no stale temp)
-    // 4) existsSync(repoPath) before swap -> true (old checkout exists)
+    // 3) existsSync(repoPath) before swap -> true (old checkout exists)
     mockExistsSync
       .mockReturnValueOnce(false) // needsReclone -> isRepoCloned -> not at right version
       .mockReturnValueOnce(true)  // existsSync(repoPath) -> repo exists, so needsForceReclone=true
-      .mockReturnValueOnce(false) // existsSync(clonePath) -> no stale temp
       .mockReturnValueOnce(true); // existsSync(repoPath) before swap -> old checkout exists
 
     mockGitInstance.clone.mockResolvedValue(undefined);
@@ -253,8 +251,7 @@ describe("cloneRepo", () => {
   it("clone failure preserves existing repo", async () => {
     mockExistsSync
       .mockReturnValueOnce(false) // needsReclone -> isRepoCloned -> needs reclone
-      .mockReturnValueOnce(true)  // existsSync(repoPath) -> repo exists
-      .mockReturnValueOnce(false); // existsSync(clonePath .tmp) -> no stale temp
+      .mockReturnValueOnce(true); // existsSync(repoPath) -> repo exists
 
     mockGitInstance.clone.mockRejectedValue(new Error("network error"));
 
@@ -277,7 +274,7 @@ describe("cloneRepo", () => {
     mockExistsSync
       .mockReturnValueOnce(false) // needsReclone -> isRepoCloned -> needs reclone
       .mockReturnValueOnce(true)  // existsSync(repoPath) -> repo exists
-      .mockReturnValueOnce(true); // existsSync(clonePath .tmp) -> stale temp exists
+      .mockReturnValueOnce(true); // existsSync(repoPath) before swap -> old checkout exists
 
     mockGitInstance.clone.mockResolvedValue(undefined);
     mockGitInstance.raw.mockResolvedValue(undefined);
@@ -316,7 +313,6 @@ describe("cloneRepo", () => {
     mockExistsSync.mockReturnValueOnce(true);  // getRepoTag -> isRepoCloned -> true
     mockGitInstance.raw.mockResolvedValueOnce("v1.0.0\n"); // getRepoTag -> v1.0.0 (mismatch!)
     mockExistsSync.mockReturnValueOnce(true);  // existsSync(repoPath) -> repo exists
-    mockExistsSync.mockReturnValueOnce(false); // existsSync(clonePath .tmp) -> no stale temp
     mockExistsSync.mockReturnValueOnce(true);  // existsSync(repoPath) before swap -> exists
 
     mockGitInstance.clone.mockResolvedValue(undefined);

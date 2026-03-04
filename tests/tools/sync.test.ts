@@ -81,6 +81,7 @@ vi.mock("../../src/utils/git.js", () => ({
   cloneRepo: (...args: any[]) => mockCloneRepo(...args),
   getReposStatus: (...args: any[]) => mockGetReposStatus(...args),
   getNoirCommitFromAztec: () => mockGetNoirCommitFromAztec(),
+  getRepoPath: (name: string) => `/fake/repos/${name}`,
   REPOS_DIR: "/fake/repos",
 }));
 

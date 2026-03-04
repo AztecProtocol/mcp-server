@@ -24,6 +24,14 @@ export function getMetadataPath(): string {
   return join(REPOS_DIR, ".sync-metadata.json");
 }
 
+// In-memory cache — avoids a readFileSync + JSON.parse on every tool call
+let cachedSyncState: SyncState | null = null;
+
+/** Invalidate the cached sync state (called after writes) */
+export function invalidateSyncStateCache(): void {
+  cachedSyncState = null;
+}
+
 export function writeSyncMetadata(aztecVersion: string): void {
   const metadata: SyncMetadata = {
     mcpVersion: MCP_VERSION,
@@ -31,6 +39,7 @@ export function writeSyncMetadata(aztecVersion: string): void {
     aztecVersion,
   };
   writeFileSync(getMetadataPath(), JSON.stringify(metadata, null, 2));
+  invalidateSyncStateCache();
 }
 
 export function readSyncMetadata(): SyncMetadata | null {
@@ -65,6 +74,7 @@ export function writeAutoResyncAttempt(
     result,
   };
   writeFileSync(getMetadataPath(), JSON.stringify(metadata, null, 2));
+  invalidateSyncStateCache();
 }
 
 /**
@@ -85,6 +95,7 @@ export function stampMetadataMcpVersion(aztecVersion: string): void {
   }
   delete metadata.autoResyncAttempt;
   writeFileSync(getMetadataPath(), JSON.stringify(metadata, null, 2));
+  invalidateSyncStateCache();
 }
 
 /**
@@ -98,6 +109,14 @@ export function stampMetadataMcpVersion(aztecVersion: string): void {
  * - upToDate: versions match, or auto-resync already attempted for this version
  */
 export function getSyncState(): SyncState {
+  if (cachedSyncState) return cachedSyncState;
+
+  const result = computeSyncState();
+  cachedSyncState = result;
+  return result;
+}
+
+function computeSyncState(): SyncState {
   const metadata = readSyncMetadata();
   if (!metadata) {
     if (!existsSync(REPOS_DIR)) return { kind: "noRepos" };

@@ -27,10 +27,12 @@ import {
   getSyncState,
   writeAutoResyncAttempt,
   stampMetadataMcpVersion,
+  invalidateSyncStateCache,
 } from "../../src/utils/sync-metadata.js";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  invalidateSyncStateCache();
 });
 
 describe("getMetadataPath", () => {

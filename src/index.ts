@@ -35,6 +35,7 @@ import {
 import { MCP_VERSION } from "./version.js";
 import { getSyncState, writeAutoResyncAttempt } from "./utils/sync-metadata.js";
 import { getRepoTag } from "./utils/git.js";
+import type { Logger } from "./utils/git.js";
 
 const server = new Server(
   {
@@ -216,10 +217,10 @@ function validateToolRequest(name: string, args: Record<string, unknown> | undef
 // Sync lock — prevents concurrent syncs from racing over filesystem paths
 let syncInFlight: Promise<void> | null = null;
 
-function createSyncLog() {
-  return (message: string, level: string = "info") => {
+function createSyncLog(): Logger {
+  return (message: string, level: "info" | "debug" | "warning" | "error" = "info") => {
     server.sendLoggingMessage({
-      level: level as "info" | "debug" | "warning" | "error",
+      level,
       logger: "aztec-sync",
       data: message,
     }).catch(() => {});
@@ -259,14 +260,14 @@ function ensureAutoResync(): void {
     const syncResult = await syncRepos({ version, force: true, log });
     if (syncResult.metadataSafe) {
       log("Auto-sync complete", "info");
-    } else if (syncResult.success) {
-      // Repos synced but metadata could not be persisted — retry later
-      try { writeAutoResyncAttempt("retryable"); } catch { /* non-fatal */ }
-      log(`Auto-resync partial: ${syncResult.message}`, "info");
     } else {
-      // Sync failed (network error, aztec-packages abort, etc.) — retry after backoff
+      // Sync failed or metadata could not be persisted — retry after backoff
       try { writeAutoResyncAttempt("retryable"); } catch { /* non-fatal */ }
-      log(`Auto-resync failed: ${syncResult.message}. Local tools will use existing checkouts.`, "warning");
+      if (syncResult.success) {
+        log(`Auto-resync partial: ${syncResult.message}`, "info");
+      } else {
+        log(`Auto-resync failed: ${syncResult.message}. Local tools will use existing checkouts.`, "warning");
+      }
     }
   })();
 
@@ -293,7 +294,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 
   try {
-    let text: string;
+    // validateToolRequest() above guarantees name is a known tool
+    let text!: string;
 
     switch (name) {
       case "aztec_sync_repos": {
@@ -363,8 +365,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         break;
       }
 
-      default:
-        throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
     }
 
     return {
