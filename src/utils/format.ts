@@ -4,6 +4,7 @@
 
 import type { SyncResult } from "../tools/sync.js";
 import type { SearchResult, FileInfo } from "./search.js";
+import type { SyncMetadata } from "./sync-metadata.js";
 
 export function formatSyncResult(result: SyncResult): string {
   const lines = [
@@ -31,14 +32,22 @@ export function formatStatus(status: {
     cloned: boolean;
     commit?: string;
   }[];
+  syncMetadata?: SyncMetadata | null;
 }): string {
   const lines = [
     "Aztec MCP Server Status",
     "",
     `Repos directory: ${status.reposDir}`,
-    "",
-    "Repositories:",
   ];
+
+  if (status.syncMetadata) {
+    lines.push(`Last synced: ${status.syncMetadata.syncedAt}`);
+    lines.push(`MCP server version: ${status.syncMetadata.mcpVersion}`);
+    lines.push(`Aztec version: ${status.syncMetadata.aztecVersion}`);
+  }
+
+  lines.push("");
+  lines.push("Repositories:");
 
   for (const repo of status.repos) {
     const icon = repo.cloned ? "✓" : "○";

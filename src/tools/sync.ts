@@ -2,11 +2,15 @@
  * Repository sync tool - clones and updates Aztec repositories
  */
 
+import { existsSync } from "fs";
+import { join } from "path";
 import { AZTEC_REPOS, getAztecRepos, DEFAULT_AZTEC_VERSION, RepoConfig } from "../repos/config.js";
-import { cloneRepo, getReposStatus, getNoirCommitFromAztec, REPOS_DIR, Logger } from "../utils/git.js";
+import { cloneRepo, getReposStatus, getNoirCommitFromAztec, getRepoPath, REPOS_DIR, Logger } from "../utils/git.js";
+import { writeSyncMetadata, stampMetadataMcpVersion, readSyncMetadata, SyncMetadata } from "../utils/sync-metadata.js";
 
 export interface SyncResult {
   success: boolean;
+  metadataSafe: boolean;
   message: string;
   version: string;
   repos: {
@@ -40,6 +44,7 @@ export async function syncRepos(options: {
   if (reposToSync.length === 0) {
     return {
       success: false,
+      metadataSafe: false,
       message: "No repositories matched the specified names",
       version: effectiveVersion,
       repos: [],
@@ -94,8 +99,25 @@ export async function syncRepos(options: {
     await syncRepo(aztecPackages, nextIndex++, totalRepos);
   }
 
-  // Get the Noir commit from aztec-packages (if available)
-  const noirCommit = await getNoirCommitFromAztec();
+  // Abort if aztec-packages failed during any version-targeted or forced sync —
+  // cloneRepo does a destructive replacement when the version changes, so a failure
+  // leaves the old checkout while other repos sync to the new tag, producing a
+  // mixed-version workspace.
+  const aztecFailed = results.some(
+    (r) => r.name === "aztec-packages" && r.status.toLowerCase().includes("error"),
+  );
+  if (aztecFailed && (force || version)) {
+    return {
+      success: false,
+      metadataSafe: false,
+      message: "Sync aborted: aztec-packages failed to sync",
+      version: effectiveVersion,
+      repos: results,
+    };
+  }
+
+  // Only derive noir commit if aztec-packages succeeded
+  const noirCommit = !aztecFailed ? await getNoirCommitFromAztec() : null;
   if (noirCommit) {
     log?.(`Resolved Noir commit from aztec-packages: ${noirCommit.substring(0, 7)}`, "info");
   }
@@ -133,17 +155,66 @@ export async function syncRepos(options: {
     parallelBatch.map((item) => syncRepo(item.config, item.index, totalRepos, item.statusTransform))
   );
 
+  // Warn if versioned docs paths don't exist after clone
+  let versionedDocsMissing = false;
+  for (const repo of syntheticRepos) {
+    const result = results.find((r) => r.name === repo.name);
+    if (!result || result.status.toLowerCase().includes("error")) continue;
+
+    for (const sparsePath of repo.sparse || []) {
+      if (!sparsePath.includes(effectiveVersion)) continue;
+      const fullPath = join(getRepoPath(repo.name), sparsePath);
+      if (!existsSync(fullPath)) {
+        result.status += `. Note: docs not found for ${effectiveVersion} in aztec-packages`;
+        versionedDocsMissing = true;
+        break;
+      }
+    }
+  }
+
   const allSuccess = results.every(
     (r) => !r.status.toLowerCase().includes("error")
   );
 
   log?.(`Sync complete: ${results.length} repos, ${allSuccess ? "all succeeded" : "some failed"}`, "info");
 
+  // Metadata is safe to write when all repos succeeded and every configured
+  // repo was included (explicit full list counts as full sync). Docs-missing
+  // is cosmetic — repos are usable and auto-resync should not keep retrying.
+  const isFullSync = !repoNames || configuredRepos.every((r) => repoNames.includes(r.name));
+  let metadataSafe = allSuccess && isFullSync;
+  let metadataWriteFailed = false;
+
+  if (metadataSafe) {
+    try {
+      writeSyncMetadata(effectiveVersion);
+    } catch {
+      // Metadata write failed — caller must not treat this as fully persisted
+      metadataSafe = false;
+      metadataWriteFailed = true;
+    }
+  } else if (allSuccess && !isFullSync) {
+    // Partial sync succeeded — stamp mcpVersion so the install is not mistaken
+    // for a legacy or stale-version install that needs a full auto-resync.
+    try {
+      stampMetadataMcpVersion(effectiveVersion);
+    } catch {
+      // Non-fatal
+    }
+  }
+
+  const message = !allSuccess
+    ? "Some repositories failed to sync"
+    : metadataWriteFailed
+      ? `Synced ${results.length} repositories but failed to persist sync metadata — next startup may re-sync`
+      : versionedDocsMissing
+        ? `Synced ${results.length} repositories but docs not found for ${effectiveVersion} — version may not exist yet`
+        : `Successfully synced ${results.length} repositories to ${REPOS_DIR}`;
+
   return {
     success: allSuccess,
-    message: allSuccess
-      ? `Successfully synced ${results.length} repositories to ${REPOS_DIR}`
-      : "Some repositories failed to sync",
+    metadataSafe,
+    message,
     version: effectiveVersion,
     repos: results,
   };
@@ -160,6 +231,7 @@ export async function getStatus(): Promise<{
     cloned: boolean;
     commit?: string;
   }[];
+  syncMetadata: SyncMetadata | null;
 }> {
   const statusMap = await getReposStatus(AZTEC_REPOS);
 
@@ -176,5 +248,6 @@ export async function getStatus(): Promise<{
   return {
     reposDir: REPOS_DIR,
     repos,
+    syncMetadata: readSyncMetadata(),
   };
 }
