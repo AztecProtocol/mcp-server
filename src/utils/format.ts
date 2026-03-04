@@ -5,6 +5,7 @@
 import type { SyncResult } from "../tools/sync.js";
 import type { SearchResult, FileInfo } from "./search.js";
 import type { SyncMetadata } from "./sync-metadata.js";
+import type { ErrorLookupResult } from "./error-lookup.js";
 
 export function formatSyncResult(result: SyncResult): string {
   const lines = [
@@ -150,4 +151,54 @@ export function formatFileContent(result: {
   }
 
   return result.content;
+}
+
+export function formatErrorLookupResult(result: {
+  success: boolean;
+  result: ErrorLookupResult;
+  message: string;
+}): string {
+  const lines = [result.message, ""];
+
+  const { catalogMatches, codeMatches } = result.result;
+
+  if (catalogMatches.length > 0) {
+    lines.push("## Known Errors");
+    lines.push("");
+
+    for (const m of catalogMatches) {
+      const { entry } = m;
+      lines.push(`**${entry.name}**`);
+      if (entry.errorCode !== undefined) lines.push(`- Code: ${entry.errorCode}`);
+      if (entry.hexSignature) lines.push(`- Hex: ${entry.hexSignature}`);
+      lines.push(`- Category: ${entry.category}`);
+      lines.push(`- Source: ${entry.source}`);
+      lines.push(`- Match: ${m.matchType} (score ${m.score})`);
+      lines.push(`- **Cause**: ${entry.cause}`);
+      lines.push(`- **Fix**: ${entry.fix}`);
+      lines.push("");
+    }
+  }
+
+  if (codeMatches.length > 0) {
+    lines.push("## Related Code References");
+    lines.push("");
+
+    for (const match of codeMatches) {
+      lines.push(`**${match.file}:${match.line}**`);
+      lines.push("```");
+      lines.push(match.content);
+      lines.push("```");
+      lines.push("");
+    }
+  }
+
+  if (catalogMatches.length === 0 && codeMatches.length === 0) {
+    lines.push("No matching errors found. Try:");
+    lines.push("- A numeric error code (e.g., `2002`)");
+    lines.push("- A hex signature (e.g., `0xa5b2ba17`)");
+    lines.push("- An error message substring (e.g., `insufficient fee`)");
+  }
+
+  return lines.join("\n");
 }
