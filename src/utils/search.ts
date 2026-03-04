@@ -182,6 +182,29 @@ export function findExample(name: string): FileInfo | null {
   return match || null;
 }
 
+/**
+ * Get numeric priority for a search result (lower = higher priority).
+ * SDK sources rank above example apps.
+ */
+export function getResultPriority(result: SearchResult): number {
+  const { repo, file } = result;
+
+  if (repo === "aztec-packages") {
+    if (/\baztec-nr\b/.test(file) || /\byarn-project\b/.test(file)) return 1;
+    if (/\bnoir-contracts\b/.test(file)) return 2;
+    // Other aztec-packages paths (boxes, playground, etc.)
+    return 4;
+  }
+
+  if (repo === "noir") {
+    if (/\bnoir_stdlib\b/.test(file)) return 3;
+    return 4;
+  }
+
+  // Example apps / community repos
+  return 5;
+}
+
 // --- Helper functions ---
 
 /**
@@ -197,8 +220,6 @@ function parseRgOutput(output: string, maxResults: number): SearchResult[] {
   const lines = output.split("\n").filter(Boolean);
 
   for (const line of lines) {
-    if (results.length >= maxResults) break;
-
     // Format: /path/to/file:linenum:content
     const match = line.match(/^(.+?):(\d+):(.*)$/);
     if (match) {
@@ -215,7 +236,8 @@ function parseRgOutput(output: string, maxResults: number): SearchResult[] {
     }
   }
 
-  return results;
+  results.sort((a, b) => getResultPriority(a) - getResultPriority(b));
+  return results.slice(0, maxResults);
 }
 
 function manualSearch(
@@ -243,15 +265,11 @@ function manualSearch(
     }
 
     for (const file of files) {
-      if (results.length >= maxResults) break;
-
       try {
         const content = readFileSync(file, "utf-8");
         const lines = content.split("\n");
 
         for (let i = 0; i < lines.length; i++) {
-          if (results.length >= maxResults) break;
-
           if (searchRegex.test(lines[i])) {
             const relativePath = relative(REPOS_DIR, file);
             const repoPart = relativePath.split("/")[0];
@@ -275,7 +293,8 @@ function manualSearch(
     // Globby error, return empty
   }
 
-  return results;
+  results.sort((a, b) => getResultPriority(a) - getResultPriority(b));
+  return results.slice(0, maxResults);
 }
 
 function findContracts(basePath: string, repoName: string): FileInfo[] {
