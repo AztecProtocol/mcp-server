@@ -7,6 +7,7 @@ import { join } from "path";
 import { AZTEC_REPOS, getAztecRepos, DEFAULT_AZTEC_VERSION, RepoConfig } from "../repos/config.js";
 import { cloneRepo, getReposStatus, getNoirCommitFromAztec, getRepoPath, REPOS_DIR, Logger } from "../utils/git.js";
 import { writeSyncMetadata, stampMetadataMcpVersion, readSyncMetadata, SyncMetadata } from "../utils/sync-metadata.js";
+import { clearErrorCache } from "../utils/error-lookup.js";
 
 export interface SyncResult {
   success: boolean;
@@ -202,6 +203,9 @@ export async function syncRepos(options: {
       // Non-fatal
     }
   }
+
+  // Invalidate cached error entries so the next lookup re-parses from updated files
+  clearErrorCache();
 
   const message = !allSuccess
     ? "Some repositories failed to sync"

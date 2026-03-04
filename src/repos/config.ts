@@ -45,6 +45,7 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
       "barretenberg/ts/src",
       "boxes",
       "playground",
+      "l1-contracts/src/core/libraries/Errors.sol",
     ],
     sparsePathOverrides: [
       {
@@ -52,6 +53,8 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
           "docs/developer_versioned_docs/version-{version}",
           "docs/static/aztec-nr-api/devnet",
           "docs/static/typescript-api/devnet",
+          "docs/docs-developers/docs/aztec-nr/debugging.md",
+          "docs/docs-operate/operators/operator-faq.md",
         ],
         branch: "next",
       },

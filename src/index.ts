@@ -23,6 +23,7 @@ import {
   listAztecExamples,
   readAztecExample,
   readRepoFile,
+  lookupAztecError,
 } from "./tools/index.js";
 import {
   formatSyncResult,
@@ -31,6 +32,7 @@ import {
   formatExamplesList,
   formatExampleContent,
   formatFileContent,
+  formatErrorLookupResult,
 } from "./utils/format.js";
 import { MCP_VERSION } from "./version.js";
 import { getSyncState, writeAutoResyncAttempt } from "./utils/sync-metadata.js";
@@ -190,6 +192,33 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         required: ["path"],
       },
     },
+    {
+      name: "aztec_lookup_error",
+      description:
+        "Look up an Aztec error by message, error code, or hex signature. " +
+        "Returns root cause and suggested fix. Searches Solidity errors, " +
+        "TX validation errors, circuit codes, AVM errors, and documentation.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description:
+              "Error message, numeric error code (e.g., '2002'), or hex signature (e.g., '0xa5b2ba17')",
+          },
+          category: {
+            type: "string",
+            description:
+              "Filter by error category. Options: contract, circuit, tx-validation, l1, avm, sequencer, operator, general",
+          },
+          maxResults: {
+            type: "number",
+            description: "Maximum results to return (default: 10)",
+          },
+        },
+        required: ["query"],
+      },
+    },
   ],
 }));
 
@@ -201,6 +230,7 @@ function validateToolRequest(name: string, args: Record<string, unknown> | undef
       break;
     case "aztec_search_code":
     case "aztec_search_docs":
+    case "aztec_lookup_error":
       if (!args?.query) throw new McpError(ErrorCode.InvalidParams, "query is required");
       break;
     case "aztec_read_example":
@@ -362,6 +392,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           path: args!.path as string,
         });
         text = formatFileContent(result);
+        break;
+      }
+
+      case "aztec_lookup_error": {
+        const result = lookupAztecError({
+          query: args!.query as string,
+          category: args?.category as string | undefined,
+          maxResults: args?.maxResults as number | undefined,
+        });
+        text = formatErrorLookupResult(result);
         break;
       }
 

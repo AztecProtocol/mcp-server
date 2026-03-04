@@ -35,6 +35,8 @@ describe("AZTEC_REPOS", () => {
           `docs/developer_versioned_docs/version-${DEFAULT_AZTEC_VERSION}`,
           "docs/static/aztec-nr-api/devnet",
           "docs/static/typescript-api/devnet",
+          "docs/docs-developers/docs/aztec-nr/debugging.md",
+          "docs/docs-operate/operators/operator-faq.md",
         ],
         branch: "next",
       },
