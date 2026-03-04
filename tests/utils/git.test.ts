@@ -19,6 +19,7 @@ vi.mock("fs", () => ({
   existsSync: vi.fn(),
   mkdirSync: vi.fn(),
   rmSync: vi.fn(),
+  renameSync: vi.fn(),
 }));
 
 vi.mock("os", () => ({
@@ -29,7 +30,7 @@ vi.mock("os", () => ({
 process.env.AZTEC_MCP_REPOS_DIR = "/tmp/test-repos";
 
 import { simpleGit } from "simple-git";
-import { existsSync, mkdirSync, rmSync } from "fs";
+import { existsSync, mkdirSync, rmSync, renameSync } from "fs";
 import {
   REPOS_DIR,
   ensureReposDir,
@@ -48,6 +49,7 @@ import type { RepoConfig } from "../../src/repos/config.js";
 const mockExistsSync = vi.mocked(existsSync);
 const mockMkdirSync = vi.mocked(mkdirSync);
 const mockRmSync = vi.mocked(rmSync);
+const mockRenameSync = vi.mocked(renameSync);
 const mockSimpleGit = vi.mocked(simpleGit);
 
 beforeEach(() => {
@@ -208,14 +210,17 @@ describe("cloneRepo", () => {
     expect(sparseCheckoutCalls).toHaveLength(0);
   });
 
-  it("force=true removes existing directory", async () => {
-    // First call: not cloned (needsReclone check) - make it return true
-    // isRepoCloned checks existsSync for .git dir
-    // existsSync calls: 1) needsReclone->isRepoCloned(.git), 2) repoPath exists, 3) isRepoCloned(.git)
+  it("force=true clones to temp dir then swaps", async () => {
+    // existsSync calls:
+    // 1) needsReclone -> isRepoCloned(.git) -> false (needs reclone)
+    // 2) existsSync(repoPath) for needsForceReclone -> true (repo exists)
+    // 3) existsSync(clonePath .tmp) for stale cleanup -> false (no stale temp)
+    // 4) existsSync(repoPath) before swap -> true (old checkout exists)
     mockExistsSync
-      .mockReturnValueOnce(false) // needsReclone -> isRepoCloned -> false -> needs clone
-      .mockReturnValueOnce(true)  // existsSync(repoPath) for rmSync guard
-      .mockReturnValueOnce(false); // isRepoCloned -> not cloned after removal
+      .mockReturnValueOnce(false) // needsReclone -> isRepoCloned -> not at right version
+      .mockReturnValueOnce(true)  // existsSync(repoPath) -> repo exists, so needsForceReclone=true
+      .mockReturnValueOnce(false) // existsSync(clonePath) -> no stale temp
+      .mockReturnValueOnce(true); // existsSync(repoPath) before swap -> old checkout exists
 
     mockGitInstance.clone.mockResolvedValue(undefined);
     mockGitInstance.raw.mockResolvedValue(undefined);
@@ -223,10 +228,112 @@ describe("cloneRepo", () => {
     mockGitInstance.checkout.mockResolvedValue(undefined);
 
     await cloneRepo(sparseConfig, true);
+
+    // Clone goes to .tmp path
+    expect(mockGitInstance.clone).toHaveBeenCalledWith(
+      sparseConfig.url,
+      expect.stringContaining("aztec-packages.tmp"),
+      expect.any(Array)
+    );
+    // On success: move old to .old backup, rename temp into place, delete backup
+    expect(mockRenameSync).toHaveBeenCalledWith(
+      expect.stringMatching(/aztec-packages$/),
+      expect.stringContaining("aztec-packages.old")
+    );
+    expect(mockRenameSync).toHaveBeenCalledWith(
+      expect.stringContaining("aztec-packages.tmp"),
+      expect.stringMatching(/aztec-packages$/)
+    );
     expect(mockRmSync).toHaveBeenCalledWith(
-      expect.stringContaining("aztec-packages"),
+      expect.stringContaining("aztec-packages.old"),
       { recursive: true, force: true }
     );
+  });
+
+  it("clone failure preserves existing repo", async () => {
+    mockExistsSync
+      .mockReturnValueOnce(false) // needsReclone -> isRepoCloned -> needs reclone
+      .mockReturnValueOnce(true)  // existsSync(repoPath) -> repo exists
+      .mockReturnValueOnce(false); // existsSync(clonePath .tmp) -> no stale temp
+
+    mockGitInstance.clone.mockRejectedValue(new Error("network error"));
+
+    await expect(cloneRepo(sparseConfig, true)).rejects.toThrow("network error");
+
+    // Only the temp dir is cleaned up, not the original
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("aztec-packages.tmp"),
+      { recursive: true, force: true }
+    );
+    // Original repo not deleted, rename not called
+    expect(mockRmSync).not.toHaveBeenCalledWith(
+      expect.stringMatching(/aztec-packages$/),
+      expect.anything()
+    );
+    expect(mockRenameSync).not.toHaveBeenCalled();
+  });
+
+  it("stale temp dir is cleaned before clone", async () => {
+    mockExistsSync
+      .mockReturnValueOnce(false) // needsReclone -> isRepoCloned -> needs reclone
+      .mockReturnValueOnce(true)  // existsSync(repoPath) -> repo exists
+      .mockReturnValueOnce(true); // existsSync(clonePath .tmp) -> stale temp exists
+
+    mockGitInstance.clone.mockResolvedValue(undefined);
+    mockGitInstance.raw.mockResolvedValue(undefined);
+    mockGitInstance.fetch.mockResolvedValue(undefined);
+    mockGitInstance.checkout.mockResolvedValue(undefined);
+
+    await cloneRepo(sparseConfig, true);
+
+    // First rmSync call cleans stale temp, before clone
+    const rmCalls = mockRmSync.mock.calls;
+    const staleTempCleanup = rmCalls.find(
+      (c) => typeof c[0] === "string" && c[0].endsWith(".tmp")
+    );
+    expect(staleTempCleanup).toBeDefined();
+
+    // Clone still proceeds to .tmp
+    expect(mockGitInstance.clone).toHaveBeenCalledWith(
+      sparseConfig.url,
+      expect.stringContaining("aztec-packages.tmp"),
+      expect.any(Array)
+    );
+  });
+
+  it("version mismatch uses safe re-clone via temp dir", async () => {
+    // Config with a tag that doesn't match what's cloned
+    const mismatchConfig: RepoConfig = {
+      name: "aztec-packages",
+      url: "https://github.com/AztecProtocol/aztec-packages",
+      tag: "v2.0.0",
+      sparse: ["docs"],
+      description: "test",
+    };
+
+    // needsReclone calls: isRepoCloned(.git), then getRepoTag which also calls isRepoCloned(.git)
+    mockExistsSync.mockReturnValueOnce(true);  // needsReclone -> isRepoCloned -> true (cloned)
+    mockExistsSync.mockReturnValueOnce(true);  // getRepoTag -> isRepoCloned -> true
+    mockGitInstance.raw.mockResolvedValueOnce("v1.0.0\n"); // getRepoTag -> v1.0.0 (mismatch!)
+    mockExistsSync.mockReturnValueOnce(true);  // existsSync(repoPath) -> repo exists
+    mockExistsSync.mockReturnValueOnce(false); // existsSync(clonePath .tmp) -> no stale temp
+    mockExistsSync.mockReturnValueOnce(true);  // existsSync(repoPath) before swap -> exists
+
+    mockGitInstance.clone.mockResolvedValue(undefined);
+    mockGitInstance.raw.mockResolvedValue(undefined);
+    mockGitInstance.fetch.mockResolvedValue(undefined);
+    mockGitInstance.checkout.mockResolvedValue(undefined);
+
+    await cloneRepo(mismatchConfig);
+
+    // Should clone to .tmp path (safe re-clone, not destructive)
+    expect(mockGitInstance.clone).toHaveBeenCalledWith(
+      mismatchConfig.url,
+      expect.stringContaining("aztec-packages.tmp"),
+      expect.any(Array)
+    );
+    // Should swap on success
+    expect(mockRenameSync).toHaveBeenCalled();
   });
 
   it("already cloned + version match skips update for tag-pinned repos", async () => {

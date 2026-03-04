@@ -3,7 +3,7 @@
  */
 
 import { simpleGit, SimpleGit } from "simple-git";
-import { existsSync, mkdirSync, rmSync } from "fs";
+import { existsSync, mkdirSync, rmSync, renameSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
 import { RepoConfig } from "../repos/config.js";
@@ -51,21 +51,27 @@ export async function cloneRepo(
 
   // Check if we need to re-clone due to version mismatch
   const versionMismatch = await needsReclone(config);
-
-  // Remove existing if force is set or version changed
-  if ((force || versionMismatch) && existsSync(repoPath)) {
-    log?.(`${config.name}: Removing existing clone (force=${force}, versionMismatch=${versionMismatch})`, "debug");
-    rmSync(repoPath, { recursive: true, force: true });
-  }
+  const needsForceReclone = (force || versionMismatch) && existsSync(repoPath);
 
   // If already cloned and version matches, skip or update
-  if (isRepoCloned(config.name)) {
+  if (!needsForceReclone && isRepoCloned(config.name)) {
     if (config.tag || config.commit) {
       log?.(`${config.name}: Already cloned at correct ${config.tag ? "tag" : "commit"}, skipping`, "debug");
       return `${config.name} already at ${config.commit || config.tag}`;
     }
     log?.(`${config.name}: Already cloned, updating`, "debug");
     return await updateRepo(config.name, log);
+  }
+
+  // Clone to a temp dir when replacing an existing repo, so failure leaves the old repo intact
+  const clonePath = needsForceReclone ? repoPath + ".tmp" : repoPath;
+
+  if (needsForceReclone) {
+    log?.(`${config.name}: Safe re-clone (force=${force}, versionMismatch=${versionMismatch})`, "debug");
+    // Clean up stale temp dir from any previous failed attempt
+    if (existsSync(clonePath)) {
+      rmSync(clonePath, { recursive: true, force: true });
+    }
   }
 
   // Determine ref to checkout: commit > tag > branch
@@ -83,83 +89,110 @@ export async function cloneRepo(
 
   const git: SimpleGit = simpleGit({ progress: progressHandler });
 
-  if (isSparse) {
-    // Clone with sparse checkout for large repos
-    if (config.commit) {
-      // For commits, we need full history to fetch the commit
-      await git.clone(config.url, repoPath, [
-        "--filter=blob:none",
-        "--sparse",
-        "--no-checkout",
-      ]);
+  try {
+    if (isSparse) {
+      // Clone with sparse checkout for large repos
+      if (config.commit) {
+        // For commits, we need full history to fetch the commit
+        await git.clone(config.url, clonePath, [
+          "--filter=blob:none",
+          "--sparse",
+          "--no-checkout",
+        ]);
 
-      const repoGit = simpleGit({ baseDir: repoPath, progress: progressHandler });
-      await repoGit.raw(["config", "gc.auto", "0"]);
-      log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
-      await repoGit.raw(["sparse-checkout", "set", ...config.sparse!]);
-      log?.(`${config.name}: Fetching commit ${config.commit.substring(0, 7)}`, "info");
-      await repoGit.fetch(["origin", config.commit]);
-      log?.(`${config.name}: Checking out commit`, "debug");
-      await repoGit.checkout(config.commit);
-    } else if (config.tag) {
-      await git.clone(config.url, repoPath, [
-        "--filter=blob:none",
-        "--sparse",
-        "--no-checkout",
-      ]);
+        const repoGit = simpleGit({ baseDir: clonePath, progress: progressHandler });
+        await repoGit.raw(["config", "gc.auto", "0"]);
+        log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
+        await repoGit.raw(["sparse-checkout", "set", ...config.sparse!]);
+        log?.(`${config.name}: Fetching commit ${config.commit.substring(0, 7)}`, "info");
+        await repoGit.fetch(["origin", config.commit]);
+        log?.(`${config.name}: Checking out commit`, "debug");
+        await repoGit.checkout(config.commit);
+      } else if (config.tag) {
+        await git.clone(config.url, clonePath, [
+          "--filter=blob:none",
+          "--sparse",
+          "--no-checkout",
+        ]);
 
-      const repoGit = simpleGit({ baseDir: repoPath, progress: progressHandler });
-      await repoGit.raw(["config", "gc.auto", "0"]);
-      log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
-      await repoGit.raw(["sparse-checkout", "set", ...config.sparse!]);
-      log?.(`${config.name}: Fetching tag ${config.tag}`, "info");
-      await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
-      log?.(`${config.name}: Checking out tag`, "debug");
-      await repoGit.checkout(config.tag);
+        const repoGit = simpleGit({ baseDir: clonePath, progress: progressHandler });
+        await repoGit.raw(["config", "gc.auto", "0"]);
+        log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
+        await repoGit.raw(["sparse-checkout", "set", ...config.sparse!]);
+        log?.(`${config.name}: Fetching tag ${config.tag}`, "info");
+        await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
+        log?.(`${config.name}: Checking out tag`, "debug");
+        await repoGit.checkout(config.tag);
+      } else {
+        await git.clone(config.url, clonePath, [
+          "--filter=blob:none",
+          "--sparse",
+          "--depth=1",
+          ...(config.branch ? ["-b", config.branch] : []),
+        ]);
+
+        const repoGit = simpleGit({ baseDir: clonePath, progress: progressHandler });
+        await repoGit.raw(["config", "gc.auto", "0"]);
+        log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
+        await repoGit.raw(["sparse-checkout", "set", ...config.sparse!]);
+      }
     } else {
-      await git.clone(config.url, repoPath, [
-        "--filter=blob:none",
-        "--sparse",
-        "--depth=1",
-        ...(config.branch ? ["-b", config.branch] : []),
-      ]);
-
-      const repoGit = simpleGit({ baseDir: repoPath, progress: progressHandler });
-      await repoGit.raw(["config", "gc.auto", "0"]);
-      log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
-      await repoGit.raw(["sparse-checkout", "set", ...config.sparse!]);
+      // Clone for smaller repos
+      if (config.commit) {
+        // For commits, clone and checkout specific commit
+        await git.clone(config.url, clonePath, ["--no-checkout"]);
+        const repoGit = simpleGit({ baseDir: clonePath, progress: progressHandler });
+        log?.(`${config.name}: Fetching commit ${config.commit.substring(0, 7)}`, "info");
+        await repoGit.fetch(["origin", config.commit]);
+        log?.(`${config.name}: Checking out commit`, "debug");
+        await repoGit.checkout(config.commit);
+      } else if (config.tag) {
+        // Clone and checkout tag
+        await git.clone(config.url, clonePath, ["--no-checkout"]);
+        const repoGit = simpleGit({ baseDir: clonePath, progress: progressHandler });
+        log?.(`${config.name}: Fetching tag ${config.tag}`, "info");
+        await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
+        log?.(`${config.name}: Checking out tag`, "debug");
+        await repoGit.checkout(config.tag);
+      } else {
+        await git.clone(config.url, clonePath, [
+          "--depth=1",
+          ...(config.branch ? ["-b", config.branch] : []),
+        ]);
+      }
     }
-
-    log?.(`${config.name}: Clone complete`, "info");
-    return `Cloned ${config.name} @ ${ref} (${refType}, sparse: ${config.sparse!.join(", ")})`;
-  } else {
-    // Clone for smaller repos
-    if (config.commit) {
-      // For commits, clone and checkout specific commit
-      await git.clone(config.url, repoPath, ["--no-checkout"]);
-      const repoGit = simpleGit({ baseDir: repoPath, progress: progressHandler });
-      log?.(`${config.name}: Fetching commit ${config.commit.substring(0, 7)}`, "info");
-      await repoGit.fetch(["origin", config.commit]);
-      log?.(`${config.name}: Checking out commit`, "debug");
-      await repoGit.checkout(config.commit);
-    } else if (config.tag) {
-      // Clone and checkout tag
-      await git.clone(config.url, repoPath, ["--no-checkout"]);
-      const repoGit = simpleGit({ baseDir: repoPath, progress: progressHandler });
-      log?.(`${config.name}: Fetching tag ${config.tag}`, "info");
-      await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
-      log?.(`${config.name}: Checking out tag`, "debug");
-      await repoGit.checkout(config.tag);
-    } else {
-      await git.clone(config.url, repoPath, [
-        "--depth=1",
-        ...(config.branch ? ["-b", config.branch] : []),
-      ]);
+  } catch (error) {
+    // On failure: clean up temp dir, leave original repo intact
+    if (needsForceReclone) {
+      rmSync(clonePath, { recursive: true, force: true });
     }
-
-    log?.(`${config.name}: Clone complete`, "info");
-    return `Cloned ${config.name} @ ${ref} (${refType})`;
+    throw error;
   }
+
+  // On success: atomic swap — move old out, move new in, then delete old.
+  // If the new rename fails, restore old from backup so the repo stays available.
+  if (needsForceReclone) {
+    const backupPath = repoPath + ".old";
+    rmSync(backupPath, { recursive: true, force: true });
+    if (existsSync(repoPath)) {
+      renameSync(repoPath, backupPath);
+    }
+    try {
+      renameSync(clonePath, repoPath);
+    } catch (swapError) {
+      // Restore old checkout so the repo isn't left unavailable
+      if (existsSync(backupPath)) {
+        try { renameSync(backupPath, repoPath); } catch { /* best-effort restore */ }
+      }
+      rmSync(clonePath, { recursive: true, force: true });
+      throw swapError;
+    }
+    rmSync(backupPath, { recursive: true, force: true });
+  }
+
+  log?.(`${config.name}: Clone complete`, "info");
+  const sparseLabel = isSparse ? `, sparse: ${config.sparse!.join(", ")}` : "";
+  return `Cloned ${config.name} @ ${ref} (${refType}${sparseLabel})`;
 }
 
 /**

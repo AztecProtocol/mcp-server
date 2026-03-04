@@ -12,6 +12,7 @@ describe("formatSyncResult", () => {
   it("shows checkmark for success", () => {
     const result = formatSyncResult({
       success: true,
+      metadataSafe: true,
       message: "All good",
       version: "v1.0.0",
       repos: [{ name: "repo1", status: "Cloned repo1" }],
@@ -23,6 +24,7 @@ describe("formatSyncResult", () => {
   it("shows warning icon for failure", () => {
     const result = formatSyncResult({
       success: false,
+      metadataSafe: false,
       message: "Some failed",
       version: "v1.0.0",
       repos: [],
@@ -33,6 +35,7 @@ describe("formatSyncResult", () => {
   it("shows per-repo icons based on error in status", () => {
     const result = formatSyncResult({
       success: false,
+      metadataSafe: false,
       message: "Mixed",
       version: "v1.0.0",
       repos: [

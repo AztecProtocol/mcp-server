@@ -33,7 +33,8 @@ import {
   formatFileContent,
 } from "./utils/format.js";
 import { MCP_VERSION } from "./version.js";
-import { needsResync } from "./utils/sync-metadata.js";
+import { getSyncState, writeAutoResyncAttempt } from "./utils/sync-metadata.js";
+import { getRepoTag } from "./utils/git.js";
 
 const server = new Server(
   {
@@ -212,6 +213,68 @@ function validateToolRequest(name: string, args: Record<string, unknown> | undef
   }
 }
 
+// Sync lock — prevents concurrent syncs from racing over filesystem paths
+let syncInFlight: Promise<void> | null = null;
+
+function createSyncLog() {
+  return (message: string, level: string = "info") => {
+    server.sendLoggingMessage({
+      level: level as "info" | "debug" | "warning" | "error",
+      logger: "aztec-sync",
+      data: message,
+    }).catch(() => {});
+  };
+}
+
+function ensureAutoResync(): void {
+  // If any sync is already in progress, don't block — let the tool proceed
+  // with existing local checkouts.
+  if (syncInFlight) return;
+
+  const syncState = getSyncState();
+  if (syncState.kind !== "needsAutoResync" && syncState.kind !== "legacyUnknownVersion") {
+    return;
+  }
+
+  const task = (async () => {
+    const log = createSyncLog();
+
+    let version: string | undefined;
+    if (syncState.kind === "needsAutoResync") {
+      version = syncState.aztecVersion;
+      log(`Auto-syncing repos for MCP server v${MCP_VERSION}...`, "info");
+    } else {
+      // Legacy install — try to detect version from existing checkout
+      const detectedTag = await getRepoTag("aztec-packages");
+      if (detectedTag) {
+        version = detectedTag;
+        log(`Auto-syncing repos (detected ${detectedTag} from existing checkout)...`, "info");
+      } else {
+        log("Install predates sync metadata. Run aztec_sync_repos to establish tracked state.", "warning");
+        try { writeAutoResyncAttempt("deferred"); } catch { /* non-fatal */ }
+        return;
+      }
+    }
+
+    const syncResult = await syncRepos({ version, force: true, log });
+    if (syncResult.metadataSafe) {
+      log("Auto-sync complete", "info");
+    } else if (syncResult.success) {
+      // Repos synced but metadata could not be persisted — retry later
+      try { writeAutoResyncAttempt("retryable"); } catch { /* non-fatal */ }
+      log(`Auto-resync partial: ${syncResult.message}`, "info");
+    } else {
+      // Sync failed (network error, aztec-packages abort, etc.) — retry after backoff
+      try { writeAutoResyncAttempt("retryable"); } catch { /* non-fatal */ }
+      log(`Auto-resync failed: ${syncResult.message}. Local tools will use existing checkouts.`, "warning");
+    }
+  })();
+
+  // Fire and forget — auto-resync is best-effort background work.
+  // Read-only tools proceed immediately with existing local checkouts.
+  syncInFlight = task.finally(() => { syncInFlight = null; });
+}
+
 /**
  * Handle tool calls
  */
@@ -221,27 +284,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   // Validate tool name and required arguments before any expensive operations
   validateToolRequest(name, args);
 
-  // Auto re-sync if MCP server version changed since last sync
+  // Auto re-sync if MCP server version changed since last sync.
+  // ensureAutoResync() starts the sync (fire-and-forget) — we then wait for any
+  // in-flight sync to finish so read-only tools don't race against filesystem mutations.
   if (name !== "aztec_sync_repos") {
-    const staleMetadata = needsResync();
-    if (staleMetadata) {
-      const log = (message: string, level: string = "info") => {
-        server.sendLoggingMessage({
-          level: level as "info" | "debug" | "warning" | "error",
-          logger: "aztec-sync",
-          data: message,
-        }).catch(() => {});
-      };
-      log(`Auto-syncing repos for MCP server v${MCP_VERSION} (was v${staleMetadata.mcpVersion})...`, "info");
-      const syncResult = await syncRepos({ version: staleMetadata.aztecVersion, force: true, log });
-      if (!syncResult.success) {
-        throw new McpError(
-          ErrorCode.InternalError,
-          `Auto-resync failed after MCP upgrade (v${staleMetadata.mcpVersion} → v${MCP_VERSION}): ${syncResult.message}`
-        );
-      }
-      log("Auto-sync complete", "info");
-    }
+    ensureAutoResync();
+    if (syncInFlight) await syncInFlight.catch(() => {});
   }
 
   try {
@@ -249,19 +297,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     switch (name) {
       case "aztec_sync_repos": {
-        const log = (message: string, level: string = "info") => {
-          server.sendLoggingMessage({
-            level: level as "info" | "debug" | "warning" | "error",
-            logger: "aztec-sync",
-            data: message,
-          }).catch(() => {});
-        };
-        const result = await syncRepos({
+        // Wait for any in-flight sync (auto or manual) before starting
+        while (syncInFlight) await syncInFlight.catch(() => {});
+        const log = createSyncLog();
+        const task = syncRepos({
           version: args?.version as string | undefined,
           force: args?.force as boolean | undefined,
           repos: args?.repos as string[] | undefined,
           log,
         });
+        syncInFlight = task.then(() => {}).finally(() => { syncInFlight = null; });
+        const result = await task;
         text = formatSyncResult(result);
         break;
       }
