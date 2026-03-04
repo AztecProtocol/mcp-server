@@ -30,6 +30,7 @@ import {
   readFile,
   findExample,
   getFileType,
+  getResultPriority,
 } from "../../src/utils/search.js";
 
 const mockExecSync = vi.mocked(execSync);
@@ -363,5 +364,85 @@ describe("findExample", () => {
 
     const result = findExample("nonexistent");
     expect(result).toBeNull();
+  });
+});
+
+describe("getResultPriority", () => {
+  it("ranks aztec-nr / yarn-project as highest priority (1)", () => {
+    expect(getResultPriority({ repo: "aztec-packages", file: "aztec-packages/yarn-project/aztec.js/src/main.ts", content: "", line: 1 })).toBe(1);
+    expect(getResultPriority({ repo: "aztec-packages", file: "aztec-packages/aztec-nr/aztec/src/lib.nr", content: "", line: 1 })).toBe(1);
+  });
+
+  it("ranks noir-contracts as priority 2", () => {
+    expect(getResultPriority({ repo: "aztec-packages", file: "aztec-packages/noir-projects/noir-contracts/token/src/main.nr", content: "", line: 1 })).toBe(2);
+  });
+
+  it("ranks noir_stdlib as priority 3", () => {
+    expect(getResultPriority({ repo: "noir", file: "noir/noir_stdlib/src/hash.nr", content: "", line: 1 })).toBe(3);
+  });
+
+  it("ranks other aztec-packages and noir paths as priority 4", () => {
+    expect(getResultPriority({ repo: "aztec-packages", file: "aztec-packages/boxes/token/src/main.nr", content: "", line: 1 })).toBe(4);
+    expect(getResultPriority({ repo: "noir", file: "noir/tooling/nargo/src/lib.rs", content: "", line: 1 })).toBe(4);
+  });
+
+  it("ranks example repos as lowest priority (5)", () => {
+    expect(getResultPriority({ repo: "aztec-examples", file: "aztec-examples/token/src/main.nr", content: "", line: 1 })).toBe(5);
+    expect(getResultPriority({ repo: "aztec-starter", file: "aztec-starter/src/main.nr", content: "", line: 1 })).toBe(5);
+    expect(getResultPriority({ repo: "gregoswap", file: "gregoswap/src/main.nr", content: "", line: 1 })).toBe(5);
+  });
+});
+
+describe("search result sorting", () => {
+  it("sorts ripgrep results by source priority", () => {
+    mockExistsSync.mockReturnValue(true);
+    mockExecSync.mockReturnValue(
+      "/fake/repos/gregoswap/src/main.nr:1:fn transfer() {\n" +
+      "/fake/repos/aztec-packages/yarn-project/aztec.js/src/main.ts:5:fn transfer() {\n" +
+      "/fake/repos/aztec-examples/token/src/main.nr:3:fn transfer() {\n" +
+      "/fake/repos/aztec-packages/noir-projects/noir-contracts/token/src/main.nr:10:fn transfer() {\n" +
+      "/fake/repos/noir/noir_stdlib/src/hash.nr:7:fn transfer() {\n"
+    );
+
+    const results = searchCode("transfer");
+    expect(results[0].repo).toBe("aztec-packages");
+    expect(results[0].file).toContain("yarn-project");
+    expect(results[1].repo).toBe("aztec-packages");
+    expect(results[1].file).toContain("noir-contracts");
+    expect(results[2].repo).toBe("noir");
+    expect(results[2].file).toContain("noir_stdlib");
+    expect(results[3].repo).toBe("gregoswap");
+    expect(results[4].repo).toBe("aztec-examples");
+  });
+
+  it("sorts manual search results by source priority", () => {
+    mockExistsSync.mockReturnValue(true);
+    mockExecSync.mockImplementation(() => { throw new Error("rg not found"); });
+    mockGlobbySync.mockReturnValue([
+      "/fake/repos/aztec-starter/src/main.nr",
+      "/fake/repos/aztec-packages/yarn-project/aztec.js/src/lib.nr",
+    ]);
+    mockReadFileSync
+      .mockReturnValueOnce("fn transfer() {" as any)
+      .mockReturnValueOnce("fn transfer() {" as any);
+
+    const results = searchCode("transfer");
+    expect(results).toHaveLength(2);
+    expect(results[0].repo).toBe("aztec-packages");
+    expect(results[1].repo).toBe("aztec-starter");
+  });
+
+  it("applies sorting before maxResults limit", () => {
+    mockExistsSync.mockReturnValue(true);
+    mockExecSync.mockReturnValue(
+      "/fake/repos/gregoswap/src/a.nr:1:match\n" +
+      "/fake/repos/aztec-examples/src/b.nr:2:match\n" +
+      "/fake/repos/aztec-packages/yarn-project/c.nr:3:match\n"
+    );
+
+    const results = searchCode("match", { maxResults: 2 });
+    expect(results).toHaveLength(2);
+    // SDK result should be kept even though it appeared last in raw output
+    expect(results[0].repo).toBe("aztec-packages");
   });
 });
