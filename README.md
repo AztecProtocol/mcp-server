@@ -4,7 +4,7 @@ An MCP (Model Context Protocol) server that provides local access to Aztec docum
 
 ## Features
 
-- **Version Support**: Clone specific Aztec release tags (e.g., `v3.0.0-devnet.6-patch.1`)
+- **Version Support**: Clone specific Aztec release tags (e.g., `v4.0.0-devnet.2-patch.1`)
 - **Local Repository Cloning**: Automatically clones Aztec repositories with sparse checkout for efficiency
 - **Fast Code Search**: Search Noir contracts and TypeScript files using ripgrep (with fallback)
 - **Documentation Search**: Search Aztec documentation by section
@@ -34,9 +34,9 @@ Add to your `.mcp.json`:
 ```json
 {
   "mcpServers": {
-    "aztec-local": {
+    "aztec-mcp": {
       "command": "npx",
-      "args": ["-y", "@aztec/mcp-server@latest"]
+      "args": ["--prefer-online", "-y", "@aztec/mcp-server@latest"]
     }
   }
 }
@@ -57,14 +57,14 @@ Clones:
 
 **Parameters:**
 
-- `version` (string): Aztec version tag to clone (e.g., `v3.0.0-devnet.6-patch.1`). Defaults to latest supported version.
+- `version` (string): Aztec version tag to clone (e.g., `v4.0.0-devnet.2-patch.1`). Defaults to latest supported version.
 - `force` (boolean): Force re-clone even if repos exist
 - `repos` (string[]): Specific repos to sync
 
 **Example - Clone specific version:**
 
 ```
-aztec_sync_repos({ version: "v3.0.0-devnet.6-patch.1" })
+aztec_sync_repos({ version: "v4.0.0-devnet.2-patch.1" })
 ```
 
 ### `aztec_status`
@@ -133,9 +133,9 @@ Override with the `AZTEC_MCP_REPOS_DIR` environment variable:
 ```json
 {
   "mcpServers": {
-    "aztec-local": {
+    "aztec-mcp": {
       "command": "npx",
-      "args": ["-y", "@aztec/mcp-server"],
+      "args": ["--prefer-online", "-y", "@aztec/mcp-server"],
       "env": {
         "AZTEC_MCP_REPOS_DIR": "/custom/path"
       }
@@ -151,9 +151,9 @@ Set the default Aztec version with the `AZTEC_DEFAULT_VERSION` environment varia
 ```json
 {
   "mcpServers": {
-    "aztec-local": {
+    "aztec-mcp": {
       "command": "npx",
-      "args": ["-y", "@aztec/mcp-server"],
+      "args": ["--prefer-online", "-y", "@aztec/mcp-server"],
       "env": {
         "AZTEC_DEFAULT_VERSION": "v3.0.0-devnet.6-plugin.1"
       }
