@@ -101,7 +101,7 @@ export async function cloneRepo(
         const repoGit = simpleGit({ baseDir: clonePath, progress: progressHandler });
         await repoGit.raw(["config", "gc.auto", "0"]);
         log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
-        await repoGit.raw(["sparse-checkout", "set", ...config.sparse!]);
+        await repoGit.raw(["sparse-checkout", "set", "--skip-checks", ...config.sparse!]);
         log?.(`${config.name}: Fetching commit ${config.commit.substring(0, 7)}`, "info");
         await repoGit.fetch(["origin", config.commit]);
         log?.(`${config.name}: Checking out commit`, "debug");
@@ -116,7 +116,7 @@ export async function cloneRepo(
         const repoGit = simpleGit({ baseDir: clonePath, progress: progressHandler });
         await repoGit.raw(["config", "gc.auto", "0"]);
         log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
-        await repoGit.raw(["sparse-checkout", "set", ...config.sparse!]);
+        await repoGit.raw(["sparse-checkout", "set", "--skip-checks", ...config.sparse!]);
         log?.(`${config.name}: Fetching tag ${config.tag}`, "info");
         await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
         log?.(`${config.name}: Checking out tag`, "debug");
@@ -132,7 +132,7 @@ export async function cloneRepo(
         const repoGit = simpleGit({ baseDir: clonePath, progress: progressHandler });
         await repoGit.raw(["config", "gc.auto", "0"]);
         log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
-        await repoGit.raw(["sparse-checkout", "set", ...config.sparse!]);
+        await repoGit.raw(["sparse-checkout", "set", "--skip-checks", ...config.sparse!]);
       }
     } else {
       // Clone for smaller repos
