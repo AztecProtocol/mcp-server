@@ -45,7 +45,7 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
       "barretenberg/ts/src",
       "boxes",
       "playground",
-      "l1-contracts/src/core/libraries",
+      "l1-contracts/src/core/libraries/Errors.sol",
     ],
     sparsePathOverrides: [
       {
