@@ -2,7 +2,7 @@
  * Formatting utilities for MCP tool responses
  */
 
-import type { SyncResult } from "../tools/sync.js";
+import { isRepoError, type SyncResult } from "../tools/sync.js";
 import type { SearchResult, FileInfo } from "./search.js";
 import type { SyncMetadata } from "./sync-metadata.js";
 import type { ErrorLookupResult } from "./error-lookup.js";
@@ -18,7 +18,7 @@ export function formatSyncResult(result: SyncResult): string {
   ];
 
   for (const repo of result.repos) {
-    const icon = repo.status.startsWith("Error:") ? "✗" : "✓";
+    const icon = isRepoError(repo) ? "✗" : "✓";
     lines.push(`  ${icon} ${repo.name}: ${repo.status}`);
   }
 
