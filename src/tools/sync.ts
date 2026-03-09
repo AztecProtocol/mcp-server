@@ -9,16 +9,22 @@ import { cloneRepo, getReposStatus, getNoirCommitFromAztec, getRepoPath, REPOS_D
 import { writeSyncMetadata, stampMetadataMcpVersion, readSyncMetadata, SyncMetadata } from "../utils/sync-metadata.js";
 import { clearErrorCache } from "../utils/error-lookup.js";
 
+export interface RepoSyncStatus {
+  name: string;
+  status: string;
+  commit?: string;
+}
+
+export function isRepoError(repo: RepoSyncStatus): boolean {
+  return repo.status.startsWith("Error:");
+}
+
 export interface SyncResult {
   success: boolean;
   metadataSafe: boolean;
   message: string;
   version: string;
-  repos: {
-    name: string;
-    status: string;
-    commit?: string;
-  }[];
+  repos: RepoSyncStatus[];
 }
 
 /**
@@ -105,7 +111,7 @@ export async function syncRepos(options: {
   // leaves the old checkout while other repos sync to the new tag, producing a
   // mixed-version workspace.
   const aztecFailed = results.some(
-    (r) => r.name === "aztec-packages" && r.status.toLowerCase().includes("error"),
+    (r) => r.name === "aztec-packages" && isRepoError(r),
   );
   if (aztecFailed && (force || version)) {
     return {
@@ -160,7 +166,7 @@ export async function syncRepos(options: {
   let versionedDocsMissing = false;
   for (const repo of syntheticRepos) {
     const result = results.find((r) => r.name === repo.name);
-    if (!result || result.status.toLowerCase().includes("error")) continue;
+    if (!result || isRepoError(result)) continue;
 
     for (const sparsePath of repo.sparse || []) {
       if (!sparsePath.includes(effectiveVersion)) continue;
@@ -174,7 +180,7 @@ export async function syncRepos(options: {
   }
 
   const allSuccess = results.every(
-    (r) => !r.status.toLowerCase().includes("error")
+    (r) => !isRepoError(r)
   );
 
   log?.(`Sync complete: ${results.length} repos, ${allSuccess ? "all succeeded" : "some failed"}`, "info");
