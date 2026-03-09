@@ -138,6 +138,7 @@ describe("cloneRepo", () => {
     expect(mockGitInstance.raw).toHaveBeenCalledWith([
       "sparse-checkout",
       "set",
+      "--skip-checks",
       "docs",
       "noir-projects",
     ]);
