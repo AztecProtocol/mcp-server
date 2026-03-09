@@ -18,7 +18,7 @@ export function formatSyncResult(result: SyncResult): string {
   ];
 
   for (const repo of result.repos) {
-    const icon = repo.status.toLowerCase().includes("error") ? "✗" : "✓";
+    const icon = repo.status.startsWith("Error:") ? "✗" : "✓";
     lines.push(`  ${icon} ${repo.name}: ${repo.status}`);
   }
 

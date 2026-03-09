@@ -105,7 +105,7 @@ export async function syncRepos(options: {
   // leaves the old checkout while other repos sync to the new tag, producing a
   // mixed-version workspace.
   const aztecFailed = results.some(
-    (r) => r.name === "aztec-packages" && r.status.toLowerCase().includes("error"),
+    (r) => r.name === "aztec-packages" && r.status.startsWith("Error:"),
   );
   if (aztecFailed && (force || version)) {
     return {
@@ -160,7 +160,7 @@ export async function syncRepos(options: {
   let versionedDocsMissing = false;
   for (const repo of syntheticRepos) {
     const result = results.find((r) => r.name === repo.name);
-    if (!result || result.status.toLowerCase().includes("error")) continue;
+    if (!result || result.status.startsWith("Error:")) continue;
 
     for (const sparsePath of repo.sparse || []) {
       if (!sparsePath.includes(effectiveVersion)) continue;
@@ -174,7 +174,7 @@ export async function syncRepos(options: {
   }
 
   const allSuccess = results.every(
-    (r) => !r.status.toLowerCase().includes("error")
+    (r) => !r.status.startsWith("Error:")
   );
 
   log?.(`Sync complete: ${results.length} repos, ${allSuccess ? "all succeeded" : "some failed"}`, "info");
