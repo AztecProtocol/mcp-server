@@ -27,9 +27,15 @@ aztec-mcp
 
 ## Configuration
 
-### Claude Code Plugin
+### Claude Code
 
-Add to your `.mcp.json`:
+Install with the CLI:
+
+```bash
+claude mcp add aztec -- npx @aztec/mcp-server@latest
+```
+
+Or add to your `.mcp.json`:
 
 ```json
 {
@@ -40,6 +46,22 @@ Add to your `.mcp.json`:
     }
   }
 }
+```
+
+### Codex
+
+Install with the CLI:
+
+```bash
+codex mcp add aztec -- npx @aztec/mcp-server@latest
+```
+
+Or add to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.aztec]
+command = "npx"
+args = ["-y", "@aztec/mcp-server@latest"]
 ```
 
 ## Available Tools
