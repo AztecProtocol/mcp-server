@@ -36,7 +36,7 @@ Add to your `.mcp.json`:
   "mcpServers": {
     "aztec-mcp": {
       "command": "npx",
-      "args": ["--prefer-online", "-y", "@aztec/mcp-server@latest"]
+      "args": ["-y", "@aztec/mcp-server@latest"]
     }
   }
 }
@@ -135,7 +135,7 @@ Override with the `AZTEC_MCP_REPOS_DIR` environment variable:
   "mcpServers": {
     "aztec-mcp": {
       "command": "npx",
-      "args": ["--prefer-online", "-y", "@aztec/mcp-server"],
+      "args": ["-y", "@aztec/mcp-server"],
       "env": {
         "AZTEC_MCP_REPOS_DIR": "/custom/path"
       }
@@ -153,7 +153,7 @@ Set the default Aztec version with the `AZTEC_DEFAULT_VERSION` environment varia
   "mcpServers": {
     "aztec-mcp": {
       "command": "npx",
-      "args": ["--prefer-online", "-y", "@aztec/mcp-server"],
+      "args": ["-y", "@aztec/mcp-server"],
       "env": {
         "AZTEC_DEFAULT_VERSION": "v3.0.0-devnet.6-plugin.1"
       }
