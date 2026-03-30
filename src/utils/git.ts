@@ -19,7 +19,54 @@ function alternateTagName(tag: string): string {
 }
 
 /**
+ * Find the latest incremental tag matching a base version via ls-remote.
+ * e.g., for base "4.2.0-rc.1" finds the highest "4.2.0-rc.1-N" tag.
+ * Tries both with and without v-prefix.
+ */
+async function findLatestIncrementalTag(
+  repoUrl: string,
+  baseTag: string,
+  log?: Logger,
+  repoName?: string,
+): Promise<string | null> {
+  const git = simpleGit();
+  const bare = baseTag.startsWith("v") ? baseTag.slice(1) : baseTag;
+  const candidates = [`${bare}-*`, `v${bare}-*`];
+
+  for (const pattern of candidates) {
+    try {
+      const result = await git.listRemote(["--tags", repoUrl, `refs/tags/${pattern}`]);
+      if (!result.trim()) continue;
+
+      const tags = result
+        .trim()
+        .split("\n")
+        .map((line) => {
+          const match = line.match(/refs\/tags\/(.+)$/);
+          return match ? match[1] : null;
+        })
+        .filter((t): t is string => t !== null)
+        .sort((a, b) => {
+          const numA = parseInt(a.match(/-(\d+)$/)?.[1] || "0", 10);
+          const numB = parseInt(b.match(/-(\d+)$/)?.[1] || "0", 10);
+          return numB - numA;
+        });
+
+      if (tags.length > 0) {
+        log?.(`${repoName}: Found incremental tags: ${tags.join(", ")}`, "debug");
+        return tags[0];
+      }
+    } catch {
+      // pattern didn't match, try next
+    }
+  }
+  return null;
+}
+
+/**
  * Fetch a tag from origin, trying the alternate v-prefix variant on failure.
+ * If matchLatestIncrementalTag is set on the config, also tries finding
+ * the latest incremental tag (e.g., "4.2.0-rc.1-2" for "4.2.0-rc.1").
  * Returns the resolved tag name that was successfully fetched.
  */
 async function fetchTag(
@@ -27,6 +74,7 @@ async function fetchTag(
   tag: string,
   log?: Logger,
   repoName?: string,
+  config?: RepoConfig,
 ): Promise<string> {
   const fetchArgs = (t: string): string[] => ["--depth=1", "origin", `refs/tags/${t}:refs/tags/${t}`];
   try {
@@ -35,10 +83,23 @@ async function fetchTag(
     return tag;
   } catch {
     const alt = alternateTagName(tag);
-    log?.(`${repoName}: Tag "${tag}" not found, trying "${alt}"`, "info");
-    await repoGit.fetch(fetchArgs(alt));
-    return alt;
+    try {
+      log?.(`${repoName}: Tag "${tag}" not found, trying "${alt}"`, "info");
+      await repoGit.fetch(fetchArgs(alt));
+      return alt;
+    } catch {
+      if (!config?.matchLatestIncrementalTag) throw new Error(`Tag "${tag}" not found (also tried "${alt}")`);
+    }
   }
+
+  // Incremental tag fallback: find latest tag matching baseVersion-N
+  log?.(`${repoName}: Exact tags not found, searching for incremental tags matching "${tag}"`, "info");
+  const resolved = await findLatestIncrementalTag(config!.url, tag, log, repoName);
+  if (!resolved) throw new Error(`No tags found matching "${tag}" or its variants`);
+
+  log?.(`${repoName}: Using incremental tag "${resolved}"`, "info");
+  await repoGit.fetch(fetchArgs(resolved));
+  return resolved;
 }
 
 /** Base directory for cloned repos */
@@ -148,7 +209,7 @@ export async function cloneRepo(
         await repoGit.raw(["config", "gc.auto", "0"]);
         log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
         await repoGit.raw(["sparse-checkout", "set", "--skip-checks", ...config.sparse!]);
-        const resolvedTag = await fetchTag(repoGit, config.tag, log, config.name);
+        const resolvedTag = await fetchTag(repoGit, config.tag, log, config.name, config);
         log?.(`${config.name}: Checking out tag`, "debug");
         await repoGit.checkout(resolvedTag);
       } else {
@@ -178,7 +239,7 @@ export async function cloneRepo(
         // Clone and checkout tag
         await git.clone(config.url, clonePath, ["--no-checkout"]);
         const repoGit = simpleGit({ baseDir: clonePath, progress: progressHandler });
-        const resolvedTag = await fetchTag(repoGit, config.tag, log, config.name);
+        const resolvedTag = await fetchTag(repoGit, config.tag, log, config.name, config);
         log?.(`${config.name}: Checking out tag`, "debug");
         await repoGit.checkout(resolvedTag);
       } else {
@@ -310,7 +371,20 @@ export async function needsReclone(config: RepoConfig): Promise<boolean> {
   if (config.tag) {
     const currentTag = await getRepoTag(config.name);
     if (currentTag === null) return true;
-    return currentTag !== config.tag && currentTag !== alternateTagName(config.tag);
+    if (currentTag === config.tag || currentTag === alternateTagName(config.tag)) return false;
+    // For incremental tags (e.g., "4.2.0-rc.1-2"), check if the current tag
+    // is a versioned variant and whether a newer one exists upstream
+    if (config.matchLatestIncrementalTag) {
+      const bare = config.tag.startsWith("v") ? config.tag.slice(1) : config.tag;
+      const currentBare = currentTag.startsWith("v") ? currentTag.slice(1) : currentTag;
+      if (currentBare.startsWith(bare + "-")) {
+        const latest = await findLatestIncrementalTag(config.url, config.tag);
+        if (!latest) return false; // can't reach remote, assume current is fine
+        const latestBare = latest.startsWith("v") ? latest.slice(1) : latest;
+        return currentBare !== latestBare;
+      }
+    }
+    return true;
   }
 
   // For branches, we don't force re-clone (just update)
