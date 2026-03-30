@@ -26,6 +26,8 @@ export interface RepoConfig {
   skipVersionTag?: boolean;
   /** Override specific sparse paths to come from a different branch instead of the tag */
   sparsePathOverrides?: { paths: string[]; branch: string }[];
+  /** When true, if the exact tag isn't found, find the latest tag starting with the version (e.g., "4.2.0-rc.1-2" for version "4.2.0-rc.1") */
+  matchLatestIncrementalTag?: boolean;
 }
 
 /** Default Aztec version (tag) to use - can be overridden via AZTEC_DEFAULT_VERSION env var */
@@ -111,6 +113,7 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
   {
     name: "demo-wallet",
     url: "https://github.com/AztecProtocol/demo-wallet",
+    matchLatestIncrementalTag: true,
     description: "Aztec demo wallet application",
     searchPatterns: {
       code: ["*.nr", "*.ts"],

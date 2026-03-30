@@ -9,6 +9,7 @@ const mockGitInstance = {
   log: vi.fn(),
   raw: vi.fn(),
   checkout: vi.fn(),
+  listRemote: vi.fn(),
 };
 
 vi.mock("simple-git", () => ({
@@ -262,6 +263,54 @@ describe("cloneRepo", () => {
       "--depth=1", "origin", "refs/tags/2.0.0:refs/tags/2.0.0",
     ]);
     expect(mockGitInstance.checkout).toHaveBeenCalledWith("2.0.0");
+  });
+
+  it("non-sparse + tag: falls back to incremental tag when matchLatestIncrementalTag is set", async () => {
+    const incrementalConfig: RepoConfig = {
+      name: "demo-wallet",
+      url: "https://github.com/AztecProtocol/demo-wallet",
+      tag: "v4.2.0-aztecnr-rc.2",
+      matchLatestIncrementalTag: true,
+      description: "test",
+    };
+    mockExistsSync.mockReturnValue(false);
+    mockGitInstance.clone.mockResolvedValue(undefined);
+    // Both exact and v-prefix alternate fail
+    mockGitInstance.fetch
+      .mockRejectedValueOnce(new Error("not found"))  // v4.2.0-aztecnr-rc.2
+      .mockRejectedValueOnce(new Error("not found"))  // 4.2.0-aztecnr-rc.2
+      .mockResolvedValueOnce(undefined);               // resolved incremental tag
+    mockGitInstance.checkout.mockResolvedValue(undefined);
+    // ls-remote returns incremental tags
+    mockGitInstance.listRemote.mockResolvedValueOnce(
+      "abc123\trefs/tags/4.2.0-aztecnr-rc.2-0\n" +
+      "def456\trefs/tags/4.2.0-aztecnr-rc.2-1\n" +
+      "ghi789\trefs/tags/4.2.0-aztecnr-rc.2-2\n"
+    );
+
+    await cloneRepo(incrementalConfig);
+
+    // Should have tried ls-remote and picked the highest
+    expect(mockGitInstance.listRemote).toHaveBeenCalled();
+    expect(mockGitInstance.fetch).toHaveBeenCalledWith([
+      "--depth=1", "origin",
+      "refs/tags/4.2.0-aztecnr-rc.2-2:refs/tags/4.2.0-aztecnr-rc.2-2",
+    ]);
+    expect(mockGitInstance.checkout).toHaveBeenCalledWith("4.2.0-aztecnr-rc.2-2");
+  });
+
+  it("non-sparse + tag: throws when all tag strategies fail without matchLatestIncrementalTag", async () => {
+    const noFallbackConfig: RepoConfig = {
+      ...nonSparseConfig,
+      tag: "v99.0.0",
+    };
+    mockExistsSync.mockReturnValue(false);
+    mockGitInstance.clone.mockResolvedValue(undefined);
+    mockGitInstance.fetch
+      .mockRejectedValueOnce(new Error("not found"))
+      .mockRejectedValueOnce(new Error("not found"));
+
+    await expect(cloneRepo(noFallbackConfig)).rejects.toThrow("not found");
   });
 
   it("force=true clones to temp dir then swaps", async () => {
@@ -555,6 +604,34 @@ describe("needsReclone", () => {
       description: "test",
     });
     expect(result).toBe(false);
+  });
+
+  it("returns false when current tag is an incremental variant and matchLatestIncrementalTag is set", async () => {
+    mockExistsSync.mockReturnValue(true);
+    // Repo is checked out at "4.2.0-aztecnr-rc.2-2" but config requests "v4.2.0-aztecnr-rc.2"
+    mockGitInstance.raw.mockResolvedValue("4.2.0-aztecnr-rc.2-2\n");
+
+    const result = await needsReclone({
+      name: "test",
+      url: "test",
+      tag: "v4.2.0-aztecnr-rc.2",
+      matchLatestIncrementalTag: true,
+      description: "test",
+    });
+    expect(result).toBe(false);
+  });
+
+  it("returns true when current tag is an incremental variant but matchLatestIncrementalTag is not set", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockGitInstance.raw.mockResolvedValue("4.2.0-aztecnr-rc.2-2\n");
+
+    const result = await needsReclone({
+      name: "test",
+      url: "test",
+      tag: "v4.2.0-aztecnr-rc.2",
+      description: "test",
+    });
+    expect(result).toBe(true);
   });
 
   it("returns false for branch-only config when cloned", async () => {
