@@ -10,6 +10,37 @@ import { RepoConfig } from "../repos/config.js";
 
 export type Logger = (message: string, level?: "info" | "debug" | "warning" | "error") => void;
 
+/**
+ * Get the alternate v-prefix variant of a tag.
+ * "v1.0.0" → "1.0.0", "1.0.0" → "v1.0.0"
+ */
+function alternateTagName(tag: string): string {
+  return tag.startsWith("v") ? tag.slice(1) : `v${tag}`;
+}
+
+/**
+ * Fetch a tag from origin, trying the alternate v-prefix variant on failure.
+ * Returns the resolved tag name that was successfully fetched.
+ */
+async function fetchTag(
+  repoGit: SimpleGit,
+  tag: string,
+  log?: Logger,
+  repoName?: string,
+): Promise<string> {
+  const fetchArgs = (t: string): string[] => ["--depth=1", "origin", `refs/tags/${t}:refs/tags/${t}`];
+  try {
+    log?.(`${repoName}: Fetching tag ${tag}`, "info");
+    await repoGit.fetch(fetchArgs(tag));
+    return tag;
+  } catch {
+    const alt = alternateTagName(tag);
+    log?.(`${repoName}: Tag "${tag}" not found, trying "${alt}"`, "info");
+    await repoGit.fetch(fetchArgs(alt));
+    return alt;
+  }
+}
+
 /** Base directory for cloned repos */
 export const REPOS_DIR = join(
   process.env.AZTEC_MCP_REPOS_DIR || join(homedir(), ".aztec-mcp"),
@@ -117,10 +148,9 @@ export async function cloneRepo(
         await repoGit.raw(["config", "gc.auto", "0"]);
         log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
         await repoGit.raw(["sparse-checkout", "set", "--skip-checks", ...config.sparse!]);
-        log?.(`${config.name}: Fetching tag ${config.tag}`, "info");
-        await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
+        const resolvedTag = await fetchTag(repoGit, config.tag, log, config.name);
         log?.(`${config.name}: Checking out tag`, "debug");
-        await repoGit.checkout(config.tag);
+        await repoGit.checkout(resolvedTag);
       } else {
         await git.clone(config.url, clonePath, [
           "--filter=blob:none",
@@ -148,10 +178,9 @@ export async function cloneRepo(
         // Clone and checkout tag
         await git.clone(config.url, clonePath, ["--no-checkout"]);
         const repoGit = simpleGit({ baseDir: clonePath, progress: progressHandler });
-        log?.(`${config.name}: Fetching tag ${config.tag}`, "info");
-        await repoGit.fetch(["--depth=1", "origin", `refs/tags/${config.tag}:refs/tags/${config.tag}`]);
+        const resolvedTag = await fetchTag(repoGit, config.tag, log, config.name);
         log?.(`${config.name}: Checking out tag`, "debug");
-        await repoGit.checkout(config.tag);
+        await repoGit.checkout(resolvedTag);
       } else {
         await git.clone(config.url, clonePath, [
           "--depth=1",
@@ -277,10 +306,11 @@ export async function needsReclone(config: RepoConfig): Promise<boolean> {
     return !currentCommit?.startsWith(config.commit.substring(0, 7));
   }
 
-  // If a tag is requested, check if we're at that tag
+  // If a tag is requested, check if we're at that tag (v-prefix insensitive)
   if (config.tag) {
     const currentTag = await getRepoTag(config.name);
-    return currentTag !== config.tag;
+    if (currentTag === null) return true;
+    return currentTag !== config.tag && currentTag !== alternateTagName(config.tag);
   }
 
   // For branches, we don't force re-clone (just update)

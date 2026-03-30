@@ -150,6 +150,35 @@ describe("cloneRepo", () => {
     expect(mockGitInstance.checkout).toHaveBeenCalledWith("v1.0.0");
   });
 
+  it("sparse + tag: falls back to alternate v-prefix on fetch failure", async () => {
+    const noVConfig: RepoConfig = {
+      ...sparseConfig,
+      tag: "1.0.0", // no v prefix
+    };
+    mockExistsSync.mockReturnValue(false);
+    mockGitInstance.clone.mockResolvedValue(undefined);
+    mockGitInstance.raw.mockResolvedValue(undefined);
+    // First fetch (without v) fails, second (with v) succeeds
+    mockGitInstance.fetch
+      .mockRejectedValueOnce(new Error("not found"))
+      .mockResolvedValueOnce(undefined);
+    mockGitInstance.checkout.mockResolvedValue(undefined);
+
+    const result = await cloneRepo(noVConfig);
+    expect(result).toContain("Cloned aztec-packages");
+
+    // First attempt: refs/tags/1.0.0
+    expect(mockGitInstance.fetch).toHaveBeenCalledWith([
+      "--depth=1", "origin", "refs/tags/1.0.0:refs/tags/1.0.0",
+    ]);
+    // Fallback: refs/tags/v1.0.0
+    expect(mockGitInstance.fetch).toHaveBeenCalledWith([
+      "--depth=1", "origin", "refs/tags/v1.0.0:refs/tags/v1.0.0",
+    ]);
+    // Checkout uses the resolved tag name
+    expect(mockGitInstance.checkout).toHaveBeenCalledWith("v1.0.0");
+  });
+
   it("sparse + commit: clones with sparse flags, fetches commit", async () => {
     const commitConfig: RepoConfig = {
       ...sparseConfig,
@@ -209,6 +238,30 @@ describe("cloneRepo", () => {
       (c: any[]) => Array.isArray(c[0]) && c[0][0] === "sparse-checkout"
     );
     expect(sparseCheckoutCalls).toHaveLength(0);
+  });
+
+  it("non-sparse + tag: falls back to stripping v-prefix on fetch failure", async () => {
+    const vConfig: RepoConfig = {
+      ...nonSparseConfig,
+      tag: "v2.0.0",
+    };
+    mockExistsSync.mockReturnValue(false);
+    mockGitInstance.clone.mockResolvedValue(undefined);
+    // First fetch (with v) fails, second (without v) succeeds
+    mockGitInstance.fetch
+      .mockRejectedValueOnce(new Error("not found"))
+      .mockResolvedValueOnce(undefined);
+    mockGitInstance.checkout.mockResolvedValue(undefined);
+
+    await cloneRepo(vConfig);
+
+    expect(mockGitInstance.fetch).toHaveBeenCalledWith([
+      "--depth=1", "origin", "refs/tags/v2.0.0:refs/tags/v2.0.0",
+    ]);
+    expect(mockGitInstance.fetch).toHaveBeenCalledWith([
+      "--depth=1", "origin", "refs/tags/2.0.0:refs/tags/2.0.0",
+    ]);
+    expect(mockGitInstance.checkout).toHaveBeenCalledWith("2.0.0");
   });
 
   it("force=true clones to temp dir then swaps", async () => {
@@ -474,6 +527,34 @@ describe("needsReclone", () => {
       description: "test",
     });
     expect(result).toBe(true);
+  });
+
+  it("returns false when tag matches via v-prefix alternate", async () => {
+    mockExistsSync.mockReturnValue(true);
+    // Repo is checked out at "v1.0.0" but config requests "1.0.0" (no v)
+    mockGitInstance.raw.mockResolvedValue("v1.0.0\n");
+
+    const result = await needsReclone({
+      name: "test",
+      url: "test",
+      tag: "1.0.0",
+      description: "test",
+    });
+    expect(result).toBe(false);
+  });
+
+  it("returns false when tag matches via v-prefix stripped", async () => {
+    mockExistsSync.mockReturnValue(true);
+    // Repo is checked out at "1.0.0" but config requests "v1.0.0"
+    mockGitInstance.raw.mockResolvedValue("1.0.0\n");
+
+    const result = await needsReclone({
+      name: "test",
+      url: "test",
+      tag: "v1.0.0",
+      description: "test",
+    });
+    expect(result).toBe(false);
   });
 
   it("returns false for branch-only config when cloned", async () => {
