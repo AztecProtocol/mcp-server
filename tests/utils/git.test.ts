@@ -606,18 +606,61 @@ describe("needsReclone", () => {
     expect(result).toBe(false);
   });
 
-  it("returns false when current tag is an incremental variant and matchLatestIncrementalTag is set", async () => {
+  it("returns false when at latest incremental tag and matchLatestIncrementalTag is set", async () => {
     mockExistsSync.mockReturnValue(true);
     // Repo is checked out at "4.2.0-aztecnr-rc.2-2" but config requests "v4.2.0-aztecnr-rc.2"
     mockGitInstance.raw.mockResolvedValue("4.2.0-aztecnr-rc.2-2\n");
+    // ls-remote confirms -2 is the latest
+    mockGitInstance.listRemote.mockResolvedValueOnce(
+      "abc123\trefs/tags/4.2.0-aztecnr-rc.2-0\n" +
+      "def456\trefs/tags/4.2.0-aztecnr-rc.2-1\n" +
+      "ghi789\trefs/tags/4.2.0-aztecnr-rc.2-2\n"
+    );
 
     const result = await needsReclone({
       name: "test",
-      url: "test",
+      url: "https://github.com/test/test",
       tag: "v4.2.0-aztecnr-rc.2",
       matchLatestIncrementalTag: true,
       description: "test",
     });
+    expect(result).toBe(false);
+  });
+
+  it("returns true when a newer incremental tag exists upstream", async () => {
+    mockExistsSync.mockReturnValue(true);
+    // Repo is checked out at "-0" but "-2" exists upstream
+    mockGitInstance.raw.mockResolvedValue("4.2.0-aztecnr-rc.2-0\n");
+    mockGitInstance.listRemote.mockResolvedValueOnce(
+      "abc123\trefs/tags/4.2.0-aztecnr-rc.2-0\n" +
+      "def456\trefs/tags/4.2.0-aztecnr-rc.2-1\n" +
+      "ghi789\trefs/tags/4.2.0-aztecnr-rc.2-2\n"
+    );
+
+    const result = await needsReclone({
+      name: "test",
+      url: "https://github.com/test/test",
+      tag: "v4.2.0-aztecnr-rc.2",
+      matchLatestIncrementalTag: true,
+      description: "test",
+    });
+    expect(result).toBe(true);
+  });
+
+  it("returns false when remote check fails for incremental tag", async () => {
+    mockExistsSync.mockReturnValue(true);
+    mockGitInstance.raw.mockResolvedValue("4.2.0-aztecnr-rc.2-0\n");
+    // ls-remote fails (network error)
+    mockGitInstance.listRemote.mockRejectedValue(new Error("network error"));
+
+    const result = await needsReclone({
+      name: "test",
+      url: "https://github.com/test/test",
+      tag: "v4.2.0-aztecnr-rc.2",
+      matchLatestIncrementalTag: true,
+      description: "test",
+    });
+    // Can't reach remote, assume current is fine
     expect(result).toBe(false);
   });
 

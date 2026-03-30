@@ -373,11 +373,16 @@ export async function needsReclone(config: RepoConfig): Promise<boolean> {
     if (currentTag === null) return true;
     if (currentTag === config.tag || currentTag === alternateTagName(config.tag)) return false;
     // For incremental tags (e.g., "4.2.0-rc.1-2"), check if the current tag
-    // is a versioned variant of the requested tag
+    // is a versioned variant and whether a newer one exists upstream
     if (config.matchLatestIncrementalTag) {
       const bare = config.tag.startsWith("v") ? config.tag.slice(1) : config.tag;
       const currentBare = currentTag.startsWith("v") ? currentTag.slice(1) : currentTag;
-      if (currentBare.startsWith(bare + "-")) return false;
+      if (currentBare.startsWith(bare + "-")) {
+        const latest = await findLatestIncrementalTag(config.url, config.tag);
+        if (!latest) return false; // can't reach remote, assume current is fine
+        const latestBare = latest.startsWith("v") ? latest.slice(1) : latest;
+        return currentBare !== latestBare;
+      }
     }
     return true;
   }
