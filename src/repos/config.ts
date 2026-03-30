@@ -29,7 +29,7 @@ export interface RepoConfig {
 }
 
 /** Default Aztec version (tag) to use - can be overridden via AZTEC_DEFAULT_VERSION env var */
-export const DEFAULT_AZTEC_VERSION = process.env.AZTEC_DEFAULT_VERSION || "4.2.0-aztecnr-rc.2";
+export const DEFAULT_AZTEC_VERSION = process.env.AZTEC_DEFAULT_VERSION || "v4.2.0-aztecnr-rc.2";
 
 /**
  * Base Aztec repository configurations (without version)
