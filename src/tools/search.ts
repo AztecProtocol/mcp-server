@@ -13,6 +13,8 @@ import {
 } from "../utils/search.js";
 import { isRepoCloned } from "../utils/git.js";
 import { getRepoNames } from "../repos/config.js";
+import { DocsGPTClient, DocsGPTClientError } from "../backends/docsgpt-client.js";
+import type { SemanticSearchResult } from "../backends/docsgpt-client.js";
 
 /**
  * Search Aztec code (contracts, TypeScript, etc.)
@@ -60,37 +62,89 @@ export function searchAztecCode(options: {
 }
 
 /**
- * Search Aztec documentation
+ * Semantic search result shape returned by aztec_search_docs when using DocsGPT.
  */
-export function searchAztecDocs(options: {
-  query: string;
-  section?: string;
-  maxResults?: number;
-}): {
+export interface SemanticSearchToolResult {
   success: boolean;
-  results: SearchResult[];
+  results: SemanticSearchResult[];
   message: string;
-} {
+}
+
+/**
+ * Result type for aztec_search_docs — either semantic results (DocsGPT)
+ * or ripgrep code-search results (fallback when no API key).
+ */
+export type DocsSearchResult =
+  | { kind: "semantic"; result: SemanticSearchToolResult }
+  | { kind: "ripgrep"; result: { success: boolean; results: SearchResult[]; message: string } };
+
+/**
+ * Search Aztec documentation.
+ *
+ * When a DocsGPT client is available (API_KEY set), uses semantic vector
+ * search for high-quality natural language results. Otherwise, falls back
+ * to the ripgrep-based search over cloned markdown files.
+ */
+export async function searchAztecDocs(
+  options: {
+    query: string;
+    section?: string;
+    maxResults?: number;
+    chunks?: number;
+  },
+  client: DocsGPTClient | null
+): Promise<DocsSearchResult> {
+  // Semantic path — preferred when DocsGPT is configured
+  if (client) {
+    const { query, chunks, maxResults } = options;
+    const numChunks = Math.min(chunks ?? maxResults ?? 5, 20);
+
+    try {
+      const results = await client.search(query, numChunks);
+
+      return {
+        kind: "semantic",
+        result: {
+          success: true,
+          results,
+          message:
+            results.length > 0
+              ? `Found ${results.length} documentation matches`
+              : `No documentation matches found for "${query}".`,
+        },
+      };
+    } catch {
+      // DocsGPT unavailable — fall through to ripgrep if local docs exist
+    }
+  }
+
+  // Ripgrep fallback — searches cloned markdown files
   const { query, section, maxResults = 20 } = options;
 
   if (!isRepoCloned("aztec-packages-docs")) {
     return {
-      success: false,
-      results: [],
-      message:
-        "aztec-packages-docs is not cloned. Run aztec_sync_repos first to get documentation.",
+      kind: "ripgrep",
+      result: {
+        success: false,
+        results: [],
+        message:
+          "aztec-packages-docs is not cloned. Run aztec_sync_repos first to get documentation.",
+      },
     };
   }
 
   const results = doSearchDocs(query, { section, maxResults });
 
   return {
-    success: true,
-    results,
-    message:
-      results.length > 0
-        ? `Found ${results.length} documentation matches`
-        : "No documentation matches found",
+    kind: "ripgrep",
+    result: {
+      success: true,
+      results,
+      message:
+        results.length > 0
+          ? `Found ${results.length} documentation matches`
+          : "No documentation matches found",
+    },
   };
 }
 

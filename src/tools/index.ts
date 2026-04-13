@@ -9,5 +9,7 @@ export {
   listAztecExamples,
   readAztecExample,
   readRepoFile,
+  type DocsSearchResult,
+  type SemanticSearchToolResult,
 } from "./search.js";
 export { lookupAztecError } from "./error-lookup.js";

@@ -8,6 +8,11 @@ vi.mock("../../src/utils/search.js", () => ({
   readFile: vi.fn(),
 }));
 
+vi.mock("../../src/backends/docsgpt-client.js", () => ({
+  DocsGPTClient: vi.fn(),
+  DocsGPTClientError: class extends Error { constructor(msg: string) { super(msg); this.name = "DocsGPTClientError"; } },
+}));
+
 vi.mock("../../src/utils/git.js", () => ({
   isRepoCloned: vi.fn(),
 }));
@@ -18,7 +23,6 @@ vi.mock("../../src/repos/config.js", () => ({
 
 import {
   searchCode,
-  searchDocs,
   listExamples,
   findExample,
   readFile,
@@ -34,7 +38,6 @@ import {
 } from "../../src/tools/search.js";
 
 const mockSearchCode = vi.mocked(searchCode);
-const mockSearchDocs = vi.mocked(searchDocs);
 const mockListExamples = vi.mocked(listExamples);
 const mockFindExample = vi.mocked(findExample);
 const mockReadFile = vi.mocked(readFile);
@@ -97,23 +100,96 @@ describe("searchAztecCode", () => {
 });
 
 describe("searchAztecDocs", () => {
-  it("returns failure when aztec-packages-docs not cloned", () => {
+  it("falls back to ripgrep when no client configured", async () => {
     mockIsRepoCloned.mockReturnValue(false);
-    const result = searchAztecDocs({ query: "tutorial" });
-    expect(result.success).toBe(false);
-    expect(result.message).toContain("aztec-packages-docs is not cloned");
+    const result = await searchAztecDocs({ query: "tutorial" }, null);
+    expect(result.kind).toBe("ripgrep");
+    expect(result.result.success).toBe(false);
+    expect(result.result.message).toContain("aztec-packages-docs is not cloned");
   });
 
-  it("delegates to searchDocs with correct options", () => {
+  it("uses ripgrep when no client and docs are cloned", async () => {
     mockIsRepoCloned.mockReturnValue(true);
-    mockSearchDocs.mockReturnValue([]);
+    const { searchDocs } = await import("../../src/utils/search.js");
+    vi.mocked(searchDocs).mockReturnValue([]);
 
-    searchAztecDocs({ query: "tutorial", section: "concepts", maxResults: 5 });
+    const result = await searchAztecDocs({ query: "tutorial", section: "concepts", maxResults: 5 }, null);
+    expect(result.kind).toBe("ripgrep");
+    expect(result.result.success).toBe(true);
+  });
 
-    expect(mockSearchDocs).toHaveBeenCalledWith("tutorial", {
-      section: "concepts",
-      maxResults: 5,
-    });
+  it("returns semantic results from DocsGPT client", async () => {
+    const mockClient = {
+      search: vi.fn().mockResolvedValue([
+        { text: "content", title: "Tutorial", source: "docs/tutorial.md" },
+      ]),
+    } as any;
+
+    const result = await searchAztecDocs({ query: "tutorial" }, mockClient);
+    expect(result.kind).toBe("semantic");
+    if (result.kind === "semantic") {
+      expect(result.result.success).toBe(true);
+      expect(result.result.results).toHaveLength(1);
+      expect(result.result.results[0].title).toBe("Tutorial");
+    }
+    expect(mockClient.search).toHaveBeenCalledWith("tutorial", 5);
+  });
+
+  it("respects chunks parameter", async () => {
+    const mockClient = {
+      search: vi.fn().mockResolvedValue([]),
+    } as any;
+
+    await searchAztecDocs({ query: "test", chunks: 10 }, mockClient);
+    expect(mockClient.search).toHaveBeenCalledWith("test", 10);
+  });
+
+  it("uses maxResults as fallback for chunks in semantic mode", async () => {
+    const mockClient = {
+      search: vi.fn().mockResolvedValue([]),
+    } as any;
+
+    await searchAztecDocs({ query: "test", maxResults: 8 }, mockClient);
+    expect(mockClient.search).toHaveBeenCalledWith("test", 8);
+  });
+
+  it("prefers chunks over maxResults when both provided", async () => {
+    const mockClient = {
+      search: vi.fn().mockResolvedValue([]),
+    } as any;
+
+    await searchAztecDocs({ query: "test", chunks: 3, maxResults: 15 }, mockClient);
+    expect(mockClient.search).toHaveBeenCalledWith("test", 3);
+  });
+
+  it("falls back to ripgrep when client errors and local docs exist", async () => {
+    mockIsRepoCloned.mockReturnValue(true);
+    const { searchDocs } = await import("../../src/utils/search.js");
+    vi.mocked(searchDocs).mockReturnValue([
+      { file: "docs/tutorial.md", line: 1, content: "tutorial content", repo: "aztec-packages-docs" },
+    ]);
+
+    const mockClient = {
+      search: vi.fn().mockRejectedValue(new Error("network error")),
+    } as any;
+
+    const result = await searchAztecDocs({ query: "test" }, mockClient);
+    expect(result.kind).toBe("ripgrep");
+    expect(result.result.success).toBe(true);
+    expect(result.result.results).toHaveLength(1);
+  });
+
+  it("returns ripgrep not-cloned message when client errors and no local docs", async () => {
+    mockIsRepoCloned.mockReturnValue(false);
+
+    const mockClient = {
+      search: vi.fn().mockRejectedValue(new Error("network error")),
+    } as any;
+
+    const result = await searchAztecDocs({ query: "test" }, mockClient);
+    expect(result.kind).toBe("ripgrep");
+    expect(result.result.success).toBe(false);
+    expect(result.result.message).toContain("aztec-packages-docs is not cloned");
   });
 });
 
