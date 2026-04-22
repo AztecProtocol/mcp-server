@@ -69,7 +69,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           version: {
             type: "string",
             description:
-              "Aztec version tag to clone (e.g., 'v4.2.0-aztecnr-rc.2'). Defaults to latest supported version.",
+              "Aztec version tag to clone (e.g., 'v4.2.0'). Defaults to latest supported version.",
           },
           force: {
             type: "boolean",
