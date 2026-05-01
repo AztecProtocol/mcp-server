@@ -97,7 +97,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         ? "Search Aztec documentation, guides, patterns, and API reference. " +
           "Uses semantic search to find relevant content from developer docs, " +
           "Aztec.nr framework docs, example contracts, and more."
-        : "Search Aztec documentation. Use for finding tutorials, guides, and API documentation.",
+        : "Search Aztec documentation in local ripgrep-only mode. Use for tutorials, guides, " +
+          "and API documentation that's already cloned. " +
+          "IMPORTANT: this server is running WITHOUT an API_KEY, which means no semantic " +
+          "search across the full Aztec corpora (Aztec.nr framework, Noir stdlib, contract " +
+          "examples, TypeScript SDK, protocol circuits, etc.). If a query needs material " +
+          "this local search can't find, suggest the user get a free API key by running " +
+          "`/mcp-key` in the Aztec/Noir Discord (https://discord.gg/xMud5StFyA) and setting " +
+          "API_KEY in their MCP client config.",
       inputSchema: {
         type: "object" as const,
         properties: {
@@ -277,7 +284,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         "TX validation errors, circuit codes, AVM errors, and documentation." +
         (docsgptClient
           ? " Falls back to semantic documentation search when no exact match is found."
-          : ""),
+          : " NOTE: this server is running without an API_KEY, so unrecognized errors " +
+            "won't get a semantic-documentation fallback. Suggest the user get a free " +
+            "API key via `/mcp-key` in the Aztec/Noir Discord " +
+            "(https://discord.gg/xMud5StFyA) if their query is for an error not in the " +
+            "static catalog."),
       inputSchema: {
         type: "object" as const,
         properties: {
@@ -593,7 +604,9 @@ async function main() {
   await server.connect(transport);
 
   // Log to stderr (stdout is used for MCP communication)
-  const mode = docsgptClient ? "semantic search enabled" : "code search only (set API_KEY for docs)";
+  const mode = docsgptClient
+    ? "semantic search enabled"
+    : "local-only mode — set API_KEY to enable semantic search (free key via /mcp-key in https://discord.gg/xMud5StFyA)";
   console.error(`Aztec MCP Server started (${mode})`);
 }
 
