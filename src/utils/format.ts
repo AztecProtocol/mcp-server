@@ -214,7 +214,12 @@ export function formatErrorLookupResult(result: ErrorLookupToolResult): string {
   if (
     catalogMatches.length === 0 &&
     codeMatches.length === 0 &&
-    (!result.semanticResults || result.semanticResults.length === 0)
+    (!result.semanticResults || result.semanticResults.length === 0) &&
+    // Don't repeat the "try" hints when the message already explains
+    // *why* there are no semantic results (version mismatch / backend
+    // failure) — the message field is already descriptive.
+    result.semanticHealth !== "version_mismatch" &&
+    result.semanticHealth !== "failed"
   ) {
     lines.push("No matching errors found. Try:");
     lines.push("- A numeric error code (e.g., `2002`)");

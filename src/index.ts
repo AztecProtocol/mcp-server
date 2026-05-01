@@ -52,9 +52,16 @@ import { DocsGPTClient } from "./backends/docsgpt-client.js";
 // DocsGPT client — optional, enabled when API_KEY is set
 // ---------------------------------------------------------------------------
 
+// Default points at the public Aztec DocsGPT deployment so the npm
+// package "just works" with only API_KEY set. Override via API_URL for
+// self-hosted or local backends. The previous default
+// (`http://localhost:7091`) sent the user's API key to whatever was
+// listening on their loopback port 7091 if API_URL was forgotten.
+const DOCSGPT_DEFAULT_URL = "https://aztec.adjacentpossible.dev";
+
 const docsgptClient = process.env.API_KEY
   ? new DocsGPTClient({
-      apiUrl: process.env.API_URL || "http://localhost:7091",
+      apiUrl: process.env.API_URL || DOCSGPT_DEFAULT_URL,
       apiKey: process.env.API_KEY,
       timeout: parseInt(process.env.REQUEST_TIMEOUT || "60000", 10),
     })
@@ -109,16 +116,34 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           maxResults: {
             type: "number",
             description: docsgptClient
-              ? "Maximum results to return (default: 5 for semantic search, max: 20)"
+              ? "Maximum results to return (default: 5 for semantic search, 1-20)"
               : "Maximum results to return (default: 20)",
+            minimum: 1,
+            maximum: docsgptClient ? 20 : 100,
           },
           ...(docsgptClient
             ? {
                 chunks: {
                   type: "number",
                   description:
-                    "Number of result chunks for semantic search (default: 5, max: 20). " +
+                    "Number of result chunks for semantic search (default: 5, 1-20). " +
                     "If omitted, maxResults is used.",
+                  minimum: 1,
+                  maximum: 20,
+                },
+                useLocalFallback: {
+                  type: "boolean",
+                  description:
+                    "If the semantic search backend fails, fall back to ripgrep over local cloned docs. " +
+                    "Default false: failures are surfaced so the user sees backend/auth issues instead of " +
+                    "silently degrading to (potentially stale) local results.",
+                },
+                allowVersionMismatch: {
+                  type: "boolean",
+                  description:
+                    "Override the version-sync gate. By default the search refuses to run when the local " +
+                    "aztec-packages clone tag differs from the corpus version the DocsGPT backend has indexed. " +
+                    "Set true to query anyway (results reflect the corpus version, not your local clone).",
                 },
               }
             : {}),
@@ -269,7 +294,19 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           maxResults: {
             type: "number",
             description: "Maximum results to return (default: 10)",
+            minimum: 1,
+            maximum: 100,
           },
+          ...(docsgptClient
+            ? {
+                allowVersionMismatch: {
+                  type: "boolean",
+                  description:
+                    "Override the version-sync gate for the semantic-fallback documentation search. " +
+                    "Has no effect when the static error catalog already matched.",
+                },
+              }
+            : {}),
         },
         required: ["query"],
       },
@@ -415,9 +452,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   validateToolRequest(name, args);
 
   // Auto re-sync if MCP server version changed since last sync.
-  // When using DocsGPT, aztec_search_docs doesn't need local repos — skip sync wait.
-  const isSemanticDocsSearch = name === "aztec_search_docs" && docsgptClient != null;
-  if (name !== "aztec_sync_repos" && !isSemanticDocsSearch) {
+  // For aztec_search_docs with DocsGPT configured AND no local fallback
+  // requested, we don't need cloned repos — skip the sync wait entirely.
+  // BUT if the caller passed `useLocalFallback: true`, a semantic
+  // failure will fall through to ripgrep, so local docs need to be
+  // fresh — let auto-resync run.
+  const semanticOnlyDocsSearch =
+    name === "aztec_search_docs"
+    && docsgptClient != null
+    && args?.useLocalFallback !== true;
+  if (name !== "aztec_sync_repos" && !semanticOnlyDocsSearch) {
     ensureAutoResync();
     if (syncInFlight) await syncInFlight.catch(() => {});
   }
@@ -459,13 +503,23 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             section: args?.section as string | undefined,
             maxResults: args?.maxResults as number | undefined,
             chunks: args?.chunks as number | undefined,
+            useLocalFallback: args?.useLocalFallback as boolean | undefined,
+            allowVersionMismatch: args?.allowVersionMismatch as boolean | undefined,
           },
           docsgptClient
         );
-        text =
-          docsResult.kind === "semantic"
-            ? formatSemanticSearchResults(docsResult.result)
-            : formatSearchResults(docsResult.result);
+        switch (docsResult.kind) {
+          case "semantic":
+            text = formatSemanticSearchResults(docsResult.result);
+            break;
+          case "ripgrep":
+            text = formatSearchResults(docsResult.result);
+            break;
+          case "version-mismatch":
+          case "error":
+            text = docsResult.message;
+            break;
+        }
         break;
       }
 
@@ -510,6 +564,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             query: args!.query as string,
             category: args?.category as string | undefined,
             maxResults: args?.maxResults as number | undefined,
+            allowVersionMismatch: args?.allowVersionMismatch as boolean | undefined,
           },
           docsgptClient
         );

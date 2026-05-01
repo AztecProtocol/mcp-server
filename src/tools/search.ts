@@ -15,6 +15,7 @@ import { isRepoCloned } from "../utils/git.js";
 import { getRepoNames } from "../repos/config.js";
 import { DocsGPTClient, DocsGPTClientError } from "../backends/docsgpt-client.js";
 import type { SemanticSearchResult } from "../backends/docsgpt-client.js";
+import { checkVersionGate, formatMismatchMessage } from "../utils/version-check.js";
 
 /**
  * Search Aztec code (contracts, TypeScript, etc.)
@@ -71,33 +72,83 @@ export interface SemanticSearchToolResult {
 }
 
 /**
- * Result type for aztec_search_docs — either semantic results (DocsGPT)
- * or ripgrep code-search results (fallback when no API key).
+ * Result type for aztec_search_docs.
+ *
+ * `semantic` — DocsGPT returned results (success path).
+ * `ripgrep`  — local search ran (no API key OR `useLocalFallback: true`
+ *              after a semantic failure).
+ * `version-mismatch` — local clone vs. corpus version diverge and the
+ *              caller did NOT pass `allowVersionMismatch: true`. The
+ *              caller can re-invoke with the override or sync repos.
+ * `error`    — semantic search failed and either fallback was disabled
+ *              or fallback also failed. `semanticError` always set;
+ *              `fallbackError` set only when both paths failed.
  */
 export type DocsSearchResult =
   | { kind: "semantic"; result: SemanticSearchToolResult }
-  | { kind: "ripgrep"; result: { success: boolean; results: SearchResult[]; message: string } };
+  | { kind: "ripgrep"; result: { success: boolean; results: SearchResult[]; message: string } }
+  | { kind: "version-mismatch"; localVersion: string; corpusVersion: string; message: string }
+  | { kind: "error"; message: string; semanticError: string; fallbackError?: string };
+
+interface SearchAztecDocsOptions {
+  query: string;
+  section?: string;
+  maxResults?: number;
+  chunks?: number;
+  /** Opt-in: fall back to ripgrep over local cloned docs when DocsGPT
+   *  is unavailable. Default false — silent fallback masks the kind of
+   *  config failures users need to see (wrong API_URL, expired key,
+   *  backend down). */
+  useLocalFallback?: boolean;
+  /** Opt-in: search the corpus even if its version doesn't match the
+   *  local clone. Default false. */
+  allowVersionMismatch?: boolean;
+}
 
 /**
  * Search Aztec documentation.
  *
  * When a DocsGPT client is available (API_KEY set), uses semantic vector
- * search for high-quality natural language results. Otherwise, falls back
- * to the ripgrep-based search over cloned markdown files.
+ * search. Errors are surfaced — no silent ripgrep fallback unless the
+ * caller passes `useLocalFallback: true`.
  */
 export async function searchAztecDocs(
-  options: {
-    query: string;
-    section?: string;
-    maxResults?: number;
-    chunks?: number;
-  },
+  options: SearchAztecDocsOptions,
   client: DocsGPTClient | null
 ): Promise<DocsSearchResult> {
-  // Semantic path — preferred when DocsGPT is configured
+  // Semantic path
   if (client) {
-    const { query, chunks, maxResults } = options;
-    const numChunks = Math.min(chunks ?? maxResults ?? 5, 20);
+    const { query, chunks, maxResults, useLocalFallback = false, allowVersionMismatch = false } = options;
+    const numChunks = chunks ?? maxResults ?? 5;
+
+    // Version gate. `unknown` results — backend missing /api/version,
+    // or AZTEC_CORPUS_VERSION unset — let the search proceed (callers
+    // should not be locked out by an older or under-configured backend).
+    //
+    // When `useLocalFallback: true` the caller has explicitly opted
+    // into "use local docs if semantic is unusable" — a version
+    // mismatch counts as "unusable" but the local clone is a valid,
+    // version-aligned alternative, so fall through to ripgrep instead
+    // of refusing. Without `useLocalFallback`, refuse (it's the gate's
+    // whole purpose).
+    if (!allowVersionMismatch) {
+      const gate = await checkVersionGate(client);
+      if (gate.kind === "mismatch") {
+        if (useLocalFallback) {
+          return ripgrepFallback(
+            options,
+            `corpus version is ${gate.corpusVersion} but local clone is ${gate.localVersion}; ` +
+              `using local docs which match your clone. Pass allowVersionMismatch:true to query the corpus anyway.`
+          );
+        }
+        return {
+          kind: "version-mismatch",
+          localVersion: gate.localVersion,
+          corpusVersion: gate.corpusVersion,
+          message: formatMismatchMessage(gate.localVersion, gate.corpusVersion),
+        };
+      }
+    }
 
     try {
       const results = await client.search(query, numChunks);
@@ -113,23 +164,51 @@ export async function searchAztecDocs(
               : `No documentation matches found for "${query}".`,
         },
       };
-    } catch {
-      // DocsGPT unavailable — fall through to ripgrep if local docs exist
+    } catch (err) {
+      const semanticError = err instanceof DocsGPTClientError ? err.message : String(err);
+
+      if (!useLocalFallback) {
+        return {
+          kind: "error",
+          message:
+            `Semantic documentation search failed: ${semanticError}\n\n` +
+            `To search local cloned docs instead, retry with \`useLocalFallback: true\`.`,
+          semanticError,
+        };
+      }
+
+      // useLocalFallback === true: try ripgrep, accumulate both errors
+      // if it also fails so the user sees the full picture.
+      return ripgrepFallback(options, semanticError);
     }
   }
 
-  // Ripgrep fallback — searches cloned markdown files
+  // No client configured (no API_KEY) — ripgrep is the primary path.
+  return ripgrepFallback(options, undefined);
+}
+
+function ripgrepFallback(
+  options: SearchAztecDocsOptions,
+  semanticError: string | undefined
+): DocsSearchResult {
   const { query, section, maxResults = 20 } = options;
 
   if (!isRepoCloned("aztec-packages-docs")) {
+    const fallbackError = "aztec-packages-docs is not cloned. Run aztec_sync_repos first to get documentation.";
+    if (semanticError !== undefined) {
+      return {
+        kind: "error",
+        message:
+          `Both documentation backends are unavailable.\n\n` +
+          `Semantic search: ${semanticError}\n` +
+          `Local fallback: ${fallbackError}`,
+        semanticError,
+        fallbackError,
+      };
+    }
     return {
       kind: "ripgrep",
-      result: {
-        success: false,
-        results: [],
-        message:
-          "aztec-packages-docs is not cloned. Run aztec_sync_repos first to get documentation.",
-      },
+      result: { success: false, results: [], message: fallbackError },
     };
   }
 
@@ -141,9 +220,12 @@ export async function searchAztecDocs(
       success: true,
       results,
       message:
-        results.length > 0
+        (semanticError !== undefined
+          ? `Semantic search failed (${semanticError}); using local docs.\n`
+          : "") +
+        (results.length > 0
           ? `Found ${results.length} documentation matches`
-          : "No documentation matches found",
+          : "No documentation matches found"),
     },
   };
 }
