@@ -6,6 +6,8 @@ import { isRepoError, type SyncResult } from "../tools/sync.js";
 import type { SearchResult, FileInfo } from "./search.js";
 import type { SyncMetadata } from "./sync-metadata.js";
 import type { ErrorLookupResult } from "./error-lookup.js";
+import type { SemanticSearchToolResult } from "../tools/search.js";
+import type { ErrorLookupToolResult } from "../tools/error-lookup.js";
 
 export function formatSyncResult(result: SyncResult): string {
   const lines = [
@@ -153,11 +155,7 @@ export function formatFileContent(result: {
   return result.content;
 }
 
-export function formatErrorLookupResult(result: {
-  success: boolean;
-  result: ErrorLookupResult;
-  message: string;
-}): string {
+export function formatErrorLookupResult(result: ErrorLookupToolResult): string {
   const lines = [result.message, ""];
 
   const { catalogMatches, codeMatches } = result.result;
@@ -193,11 +191,67 @@ export function formatErrorLookupResult(result: {
     }
   }
 
-  if (catalogMatches.length === 0 && codeMatches.length === 0) {
+  // Semantic fallback results from DocsGPT
+  if (result.semanticResults && result.semanticResults.length > 0) {
+    lines.push("## Related Documentation");
+    lines.push("");
+
+    for (const match of result.semanticResults) {
+      if (match.title) {
+        lines.push(`**${match.title}**`);
+      }
+      if (match.source) {
+        lines.push(`Source: ${match.source}`);
+      }
+      lines.push("");
+      lines.push(match.text);
+      lines.push("");
+      lines.push("---");
+      lines.push("");
+    }
+  }
+
+  if (
+    catalogMatches.length === 0 &&
+    codeMatches.length === 0 &&
+    (!result.semanticResults || result.semanticResults.length === 0) &&
+    // Don't repeat the "try" hints when the message already explains
+    // *why* there are no semantic results (version mismatch / backend
+    // failure) — the message field is already descriptive.
+    result.semanticHealth !== "version_mismatch" &&
+    result.semanticHealth !== "failed"
+  ) {
     lines.push("No matching errors found. Try:");
     lines.push("- A numeric error code (e.g., `2002`)");
     lines.push("- A hex signature (e.g., `0xa5b2ba17`)");
     lines.push("- An error message substring (e.g., `insufficient fee`)");
+  }
+
+  return lines.join("\n");
+}
+
+/**
+ * Format semantic search results from DocsGPT.
+ */
+export function formatSemanticSearchResults(result: SemanticSearchToolResult): string {
+  const lines = [result.message, ""];
+
+  if (!result.success || result.results.length === 0) {
+    return lines.join("\n");
+  }
+
+  for (const match of result.results) {
+    if (match.title) {
+      lines.push(`**${match.title}**`);
+    }
+    if (match.source) {
+      lines.push(`Source: ${match.source}`);
+    }
+    lines.push("");
+    lines.push(match.text);
+    lines.push("");
+    lines.push("---");
+    lines.push("");
   }
 
   return lines.join("\n");
