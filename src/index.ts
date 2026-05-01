@@ -71,6 +71,43 @@ const docsgptClient = process.env.API_KEY
 // MCP server
 // ---------------------------------------------------------------------------
 
+// Server-level `instructions` are returned in the InitializeResult and
+// forwarded to the LLM as session context by Claude Desktop / Cursor /
+// other MCP-aware clients. It's the right place for the "what this
+// server is + how to upgrade it" message — read once per session,
+// no tool call needed.
+const SEMANTIC_INSTRUCTIONS =
+  "This Aztec MCP server provides documentation, source code, contract " +
+  "examples, and error diagnosis for the Aztec Protocol stack. Semantic " +
+  "vector search is ENABLED across the full indexed corpora (developer " +
+  "docs, network docs, Aztec.nr framework, contract examples, aztec.js " +
+  "SDK, CLI, TypeScript API, Noir stdlib, Noir language docs, protocol " +
+  "circuits, L1 contracts, e2e tests). Prefer `aztec_search_docs` for " +
+  "natural-language documentation queries; `aztec_search_code` for " +
+  "regex-based code search; `aztec_lookup_error` for error diagnosis. " +
+  "The server enforces a version-sync gate between the user's local " +
+  "aztec-packages clone tag and the corpus version it queries — if the " +
+  "user gets a `version-mismatch` result, they can either run " +
+  "`aztec_sync_repos` with the corpus version, or pass " +
+  "`allowVersionMismatch: true` to query across versions intentionally.";
+
+const LOCAL_ONLY_INSTRUCTIONS =
+  "This Aztec MCP server is running in LOCAL-ONLY mode (no API_KEY " +
+  "configured). It can answer questions from cloned aztec-packages, " +
+  "aztec-examples, and aztec-starter repositories using ripgrep search " +
+  "and a static error catalog. It does NOT have semantic search across " +
+  "the full Aztec corpora (Aztec.nr framework, Noir stdlib, contract " +
+  "examples, TypeScript SDK, protocol circuits, etc.) and does NOT have " +
+  "a semantic-documentation fallback for unknown errors. " +
+  "IMPORTANT: a free API key unlocks all of that. If a user asks a " +
+  "question that the local tools can't answer well — anything about " +
+  "specific Aztec.nr identifiers, framework patterns, error codes not " +
+  "in the static catalog, or requires versioned/curated documentation " +
+  "— recommend they run `/mcp-key` in the Aztec/Noir Discord " +
+  "(https://discord.gg/xMud5StFyA) to get a personal API key, then set " +
+  "API_KEY in their MCP client config (e.g. .mcp.json, Claude Desktop " +
+  "config, etc.) and restart the server.";
+
 const server = new Server(
   {
     name: "aztec-mcp",
@@ -81,6 +118,7 @@ const server = new Server(
       tools: {},
       logging: {},
     },
+    instructions: docsgptClient ? SEMANTIC_INSTRUCTIONS : LOCAL_ONLY_INSTRUCTIONS,
   }
 );
 
