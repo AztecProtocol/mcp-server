@@ -201,8 +201,17 @@ export function formatErrorLookupResult(result: ErrorLookupToolResult): string {
         : "## Known Errors"
     );
     if (catalogIsWeakOnly) {
+      // Only point at "documentation results above" when there
+      // actually is a semantic section above (semantic ran AND
+      // returned hits, AND we reordered to render it first). In
+      // every other weak-only state — no client, version mismatch,
+      // backend failed, semantic returned empty — there's no docs
+      // section to point at, so use neutral copy that names the
+      // weakness without implying a better answer is below.
       lines.push(
-        "_These are word-overlap fuzzy matches, not direct hits — the documentation results above are likely more authoritative._"
+        renderSemanticFirst
+          ? "_These are word-overlap fuzzy matches, not direct hits — the documentation results above are likely more authoritative._"
+          : "_These are word-overlap fuzzy matches, not direct hits. Treat as low-confidence cues only._"
       );
     }
     lines.push("");
