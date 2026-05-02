@@ -8,6 +8,11 @@ import type { SyncMetadata } from "./sync-metadata.js";
 import type { ErrorLookupResult } from "./error-lookup.js";
 import type { SemanticSearchToolResult } from "../tools/search.js";
 import type { ErrorLookupToolResult } from "../tools/error-lookup.js";
+import { MCP_VERSION } from "../version.js";
+import {
+  formatUpgradeStatusLine,
+  getUpgradeInfo,
+} from "./version-self-check.js";
 
 export function formatSyncResult(result: SyncResult): string {
   const lines = [
@@ -40,12 +45,33 @@ export function formatStatus(status: {
   const lines = [
     "Aztec MCP Server Status",
     "",
-    `Repos directory: ${status.reposDir}`,
+    // Live version read from package.json at module load (see
+    // ``src/version.ts``). The previous implementation pulled this
+    // from sync metadata, which was the version that ran the LAST
+    // sync — stale across upgrades that didn't touch the clones.
+    `MCP server version: ${MCP_VERSION}`,
   ];
+
+  // npm-latest comparison done at boot (``checkForUpgrade`` in
+  // ``src/index.ts``). Prints either "you are up to date" or an
+  // upgrade-available warning. Empty string when the registry check
+  // failed at boot, so we stay silent rather than misleading.
+  const upgradeLine = formatUpgradeStatusLine(getUpgradeInfo());
+  if (upgradeLine) {
+    lines.push(upgradeLine);
+  }
+
+  lines.push(`Repos directory: ${status.reposDir}`);
 
   if (status.syncMetadata) {
     lines.push(`Last synced: ${status.syncMetadata.syncedAt}`);
-    lines.push(`MCP server version: ${status.syncMetadata.mcpVersion}`);
+    if (status.syncMetadata.mcpVersion !== MCP_VERSION) {
+      // Only mention this when it differs from the live version —
+      // otherwise it's just noise that duplicates the line above.
+      lines.push(
+        `  (last sync ran under MCP server v${status.syncMetadata.mcpVersion} — re-run aztec_sync_repos to refresh metadata)`
+      );
+    }
     lines.push(`Aztec version: ${status.syncMetadata.aztecVersion}`);
   }
 

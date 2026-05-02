@@ -34,15 +34,19 @@ Keys are free, persistent (re-running `/mcp-key` returns the same key), and revo
 ### With npx (recommended)
 
 ```bash
-npx @aztec/mcp-server
+npx -y @aztec/mcp-server@latest
 ```
+
+> **Always pin `@latest`.** npx caches packages aggressively — without `@latest`, you can end up running an old version indefinitely. The `@latest` tag forces npx to check the registry for the current release every run. The server also self-reports an upgrade-available warning at startup if it detects a newer version on npm (see `aztec_status` output).
 
 ### Global install
 
 ```bash
-npm install -g @aztec/mcp-server
+npm install -g @aztec/mcp-server@latest
 aztec-mcp
 ```
+
+To update later: `npm install -g @aztec/mcp-server@latest` (or just rely on the `npx -y @aztec/mcp-server@latest` form, which always fetches current).
 
 ## Configuration
 
@@ -179,7 +183,7 @@ Override with the `AZTEC_MCP_REPOS_DIR` environment variable:
   "mcpServers": {
     "aztec-mcp": {
       "command": "npx",
-      "args": ["-y", "@aztec/mcp-server"],
+      "args": ["-y", "@aztec/mcp-server@latest"],
       "env": {
         "AZTEC_MCP_REPOS_DIR": "/custom/path"
       }
@@ -197,7 +201,7 @@ Set the default Aztec version with the `AZTEC_DEFAULT_VERSION` environment varia
   "mcpServers": {
     "aztec-mcp": {
       "command": "npx",
-      "args": ["-y", "@aztec/mcp-server"],
+      "args": ["-y", "@aztec/mcp-server@latest"],
       "env": {
         "AZTEC_DEFAULT_VERSION": "v3.0.0-devnet.6-plugin.1"
       }
