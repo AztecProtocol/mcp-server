@@ -49,11 +49,16 @@ export async function fetchLatestNpmVersion(
   timeoutMs: number = 2000,
   fetchImpl: typeof fetch = fetch
 ): Promise<string | null> {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), timeoutMs);
+  // `unref` (Node-only) prevents this timer from keeping the event
+  // loop alive on its own. Critical for short-lived processes and
+  // tests where a forgotten timer would block exit. Optional-chained
+  // because `setTimeout` in browser-shaped environments returns a
+  // primitive number with no `unref` — the optional call is safe.
+  (timer as unknown as { unref?: () => void }).unref?.();
   try {
-    const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), timeoutMs);
     const resp = await fetchImpl(NPM_REGISTRY_URL, { signal: ctl.signal });
-    clearTimeout(timer);
     if (!resp.ok) return null;
     const data = await resp.json();
     if (!data || typeof data !== "object") return null;
@@ -61,6 +66,12 @@ export async function fetchLatestNpmVersion(
     return typeof v === "string" ? v : null;
   } catch {
     return null;
+  } finally {
+    // Always clear: the previous implementation only cleared on the
+    // success path, leaking the timer when `fetchImpl` rejected
+    // (network error, CORS, malformed body) before the timeout
+    // fired. Combined with `unref` above this is belt-and-braces.
+    clearTimeout(timer);
   }
 }
 
