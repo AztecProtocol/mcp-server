@@ -1,8 +1,12 @@
 /**
  * Error lookup tool — diagnose any Aztec error by message, code, or hex signature.
  *
- * Enhanced: when the static catalog + dynamic parsers produce no matches,
- * falls back to semantic search via DocsGPT for broader documentation context.
+ * Enhanced: when the static catalog + dynamic parsers produce no STRONG
+ * matches, falls back to semantic search via DocsGPT for broader
+ * documentation context. Weak fuzzy hints (word-overlap, score < 70)
+ * no longer suppress the semantic fallback — they would shadow the
+ * better answer with a misleading top hit (e.g. "note already nullified"
+ * matching "Contract already initialized" with a Jaccard score of 54).
  */
 
 import { lookupError } from "../utils/error-lookup.js";
@@ -11,6 +15,21 @@ import { DocsGPTClientError } from "../backends/docsgpt-client.js";
 import type { DocsGPTClient } from "../backends/docsgpt-client.js";
 import type { SemanticSearchResult } from "../backends/docsgpt-client.js";
 import { checkVersionGate, formatMismatchMessage } from "../utils/version-check.js";
+
+/**
+ * Minimum catalog-match score that counts as "strong enough to short-
+ * circuit the semantic fallback." Aligned with the score system in
+ * ``utils/error-lookup.ts``:
+ *   - 100  exact-code / hex-signature
+ *   -  95  exact-pattern
+ *   -  70-80 substring
+ *   -  50-65 word-overlap (Jaccard)
+ *
+ * Threshold of 70 keeps every "real" match type and excludes only the
+ * Jaccard fuzzy band, which is exactly the noise floor we want to fall
+ * through past.
+ */
+const STRONG_MATCH_THRESHOLD = 70;
 
 export type SemanticHealth =
   | "ok" // semantic returned results
@@ -49,10 +68,31 @@ export async function lookupAztecError(
 
   const result = lookupError(query, { category, maxResults });
 
-  const totalMatches = result.catalogMatches.length + result.codeMatches.length;
+  const hasStrongCatalogMatch = result.catalogMatches.some(
+    (m) => m.score >= STRONG_MATCH_THRESHOLD
+  );
+  const hasCodeMatch = result.codeMatches.length > 0;
+  const hasAnyCatalogMatch = result.catalogMatches.length > 0;
 
-  // Static catalog hit: return immediately, semantic call not needed.
-  if (totalMatches > 0) {
+  // When the caller passed an explicit ``category`` filter and the
+  // catalog produced any in-category match (even a weak one), keep
+  // the pre-PR short-circuit: falling through to a category-agnostic
+  // semantic search would surface out-of-scope docs and confuse the
+  // user who explicitly narrowed the request. The semantic backend
+  // doesn't honor the same category taxonomy, so respecting the
+  // filter means trusting the catalog at face value.
+  const hasCategoryFilteredHit = !!category && hasAnyCatalogMatch;
+
+  const hasStrongMatch =
+    hasStrongCatalogMatch || hasCodeMatch || hasCategoryFilteredHit;
+
+  // Strong static hit: return immediately, semantic call not needed.
+  // Weak fuzzy hits (word-overlap only, no category filter) fall
+  // through to the semantic path below — they remain in
+  // ``result.catalogMatches`` so the formatter can still render them
+  // as low-confidence hints, but they no longer suppress the
+  // semantic-fallback signal that produces the actually-useful answer.
+  if (hasStrongMatch) {
     return {
       success: true,
       result,
@@ -61,15 +101,30 @@ export async function lookupAztecError(
     };
   }
 
-  // No static match. Try semantic fallback if a client exists.
+  const weakHintsCount = result.catalogMatches.length;
+
+  // Below the strong-match threshold (or zero matches). Try semantic
+  // fallback if a client exists; otherwise return the weak hints
+  // (if any) with a "skipped" health.
   if (!docsgptClient) {
     return {
       success: true,
       result,
       semanticHealth: "skipped",
-      message: `No matches found for "${query}". Try a different error message, code, or hex signature.`,
+      message:
+        weakHintsCount > 0
+          ? `No strong match for "${query}" — only ${weakHintsCount} low-confidence fuzzy hint(s) (word-overlap). Set API_KEY to enable semantic-documentation fallback (get a free key by running /mcp-key in the Aztec/Noir Discord: https://discord.gg/xMud5StFyA). Or try a different error message, code, or hex signature.`
+          : `No matches found for "${query}". Try a different error message, code, or hex signature.`,
     };
   }
+
+  // ``preface`` describes the static-catalog state; the semantic-result
+  // branch appends what semantic produced. Keeps phrasing accurate when
+  // weak fuzzy hints exist alongside the semantic results.
+  const preface =
+    weakHintsCount > 0
+      ? `No strong static match for "${query}" — ${weakHintsCount} low-confidence fuzzy hint(s) shown below.`
+      : `No exact error match found for "${query}".`;
 
   // Version gate before invoking semantic. Mirrors aztec_search_docs.
   if (!allowVersionMismatch) {
@@ -81,7 +136,7 @@ export async function lookupAztecError(
         semanticHealth: "version_mismatch",
         versionMismatch: { localVersion: gate.localVersion, corpusVersion: gate.corpusVersion },
         message:
-          `No exact error match found for "${query}", and the semantic fallback was blocked by a version mismatch.\n\n` +
+          `${preface} The semantic fallback was blocked by a version mismatch.\n\n` +
           formatMismatchMessage(gate.localVersion, gate.corpusVersion),
       };
     }
@@ -99,7 +154,7 @@ export async function lookupAztecError(
         result,
         semanticResults,
         semanticHealth: "ok",
-        message: `No exact error match found for "${query}". Showing relevant documentation.`,
+        message: `${preface} Showing relevant documentation.`,
       };
     }
 
@@ -107,7 +162,10 @@ export async function lookupAztecError(
       success: true,
       result,
       semanticHealth: "no_results",
-      message: `No matches found for "${query}". Try a different error message, code, or hex signature.`,
+      message:
+        weakHintsCount > 0
+          ? `${preface} Semantic search also returned no relevant documentation.`
+          : `No matches found for "${query}". Try a different error message, code, or hex signature.`,
     };
   } catch (err) {
     // Sanitize: don't echo the raw upstream error string to the user.
@@ -133,8 +191,7 @@ export async function lookupAztecError(
       success: true,
       result,
       semanticHealth: "failed",
-      message:
-        `No exact error match found for "${query}", and ${userFacing}.`,
+      message: `${preface} The semantic fallback was unavailable: ${userFacing}.`,
     };
   }
 }
