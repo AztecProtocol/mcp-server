@@ -57,25 +57,33 @@ beforeEach(() => {
   });
 });
 
+/**
+ * Helper for building catalog match objects with a configurable score.
+ * Lets a test simulate the various confidence bands from
+ * ``utils/error-lookup.ts``: exact-code/hex (100), exact-pattern (95),
+ * substring (70-80), word-overlap (50-65).
+ */
+function catalogHit(score: number, name = "MatchingError", matchType: any = "substring") {
+  return {
+    entry: {
+      id: name.toLowerCase(),
+      name,
+      patterns: [name.toLowerCase()],
+      cause: "c",
+      fix: "f",
+      category: "contract" as const,
+      source: "s",
+    },
+    matchType,
+    score,
+  };
+}
+
 describe("lookupAztecError — static catalog hits", () => {
   it("returns immediately with semanticHealth='skipped' when catalog matches", async () => {
     mockLookupError.mockReturnValue({
       query: "boom",
-      catalogMatches: [
-        {
-          entry: {
-            id: "x",
-            name: "BoomError",
-            patterns: ["boom"],
-            cause: "c",
-            fix: "f",
-            category: "contract",
-            source: "s",
-          },
-          matchType: "exact-name",
-          score: 100,
-        },
-      ],
+      catalogMatches: [catalogHit(100, "BoomError", "exact-name")],
       codeMatches: [],
     });
 
@@ -87,6 +95,113 @@ describe("lookupAztecError — static catalog hits", () => {
     expect(result.semanticResults).toBeUndefined();
     expect(client.search).not.toHaveBeenCalled();
     expect(client.getCorpusVersion).not.toHaveBeenCalled();
+  });
+
+  it("short-circuits at the threshold boundary (score === 70)", async () => {
+    mockLookupError.mockReturnValue({
+      query: "boundary",
+      catalogMatches: [catalogHit(70, "EdgeMatch", "substring")],
+      codeMatches: [],
+    });
+    const client = makeClient({ search: vi.fn() });
+    const result = await lookupAztecError({ query: "boundary" }, client);
+    expect(result.semanticHealth).toBe("skipped");
+    expect(client.search).not.toHaveBeenCalled();
+  });
+
+  it("short-circuits when there's only a codeMatch (ripgrep over cloned source)", async () => {
+    mockLookupError.mockReturnValue({
+      query: "RpgRet",
+      catalogMatches: [],
+      codeMatches: [
+        { file: "f.sol", line: 1, content: "x", repo: "aztec-packages" },
+      ],
+    });
+    const client = makeClient({ search: vi.fn() });
+    const result = await lookupAztecError({ query: "RpgRet" }, client);
+    expect(result.semanticHealth).toBe("skipped");
+    expect(client.search).not.toHaveBeenCalled();
+  });
+});
+
+describe("lookupAztecError — weak fuzzy matches DO NOT suppress semantic fallback", () => {
+  /**
+   * Regression for the "note already nullified" → "Contract already
+   * initialized" misfire reported in the v1.20.0 dogfood test. The
+   * Jaccard word-overlap matcher returned a score-54 hit on an
+   * unrelated catalog entry, and the early-return in lookupAztecError
+   * suppressed the semantic-documentation fallback that would have
+   * returned the actually-relevant chunks.
+   */
+  it("falls through to semantic when catalog has only word-overlap hits (score < 70)", async () => {
+    mockLookupError.mockReturnValue({
+      query: "note already nullified",
+      catalogMatches: [
+        catalogHit(54, "Contract already initialized", "word-overlap"),
+      ],
+      codeMatches: [],
+    });
+
+    const client = makeClient({
+      search: vi.fn().mockResolvedValue([
+        { text: "Notes are nullified by...", title: "Note Lifecycle", source: "docs/notes.md" },
+      ]),
+    });
+
+    const result = await lookupAztecError({ query: "note already nullified" }, client);
+    expect(result.semanticHealth).toBe("ok");
+    expect(result.semanticResults).toHaveLength(1);
+    expect(client.search).toHaveBeenCalledWith("Aztec error: note already nullified", 3);
+    // The weak hint stays in the result so the formatter can still render
+    // it as a low-confidence cue — it just no longer shadows the semantic answer.
+    expect(result.result.catalogMatches).toHaveLength(1);
+    expect(result.result.catalogMatches[0].score).toBe(54);
+    // Message acknowledges the weak hint instead of pretending nothing matched.
+    expect(result.message).toContain("low-confidence");
+  });
+
+  it("does not suppress semantic fallback for a mix of weak hints (max score 65)", async () => {
+    mockLookupError.mockReturnValue({
+      query: "x",
+      catalogMatches: [
+        catalogHit(65, "WeakA", "word-overlap"),
+        catalogHit(50, "WeakB", "word-overlap"),
+      ],
+      codeMatches: [],
+    });
+    const client = makeClient({
+      search: vi.fn().mockResolvedValue([
+        { text: "doc", title: "T", source: "S" },
+      ]),
+    });
+    const result = await lookupAztecError({ query: "x" }, client);
+    expect(result.semanticHealth).toBe("ok");
+    expect(client.search).toHaveBeenCalled();
+  });
+
+  it("with no client and only weak catalog hints, returns 'skipped' but message names the weak-hint situation", async () => {
+    mockLookupError.mockReturnValue({
+      query: "x",
+      catalogMatches: [catalogHit(54, "Weak", "word-overlap")],
+      codeMatches: [],
+    });
+    const result = await lookupAztecError({ query: "x" }, null);
+    expect(result.semanticHealth).toBe("skipped");
+    expect(result.message).toContain("low-confidence");
+    expect(result.message).toContain("API_KEY");
+  });
+
+  it("with weak hints and semantic returning empty, message acknowledges both signals", async () => {
+    mockLookupError.mockReturnValue({
+      query: "x",
+      catalogMatches: [catalogHit(54, "Weak", "word-overlap")],
+      codeMatches: [],
+    });
+    const client = makeClient({ search: vi.fn().mockResolvedValue([]) });
+    const result = await lookupAztecError({ query: "x" }, client);
+    expect(result.semanticHealth).toBe("no_results");
+    expect(result.message).toContain("low-confidence");
+    expect(result.message).toMatch(/no relevant documentation|Semantic search/i);
   });
 });
 
