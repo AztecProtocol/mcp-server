@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import {
   formatSyncResult,
   formatStatus,
@@ -7,6 +7,15 @@ import {
   formatExampleContent,
   formatFileContent,
 } from "../../src/utils/format.js";
+import { MCP_VERSION } from "../../src/version.js";
+import {
+  setUpgradeInfo,
+  _resetUpgradeCache,
+} from "../../src/utils/version-self-check.js";
+
+beforeEach(() => {
+  _resetUpgradeCache();
+});
 
 describe("formatSyncResult", () => {
   it("shows checkmark for success", () => {
@@ -80,7 +89,35 @@ describe("formatStatus", () => {
     expect(result).toContain("No repositories cloned");
   });
 
-  it("displays sync metadata when present", () => {
+  it("always shows the live MCP version (read from package.json), even without sync metadata", () => {
+    const result = formatStatus({
+      reposDir: "/repos",
+      repos: [],
+    });
+    // Live version always present — was previously gated behind syncMetadata
+    expect(result).toContain(`MCP server version: ${MCP_VERSION}`);
+    // Sync-only fields should remain absent when no metadata
+    expect(result).not.toContain("Last synced");
+    expect(result).not.toContain("Aztec version:");
+  });
+
+  it("when sync-metadata version equals live MCP_VERSION, does not duplicate it", () => {
+    const result = formatStatus({
+      reposDir: "/repos",
+      repos: [],
+      syncMetadata: {
+        mcpVersion: MCP_VERSION,
+        syncedAt: "2025-01-01T00:00:00.000Z",
+        aztecVersion: "v1.0.0",
+      },
+    });
+    expect(result).toContain(`MCP server version: ${MCP_VERSION}`);
+    expect(result).toContain("Last synced: 2025-01-01T00:00:00.000Z");
+    expect(result).toContain("Aztec version: v1.0.0");
+    expect(result).not.toContain("last sync ran under MCP server v");
+  });
+
+  it("when sync metadata records a different version, surfaces the staleness line", () => {
     const result = formatStatus({
       reposDir: "/repos",
       repos: [],
@@ -90,19 +127,50 @@ describe("formatStatus", () => {
         aztecVersion: "v1.0.0",
       },
     });
-    expect(result).toContain("Last synced: 2025-01-01T00:00:00.000Z");
-    expect(result).toContain("MCP server version: 1.5.0");
-    expect(result).toContain("Aztec version: v1.0.0");
+    // Live live (always present)
+    expect(result).toContain(`MCP server version: ${MCP_VERSION}`);
+    // Staleness annotation only when different
+    expect(result).toContain("last sync ran under MCP server v1.5.0");
   });
 
-  it("omits sync metadata lines when not present", () => {
+  it("includes upgrade-available warning in status when registry check found a newer version", () => {
+    setUpgradeInfo({
+      current: MCP_VERSION,
+      latest: "999.0.0",
+      outdated: true,
+    });
     const result = formatStatus({
       reposDir: "/repos",
       repos: [],
     });
-    expect(result).not.toContain("Last synced");
-    expect(result).not.toContain("MCP server version");
-    expect(result).not.toContain("Aztec version");
+    expect(result).toContain("UPDATE AVAILABLE");
+    expect(result).toContain("999.0.0");
+    expect(result).toContain("@latest");
+  });
+
+  it("includes 'up to date' line in status when registry check confirmed latest", () => {
+    setUpgradeInfo({
+      current: MCP_VERSION,
+      latest: MCP_VERSION,
+      outdated: false,
+    });
+    const result = formatStatus({
+      reposDir: "/repos",
+      repos: [],
+    });
+    expect(result).toContain("up to date");
+    expect(result).not.toContain("UPDATE AVAILABLE");
+  });
+
+  it("omits the npm-latest line when the registry check failed (no info cached)", () => {
+    // _resetUpgradeCache() in beforeEach already cleared this, but
+    // assert the contract explicitly.
+    const result = formatStatus({
+      reposDir: "/repos",
+      repos: [],
+    });
+    expect(result).not.toContain("npm latest");
+    expect(result).not.toContain("UPDATE AVAILABLE");
   });
 });
 

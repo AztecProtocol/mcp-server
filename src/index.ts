@@ -47,6 +47,10 @@ import { getSyncState, writeAutoResyncAttempt } from "./utils/sync-metadata.js";
 import { getRepoTag } from "./utils/git.js";
 import type { Logger } from "./utils/git.js";
 import { DocsGPTClient } from "./backends/docsgpt-client.js";
+import {
+  checkForUpgrade,
+  formatUpgradeBanner,
+} from "./utils/version-self-check.js";
 
 // ---------------------------------------------------------------------------
 // DocsGPT client — optional, enabled when API_KEY is set
@@ -108,6 +112,16 @@ const LOCAL_ONLY_INSTRUCTIONS =
   "API_KEY in their MCP client config (e.g. .mcp.json, Claude Desktop " +
   "config, etc.) and restart the server.";
 
+// Check npm registry for a newer release and surface an "outdated"
+// banner in the instructions if so. Top-level await: blocks startup
+// for at most ~2s on the registry round-trip (with internal timeout)
+// — runs once per server process, so the cost amortizes immediately.
+// Failure modes (no network, registry down, slow response) all return
+// null and produce no banner; the server boots normally.
+const upgradeInfo = await checkForUpgrade(MCP_VERSION);
+const upgradeBanner =
+  upgradeInfo && upgradeInfo.outdated ? formatUpgradeBanner(upgradeInfo) : "";
+
 const server = new Server(
   {
     name: "aztec-mcp",
@@ -118,7 +132,9 @@ const server = new Server(
       tools: {},
       logging: {},
     },
-    instructions: docsgptClient ? SEMANTIC_INSTRUCTIONS : LOCAL_ONLY_INSTRUCTIONS,
+    instructions:
+      (docsgptClient ? SEMANTIC_INSTRUCTIONS : LOCAL_ONLY_INSTRUCTIONS) +
+      upgradeBanner,
   }
 );
 
