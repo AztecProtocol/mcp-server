@@ -72,14 +72,26 @@ export async function lookupAztecError(
     (m) => m.score >= STRONG_MATCH_THRESHOLD
   );
   const hasCodeMatch = result.codeMatches.length > 0;
-  const hasStrongMatch = hasStrongCatalogMatch || hasCodeMatch;
+  const hasAnyCatalogMatch = result.catalogMatches.length > 0;
+
+  // When the caller passed an explicit ``category`` filter and the
+  // catalog produced any in-category match (even a weak one), keep
+  // the pre-PR short-circuit: falling through to a category-agnostic
+  // semantic search would surface out-of-scope docs and confuse the
+  // user who explicitly narrowed the request. The semantic backend
+  // doesn't honor the same category taxonomy, so respecting the
+  // filter means trusting the catalog at face value.
+  const hasCategoryFilteredHit = !!category && hasAnyCatalogMatch;
+
+  const hasStrongMatch =
+    hasStrongCatalogMatch || hasCodeMatch || hasCategoryFilteredHit;
 
   // Strong static hit: return immediately, semantic call not needed.
-  // Weak fuzzy hits (word-overlap only) deliberately fall through to
-  // the semantic path below — they remain in ``result.catalogMatches``
-  // so the formatter can still render them as low-confidence hints,
-  // but they no longer suppress the semantic-fallback signal that
-  // produces the actually-useful answer.
+  // Weak fuzzy hits (word-overlap only, no category filter) fall
+  // through to the semantic path below — they remain in
+  // ``result.catalogMatches`` so the formatter can still render them
+  // as low-confidence hints, but they no longer suppress the
+  // semantic-fallback signal that produces the actually-useful answer.
   if (hasStrongMatch) {
     return {
       success: true,
@@ -101,7 +113,7 @@ export async function lookupAztecError(
       semanticHealth: "skipped",
       message:
         weakHintsCount > 0
-          ? `No strong match for "${query}" — only ${weakHintsCount} low-confidence fuzzy hint(s) (word-overlap). An API_KEY would enable semantic-documentation fallback. Try a different error message, code, or hex signature.`
+          ? `No strong match for "${query}" — only ${weakHintsCount} low-confidence fuzzy hint(s) (word-overlap). Set API_KEY to enable semantic-documentation fallback (get a free key by running /mcp-key in the Aztec/Noir Discord: https://discord.gg/xMud5StFyA). Or try a different error message, code, or hex signature.`
           : `No matches found for "${query}". Try a different error message, code, or hex signature.`,
     };
   }

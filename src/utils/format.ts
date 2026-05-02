@@ -160,8 +160,51 @@ export function formatErrorLookupResult(result: ErrorLookupToolResult): string {
 
   const { catalogMatches, codeMatches } = result.result;
 
-  if (catalogMatches.length > 0) {
-    lines.push("## Known Errors");
+  // When semantic results exist AND every catalog match is below the
+  // strong-match threshold, the catalog hits are low-confidence cues
+  // that shouldn't visually dominate the response. Render semantic
+  // first under "## Related Documentation", and the catalog after
+  // under "## Lower-Confidence Catalog Hints" so the LLM consumer
+  // doesn't anchor on a misleading top hit (e.g. "note already
+  // nullified" matching "Contract already initialized" with score 54).
+  const semanticHasResults =
+    !!result.semanticResults && result.semanticResults.length > 0;
+  const catalogIsWeakOnly =
+    catalogMatches.length > 0 &&
+    catalogMatches.every((m) => m.score < 70);
+  const renderSemanticFirst = semanticHasResults && catalogIsWeakOnly;
+
+  function renderSemantic() {
+    if (!result.semanticResults || result.semanticResults.length === 0) return;
+    lines.push("## Related Documentation");
+    lines.push("");
+    for (const match of result.semanticResults) {
+      if (match.title) {
+        lines.push(`**${match.title}**`);
+      }
+      if (match.source) {
+        lines.push(`Source: ${match.source}`);
+      }
+      lines.push("");
+      lines.push(match.text);
+      lines.push("");
+      lines.push("---");
+      lines.push("");
+    }
+  }
+
+  function renderCatalog() {
+    if (catalogMatches.length === 0) return;
+    lines.push(
+      catalogIsWeakOnly
+        ? "## Lower-Confidence Catalog Hints"
+        : "## Known Errors"
+    );
+    if (catalogIsWeakOnly) {
+      lines.push(
+        "_These are word-overlap fuzzy matches, not direct hits — the documentation results above are likely more authoritative._"
+      );
+    }
     lines.push("");
 
     for (const m of catalogMatches) {
@@ -178,10 +221,10 @@ export function formatErrorLookupResult(result: ErrorLookupToolResult): string {
     }
   }
 
-  if (codeMatches.length > 0) {
+  function renderCode() {
+    if (codeMatches.length === 0) return;
     lines.push("## Related Code References");
     lines.push("");
-
     for (const match of codeMatches) {
       lines.push(`**${match.file}:${match.line}**`);
       lines.push("```");
@@ -191,24 +234,14 @@ export function formatErrorLookupResult(result: ErrorLookupToolResult): string {
     }
   }
 
-  // Semantic fallback results from DocsGPT
-  if (result.semanticResults && result.semanticResults.length > 0) {
-    lines.push("## Related Documentation");
-    lines.push("");
-
-    for (const match of result.semanticResults) {
-      if (match.title) {
-        lines.push(`**${match.title}**`);
-      }
-      if (match.source) {
-        lines.push(`Source: ${match.source}`);
-      }
-      lines.push("");
-      lines.push(match.text);
-      lines.push("");
-      lines.push("---");
-      lines.push("");
-    }
+  if (renderSemanticFirst) {
+    renderSemantic();
+    renderCatalog();
+    renderCode();
+  } else {
+    renderCatalog();
+    renderCode();
+    renderSemantic();
   }
 
   if (

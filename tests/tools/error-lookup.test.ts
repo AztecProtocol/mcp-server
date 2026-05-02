@@ -203,6 +203,64 @@ describe("lookupAztecError — weak fuzzy matches DO NOT suppress semantic fallb
     expect(result.message).toContain("low-confidence");
     expect(result.message).toMatch(/no relevant documentation|Semantic search/i);
   });
+
+  it("weak-only + version-mismatch: gate blocks semantic, weak hint preserved, message names mismatch", async () => {
+    mockGetRepoTag.mockResolvedValue("v4.1.0");
+    mockLookupError.mockReturnValue({
+      query: "x",
+      catalogMatches: [catalogHit(54, "Weak", "word-overlap")],
+      codeMatches: [],
+    });
+    const client = makeClient({
+      search: vi.fn().mockResolvedValue([{ text: "doc", title: "T", source: "S" }]),
+      getCorpusVersion: vi.fn().mockResolvedValue({ aztec_corpus_version: "v4.2.0" }),
+    });
+    const result = await lookupAztecError({ query: "x" }, client);
+    expect(result.semanticHealth).toBe("version_mismatch");
+    expect(client.search).not.toHaveBeenCalled();
+    // Weak hint preserved so the formatter can still render it
+    expect(result.result.catalogMatches).toHaveLength(1);
+    // Message names BOTH the weak-hint situation AND the version mismatch
+    expect(result.message).toContain("low-confidence");
+    expect(result.message).toContain("v4.1.0");
+    expect(result.message).toContain("v4.2.0");
+  });
+
+  it("weak-only + allowVersionMismatch=true: gate skipped, semantic runs", async () => {
+    mockGetRepoTag.mockResolvedValue("v4.1.0");
+    mockLookupError.mockReturnValue({
+      query: "x",
+      catalogMatches: [catalogHit(54, "Weak", "word-overlap")],
+      codeMatches: [],
+    });
+    const client = makeClient({
+      search: vi.fn().mockResolvedValue([{ text: "doc", title: "T", source: "S" }]),
+      getCorpusVersion: vi.fn().mockResolvedValue({ aztec_corpus_version: "v4.2.0" }),
+    });
+    const result = await lookupAztecError(
+      { query: "x", allowVersionMismatch: true },
+      client
+    );
+    expect(result.semanticHealth).toBe("ok");
+    expect(client.getCorpusVersion).not.toHaveBeenCalled();
+    expect(client.search).toHaveBeenCalledWith("Aztec error: x", 3);
+  });
+
+  it("category filter + weak-only: short-circuits (does NOT fall through to category-agnostic semantic)", async () => {
+    mockLookupError.mockReturnValue({
+      query: "x",
+      catalogMatches: [catalogHit(54, "WeakInCategory", "word-overlap")],
+      codeMatches: [],
+    });
+    const client = makeClient({
+      search: vi.fn().mockResolvedValue([{ text: "doc", title: "T", source: "S" }]),
+    });
+    const result = await lookupAztecError({ query: "x", category: "circuit" }, client);
+    // Category filter is authoritative — falling through to a
+    // category-agnostic semantic search would surface out-of-scope docs.
+    expect(result.semanticHealth).toBe("skipped");
+    expect(client.search).not.toHaveBeenCalled();
+  });
 });
 
 describe("lookupAztecError — semantic fallback", () => {
