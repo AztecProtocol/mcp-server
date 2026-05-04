@@ -6,7 +6,9 @@ import {
   formatExamplesList,
   formatExampleContent,
   formatFileContent,
+  formatErrorLookupResult,
 } from "../../src/utils/format.js";
+import type { ErrorLookupToolResult } from "../../src/tools/error-lookup.js";
 import { MCP_VERSION } from "../../src/version.js";
 import {
   setUpgradeInfo,
@@ -254,6 +256,128 @@ describe("formatExampleContent", () => {
     expect(result).toContain("```noir");
     expect(result).toContain("fn main() {}");
     expect(result).toContain("**token** (aztec-examples)");
+  });
+});
+
+describe("formatErrorLookupResult", () => {
+  function buildWeak(
+    semanticResults: { text: string; title: string; source: string }[] | undefined,
+    health: ErrorLookupToolResult["semanticHealth"]
+  ): ErrorLookupToolResult {
+    return {
+      success: true,
+      semanticHealth: health,
+      semanticResults,
+      message: "msg",
+      result: {
+        query: "note already nullified",
+        codeMatches: [],
+        catalogMatches: [
+          {
+            entry: {
+              id: "contract-already-initialized",
+              name: "Contract already initialized",
+              patterns: ["already initialized"],
+              cause: "c",
+              fix: "f",
+              category: "contract",
+              source: "s",
+            },
+            matchType: "word-overlap",
+            score: 54,
+          },
+        ],
+      },
+    };
+  }
+
+  it("suppresses weak catalog hints when semantic returned useful results", () => {
+    /**
+     * The user-reported anchoring failure: weak catalog hits visible
+     * alongside semantic results lets the LLM consumer focus on the
+     * wrong answer. With useful semantic results, we hide the weak
+     * catalog from the rendered output entirely.
+     */
+    const result = formatErrorLookupResult(
+      buildWeak(
+        [
+          {
+            text: "Notes in Aztec are nullified by emitting a nullifier...",
+            title: "Note Lifecycle",
+            source: "docs/notes.md",
+          },
+        ],
+        "ok"
+      )
+    );
+    expect(result).toContain("## Related Documentation");
+    expect(result).toContain("Note Lifecycle");
+    // Weak catalog: HIDDEN
+    expect(result).not.toContain("Contract already initialized");
+    expect(result).not.toContain("Lower-Confidence Catalog Hints");
+  });
+
+  it("keeps weak catalog when semantic produced nothing useful (no_results)", () => {
+    /**
+     * Don't hide the user's only signal. Without semantic content,
+     * keep the weak catalog visible with a "low-confidence" header.
+     */
+    const result = formatErrorLookupResult(
+      buildWeak(undefined, "no_results")
+    );
+    expect(result).toContain("## Lower-Confidence Catalog Hints");
+    expect(result).toContain("Contract already initialized");
+    expect(result).not.toContain("## Related Documentation");
+  });
+
+  it("keeps weak catalog when semantic backend failed", () => {
+    const result = formatErrorLookupResult(
+      buildWeak(undefined, "failed")
+    );
+    expect(result).toContain("## Lower-Confidence Catalog Hints");
+    expect(result).toContain("Contract already initialized");
+  });
+
+  it("keeps weak catalog when no client (semantic skipped)", () => {
+    const result = formatErrorLookupResult(
+      buildWeak(undefined, "skipped")
+    );
+    expect(result).toContain("## Lower-Confidence Catalog Hints");
+    expect(result).toContain("Contract already initialized");
+  });
+
+  it("renders strong catalog matches normally regardless of semantic state", () => {
+    const result = formatErrorLookupResult({
+      success: true,
+      semanticHealth: "ok",
+      semanticResults: [
+        { text: "Some doc text", title: "T", source: "docs/x.md" },
+      ],
+      message: "Found one",
+      result: {
+        query: "x",
+        codeMatches: [],
+        catalogMatches: [
+          {
+            entry: {
+              id: "y",
+              name: "Strong Match",
+              patterns: ["x"],
+              cause: "c",
+              fix: "f",
+              category: "contract",
+              source: "s",
+            },
+            matchType: "exact-name",
+            score: 100,
+          },
+        ],
+      },
+    });
+    // Strong catalog → normal "## Known Errors" header, NOT suppressed.
+    expect(result).toContain("## Known Errors");
+    expect(result).toContain("Strong Match");
+    expect(result).not.toContain("Lower-Confidence Catalog Hints");
   });
 });
 

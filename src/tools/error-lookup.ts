@@ -31,6 +31,56 @@ import { checkVersionGate, formatMismatchMessage } from "../utils/version-check.
  */
 const STRONG_MATCH_THRESHOLD = 70;
 
+/**
+ * Drop semantic chunks whose body is empty or just the file path.
+ *
+ * Why this exists client-side even though docsgpt's ``/api/search``
+ * has its own equivalent guard: defense-in-depth. The MCP server is
+ * shipped to end users on whatever DocsGPT instance ``API_URL``
+ * points at — that backend may not have the latest filter applied,
+ * may be a self-hosted fork, or may reintroduce the bug in a future
+ * regression. Filtering on this side keeps the MCP UX safe regardless.
+ *
+ * Mirrors the Python helper in ``application/api/answer/routes/search.py``
+ * (``_is_empty_apiref_chunk``) — same content-shape predicate.
+ */
+function isUsefulSemanticChunk(match: SemanticSearchResult): boolean {
+  const text = (match.text ?? "").trim();
+  if (!text) return false;
+
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  if (lines.length === 0) return false;
+
+  // Sourceish: any of the strings the rendered file-heading might have
+  // matched (source path / filename-equivalent title). Strip a leading
+  // "#" / "##" markdown heading marker before comparing. Deliberately
+  // does NOT include match.text — that would create a fixed point
+  // (text === sourceish[0]) that filters single-line legitimate
+  // chunks that happen to be one line long.
+  const sourceish = new Set(
+    [match.source, match.title]
+      .map((s) => (s ?? "").trim())
+      .filter(Boolean)
+  );
+  const firstStripped = lines[0].replace(/^#+\s*/, "").trim();
+  let body = lines;
+  if (sourceish.has(firstStripped) || sourceish.has(lines[0])) {
+    body = body.slice(1);
+  }
+
+  if (body.length === 0) return false;
+
+  // Body still looks like a file path: every remaining line is path-
+  // shaped (contains "/" and no whitespace). A real signature line
+  // ("pub fn ..., struct Foo, ...") always has whitespace.
+  if (body.every((l) => l.includes("/") && !/\s/.test(l))) return false;
+
+  return true;
+}
+
 export type SemanticHealth =
   | "ok" // semantic returned results
   | "no_results" // semantic ran cleanly, returned empty
@@ -143,10 +193,18 @@ export async function lookupAztecError(
   }
 
   try {
-    const semanticResults = await docsgptClient.search(
+    const rawResults = await docsgptClient.search(
       `Aztec error: ${query}`,
       3
     );
+
+    // Filter content-thin / path-only chunks. If the server-side guard
+    // is in place these will be empty already, but defense-in-depth
+    // protects against older docsgpt deployments and any future
+    // regression in the apiref ingest. "Returned 3 chunks but all
+    // were just file paths" is functionally equivalent to "returned
+    // nothing useful" and we report it as such.
+    const semanticResults = rawResults.filter(isUsefulSemanticChunk);
 
     if (semanticResults.length > 0) {
       return {
