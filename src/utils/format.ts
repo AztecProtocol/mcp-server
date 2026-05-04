@@ -187,17 +187,27 @@ export function formatErrorLookupResult(result: ErrorLookupToolResult): string {
   const { catalogMatches, codeMatches } = result.result;
 
   // When semantic results exist AND every catalog match is below the
-  // strong-match threshold, the catalog hits are low-confidence cues
-  // that shouldn't visually dominate the response. Render semantic
-  // first under "## Related Documentation", and the catalog after
-  // under "## Lower-Confidence Catalog Hints" so the LLM consumer
-  // doesn't anchor on a misleading top hit (e.g. "note already
-  // nullified" matching "Contract already initialized" with score 54).
+  // strong-match threshold, the catalog hits are low-confidence cues.
+  // Two cases:
+  //
+  //   semanticHasResults = true  → semantic returned content-bearing
+  //     chunks (the lookupAztecError filter only sets semanticResults
+  //     when at least one chunk passed isUsefulSemanticChunk). The
+  //     weak catalog hint is now actively misleading — the user keeps
+  //     anchoring on it as the "primary answer" even though semantic
+  //     gave us better context. SUPPRESS the catalog section entirely.
+  //
+  //   semanticHasResults = false → semantic ran but produced nothing
+  //     useful (or didn't run: no client, version mismatch, backend
+  //     failed). The user has no other signal. KEEP the weak catalog
+  //     with a clear "Lower-Confidence Catalog Hints" header so they
+  //     have *something* to look at, framed honestly.
   const semanticHasResults =
     !!result.semanticResults && result.semanticResults.length > 0;
   const catalogIsWeakOnly =
     catalogMatches.length > 0 &&
     catalogMatches.every((m) => m.score < 70);
+  const suppressWeakCatalog = catalogIsWeakOnly && semanticHasResults;
   const renderSemanticFirst = semanticHasResults && catalogIsWeakOnly;
 
   function renderSemantic() {
@@ -221,6 +231,12 @@ export function formatErrorLookupResult(result: ErrorLookupToolResult): string {
 
   function renderCatalog() {
     if (catalogMatches.length === 0) return;
+    // Phase 2 suppression: when semantic returned content-bearing
+    // chunks AND the catalog is weak-only, the catalog hits are
+    // pure noise that the user keeps anchoring on. Hide them
+    // entirely. They remain in `result.catalogMatches` for
+    // programmatic consumers that need every signal.
+    if (suppressWeakCatalog) return;
     lines.push(
       catalogIsWeakOnly
         ? "## Lower-Confidence Catalog Hints"

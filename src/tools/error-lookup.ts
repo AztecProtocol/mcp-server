@@ -31,6 +31,57 @@ import { checkVersionGate, formatMismatchMessage } from "../utils/version-check.
  */
 const STRONG_MATCH_THRESHOLD = 70;
 
+/**
+ * A line is "path-shaped" if it looks like a filesystem path rather
+ * than a code/docs line. Strips a leading markdown heading marker so
+ * ``# aztec-nr/.../foo.nr`` is recognized as path-shaped just like
+ * the bare ``aztec-nr/.../foo.nr``. Path-shaped means: contains ``/``
+ * and has no whitespace. Real signature lines (``pub fn foo(...)``,
+ * ``struct Bar { ... }``, ``pub use a::b;``) always have whitespace,
+ * so they never trip this predicate.
+ */
+function lineIsPathShaped(line: string): boolean {
+  const cleaned = line.replace(/^#+\s*/, "").trim();
+  return cleaned.length > 0 && cleaned.includes("/") && !/\s/.test(cleaned);
+}
+
+/**
+ * Drop semantic chunks whose body is empty or just the file path.
+ *
+ * Why this exists client-side even though docsgpt's ``/api/search``
+ * has its own equivalent guard: defense-in-depth. The MCP server is
+ * shipped to end users on whatever DocsGPT instance ``API_URL``
+ * points at — that backend may not have the latest filter applied,
+ * may be a self-hosted fork, or may reintroduce the bug in a future
+ * regression. Filtering on this side keeps the MCP UX safe regardless.
+ *
+ * Mirrors the Python helper in ``application/api/answer/routes/search.py``
+ * (``_is_empty_apiref_chunk``) — same content-shape predicate.
+ *
+ * The predicate is deliberately metadata-free. An earlier draft used
+ * ``match.source`` / ``match.title`` as a "heading-equivalent" set
+ * to strip a rendered file heading before checking the rest, but
+ * docsgpt's ``/api/search`` rewrites ``source`` to a public URL via
+ * ``_aztec_source_url`` — so the heading string never matches the
+ * post-rewrite source field. The shape-only check below works
+ * regardless of metadata transformations.
+ */
+function isUsefulSemanticChunk(match: SemanticSearchResult): boolean {
+  const text = (match.text ?? "").trim();
+  if (!text) return false;
+
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  if (lines.length === 0) return false;
+
+  // All non-empty lines are path-shaped → no real API content.
+  if (lines.every(lineIsPathShaped)) return false;
+
+  return true;
+}
+
 export type SemanticHealth =
   | "ok" // semantic returned results
   | "no_results" // semantic ran cleanly, returned empty
@@ -143,10 +194,18 @@ export async function lookupAztecError(
   }
 
   try {
-    const semanticResults = await docsgptClient.search(
+    const rawResults = await docsgptClient.search(
       `Aztec error: ${query}`,
       3
     );
+
+    // Filter content-thin / path-only chunks. If the server-side guard
+    // is in place these will be empty already, but defense-in-depth
+    // protects against older docsgpt deployments and any future
+    // regression in the apiref ingest. "Returned 3 chunks but all
+    // were just file paths" is functionally equivalent to "returned
+    // nothing useful" and we report it as such.
+    const semanticResults = rawResults.filter(isUsefulSemanticChunk);
 
     if (semanticResults.length > 0) {
       return {

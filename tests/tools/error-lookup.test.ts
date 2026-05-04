@@ -292,6 +292,152 @@ describe("lookupAztecError — semantic fallback", () => {
   });
 });
 
+describe("lookupAztecError — content-thin chunk filter", () => {
+  /**
+   * Defense-in-depth filter: even if docsgpt's `/api/search` regresses
+   * and starts returning path-only / empty-body apiref chunks,
+   * `isUsefulSemanticChunk` drops them before they're surfaced to the
+   * LLM consumer. Mirrors the server-side
+   * `_is_empty_apiref_chunk` helper.
+   */
+  function chunk(text: string, source = "aztec-nr/aztec/src/foo.nr") {
+    return { text, title: "foo.nr", source };
+  }
+
+  it("drops chunks with `#`-prefixed path heading even when source field is a public URL", async () => {
+    /**
+     * Regression for codex review: `/api/search` rewrites the chunk's
+     * `source` field to a public URL via `_aztec_source_url`. A chunk
+     * whose body is `# aztec-nr/.../foo.nr` (path heading only) won't
+     * match the URL-rewritten source field by string equality. The
+     * earlier filter would fail to strip the heading, then fall through
+     * to the path-shape check — which also failed because `# ...` has
+     * whitespace from the markdown marker. The new shape-only filter
+     * catches this directly.
+     */
+    const client = makeClient({
+      search: vi.fn().mockResolvedValue([
+        {
+          text: "# aztec-nr/aztec/src/context/foo.nr\n",
+          title: "foo.nr",
+          source: "https://github.com/AztecProtocol/aztec-packages/blob/v4.2.0/noir-projects/aztec-nr/aztec/src/context/foo.nr",
+        },
+      ]),
+    });
+    const result = await lookupAztecError({ query: "obscure" }, client);
+    expect(result.semanticHealth).toBe("no_results");
+  });
+
+  it("treats raw output of all path-only chunks as 'no_results'", async () => {
+    const client = makeClient({
+      search: vi.fn().mockResolvedValue([
+        chunk("\n\naztec-nr/aztec/src/context/note_existence_request.nr\n\n",
+              "aztec-nr/aztec/src/context/note_existence_request.nr"),
+        chunk("\n\naztec-nr/aztec/src/note/hinted_note.nr\n",
+              "aztec-nr/aztec/src/note/hinted_note.nr"),
+      ]),
+    });
+    const result = await lookupAztecError({ query: "obscure" }, client);
+    expect(result.semanticHealth).toBe("no_results");
+    expect(result.semanticResults).toBeUndefined();
+  });
+
+  it("keeps mixed results when at least one chunk has substantive body", async () => {
+    const client = makeClient({
+      search: vi.fn().mockResolvedValue([
+        chunk("\n\naztec-nr/aztec/src/empty.nr\n",
+              "aztec-nr/aztec/src/empty.nr"),
+        chunk(
+          "# aztec-nr/aztec/src/hash.nr\npub fn poseidon(input: [Field; N]) -> Field",
+          "aztec-nr/aztec/src/hash.nr"
+        ),
+        chunk("\n\naztec-nr/aztec/src/utils.nr\n",
+              "aztec-nr/aztec/src/utils.nr"),
+      ]),
+    });
+    const result = await lookupAztecError({ query: "poseidon" }, client);
+    expect(result.semanticHealth).toBe("ok");
+    expect(result.semanticResults).toHaveLength(1);
+    expect(result.semanticResults![0].text).toContain("poseidon");
+  });
+});
+
+describe("lookupAztecError — weak catalog suppression when semantic is useful", () => {
+  /**
+   * The user-reported "bogus result still appears" failure mode: weak
+   * catalog hits visible alongside semantic results lets the LLM
+   * consumer anchor on the wrong answer. When semantic returned
+   * useful (post-filter) chunks, the weak catalog is now suppressed
+   * from the rendered output entirely (still present in
+   * `result.catalogMatches` for programmatic consumers).
+   *
+   * This tests the data-shape that the formatter consumes; the
+   * formatter test (`tests/utils/format.test.ts`) verifies the
+   * suppression actually happens at render time.
+   */
+  it("returns semanticHealth='ok' with weak catalog still in result.catalogMatches", async () => {
+    mockLookupError.mockReturnValue({
+      query: "note already nullified",
+      catalogMatches: [
+        catalogHit(54, "Contract already initialized", "word-overlap"),
+      ],
+      codeMatches: [],
+    });
+
+    const client = makeClient({
+      search: vi.fn().mockResolvedValue([
+        {
+          text: "Notes in Aztec are nullified by emitting a nullifier...",
+          title: "Note Lifecycle",
+          source: "docs/notes.md",
+        },
+      ]),
+    });
+
+    const result = await lookupAztecError(
+      { query: "note already nullified" },
+      client
+    );
+    expect(result.semanticHealth).toBe("ok");
+    expect(result.semanticResults).toHaveLength(1);
+    // The weak catalog hit is preserved in the data — the formatter
+    // is responsible for hiding it. Programmatic consumers can still
+    // see all signals.
+    expect(result.result.catalogMatches).toHaveLength(1);
+    expect(result.result.catalogMatches[0].score).toBe(54);
+  });
+
+  it("when semantic is filtered out (all path-only) AND catalog is weak, keeps catalog", async () => {
+    mockLookupError.mockReturnValue({
+      query: "note already nullified",
+      catalogMatches: [
+        catalogHit(54, "Contract already initialized", "word-overlap"),
+      ],
+      codeMatches: [],
+    });
+
+    const client = makeClient({
+      search: vi.fn().mockResolvedValue([
+        // Path-only chunks that the filter will drop
+        { text: "\n\naztec-nr/aztec/src/foo.nr\n",
+          title: "foo.nr",
+          source: "aztec-nr/aztec/src/foo.nr" },
+      ]),
+    });
+
+    const result = await lookupAztecError(
+      { query: "note already nullified" },
+      client
+    );
+    // semantic returned empty (after filter) → no_results
+    expect(result.semanticHealth).toBe("no_results");
+    // Weak catalog stays in the result so the user has *some* signal
+    expect(result.result.catalogMatches).toHaveLength(1);
+    expect(result.message).toContain("low-confidence");
+    expect(result.message).toMatch(/no relevant documentation|Semantic search/i);
+  });
+});
+
 describe("lookupAztecError — semantic failure (sanitized message)", () => {
   it("sets semanticHealth='failed' and returns sanitized message on 401", async () => {
     const client = makeClient({
@@ -325,7 +471,7 @@ describe("lookupAztecError — version-mismatch gate", () => {
   it("blocks semantic fallback when local clone diverges from corpus", async () => {
     mockGetRepoTag.mockResolvedValue("v4.1.0");
     const client = makeClient({
-      search: vi.fn().mockResolvedValue([{ text: "x", title: "x", source: "x" }]),
+      search: vi.fn().mockResolvedValue([{ text: "Some prose body content here.", title: "T", source: "x" }]),
       getCorpusVersion: vi.fn().mockResolvedValue({ aztec_corpus_version: "v4.2.0" }),
     });
 
@@ -340,7 +486,7 @@ describe("lookupAztecError — version-mismatch gate", () => {
     mockGetRepoTag.mockResolvedValue("v4.1.0");
     const client = makeClient({
       search: vi.fn().mockResolvedValue([
-        { text: "x", title: "x", source: "x" },
+        { text: "Some prose body content here.", title: "T", source: "x" },
       ]),
       getCorpusVersion: vi.fn().mockResolvedValue({ aztec_corpus_version: "v4.2.0" }),
     });
