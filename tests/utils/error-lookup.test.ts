@@ -8,7 +8,7 @@ vi.mock("fs", () => ({
 }));
 
 vi.mock("child_process", () => ({
-  execSync: vi.fn(),
+  execFileSync: vi.fn(),
 }));
 
 vi.mock("globby", () => ({
@@ -21,6 +21,7 @@ vi.mock("../../src/utils/git.js", () => ({
   isRepoCloned: vi.fn(() => false),
 }));
 
+import { execFileSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import {
   parseSolidityErrors,
@@ -29,10 +30,13 @@ import {
   parseOperatorFaq,
   lookupError,
   clearErrorCache,
+  isUsefulCodeRef,
+  isMinifiedShape,
 } from "../../src/utils/error-lookup.js";
 
 const mockExistsSync = vi.mocked(existsSync);
 const mockReadFileSync = vi.mocked(readFileSync);
+const mockExecFileSync = vi.mocked(execFileSync);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -258,5 +262,182 @@ describe("lookupError", () => {
         result.catalogMatches[i].score
       );
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Code-reference filter — unit
+// ---------------------------------------------------------------------------
+
+describe("isUsefulCodeRef", () => {
+  const ok = (file: string, content = "export const FOO = 1;") => ({
+    file,
+    content,
+    repo: "aztec-packages",
+    line: 1,
+  });
+
+  it("keeps a normal source line", () => {
+    expect(isUsefulCodeRef(ok("yarn-project/foo.ts"))).toBe(true);
+  });
+
+  it("drops .test.ts files", () => {
+    expect(isUsefulCodeRef(ok("yarn-project/foo.test.ts"))).toBe(false);
+  });
+
+  it("drops .spec.ts files", () => {
+    expect(isUsefulCodeRef(ok("yarn-project/foo.spec.ts"))).toBe(false);
+  });
+
+  it("drops .e2e.ts files", () => {
+    expect(isUsefulCodeRef(ok("yarn-project/foo.e2e.ts"))).toBe(false);
+  });
+
+  it("drops files inside __tests__ directories", () => {
+    expect(isUsefulCodeRef(ok("yarn-project/__tests__/foo.ts"))).toBe(false);
+  });
+
+  it("drops files inside /test/ and /tests/ directories", () => {
+    expect(isUsefulCodeRef(ok("yarn-project/test/foo.ts"))).toBe(false);
+    expect(isUsefulCodeRef(ok("yarn-project/tests/foo.ts"))).toBe(false);
+  });
+
+  it("drops files inside /e2e/ and /fixtures/ and /mocks/", () => {
+    expect(isUsefulCodeRef(ok("yarn-project/e2e/foo.ts"))).toBe(false);
+    expect(isUsefulCodeRef(ok("yarn-project/fixtures/foo.ts"))).toBe(false);
+    expect(isUsefulCodeRef(ok("yarn-project/mocks/foo.ts"))).toBe(false);
+  });
+
+  it("does NOT drop on incidental substrings (latest, contest, attestations, testdata)", () => {
+    // The dir regex is segment-bounded — these are real source dirs
+    // that incidentally contain ``test``/``latest``/``contest`` as
+    // substrings, NOT as full path segments. They must survive.
+    expect(isUsefulCodeRef(ok("yarn-project/latest/foo.ts"))).toBe(true);
+    expect(isUsefulCodeRef(ok("yarn-project/contest/foo.ts"))).toBe(true);
+    expect(isUsefulCodeRef(ok("yarn-project/attestations/foo.ts"))).toBe(true);
+    expect(isUsefulCodeRef(ok("yarn-project/testdata/foo.ts"))).toBe(true);
+  });
+
+  it("drops paths that begin with a test segment (no leading slash)", () => {
+    // Ripgrep returns relative-from-REPOS_DIR paths, but a relative
+    // path could in theory start with a test segment if the repo
+    // itself is named ``tests`` or similar. The leading-boundary in
+    // TEST_DIR_RE handles this; locking it in here.
+    expect(isUsefulCodeRef(ok("tests/foo.ts"))).toBe(false);
+    expect(isUsefulCodeRef(ok("__tests__/foo.ts"))).toBe(false);
+  });
+
+  it("drops minified-shape lines (long pure-hex run)", () => {
+    // 600 chars of hex — clearly bytecode.
+    const hex = "deadbeef".repeat(75);
+    expect(isUsefulCodeRef(ok("yarn-project/foo.ts", hex))).toBe(false);
+  });
+
+  it("keeps long regex literals (no continuous hex run)", () => {
+    // A regex literal that's long but not hex-shaped.
+    const line =
+      "const re = /[A-Za-z0-9_]{200}.*([gimsuy]|[A-Z]+){50}/.test(input);";
+    expect(isUsefulCodeRef(ok("yarn-project/foo.ts", line))).toBe(true);
+  });
+
+  it("keeps short lines that contain hex literals", () => {
+    const line = "const sig = 0xdeadbeefcafebabe; // selector";
+    expect(isUsefulCodeRef(ok("yarn-project/foo.ts", line))).toBe(true);
+  });
+});
+
+describe("isMinifiedShape", () => {
+  it("returns false for short content", () => {
+    expect(isMinifiedShape("a".repeat(399))).toBe(false);
+  });
+
+  it("returns true only when a 200+ char hex run is present", () => {
+    const hex = "deadbeef".repeat(25); // 200 chars of hex
+    const padded = "x".repeat(200) + hex;
+    expect(padded.length).toBeGreaterThanOrEqual(400);
+    expect(isMinifiedShape(padded)).toBe(true);
+  });
+
+  it("returns false when long but no contiguous hex run", () => {
+    // 500 chars of mixed alphanumeric, but no 200+ hex run.
+    const line = ("aZ0_".repeat(125)).slice(0, 500);
+    expect(isMinifiedShape(line)).toBe(false);
+  });
+
+  it("returns false for a long generated-looking source line without hex blob", () => {
+    // Realistic noisy generated TypeScript: long but full of identifiers,
+    // commas, brackets — semantic content a human can still navigate.
+    // No 200-char contiguous hex run, so the heuristic must keep it.
+    const line =
+      "export const TX_ERROR_CODES = { " +
+      Array.from({ length: 60 }, (_, i) => `ERR_${i}: 'message ${i}'`).join(", ") +
+      " };";
+    expect(line.length).toBeGreaterThan(400);
+    expect(isMinifiedShape(line)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Code-reference filter — integration via lookupError
+// ---------------------------------------------------------------------------
+
+describe("lookupError code-ref over-fetch + filter + cap", () => {
+  beforeEach(() => {
+    // searchCode (called from lookupError) checks existsSync and shells
+    // out to ripgrep via execFileSync — the integration test pipes a
+    // synthetic rg stdout through the parser.
+    mockExistsSync.mockReturnValue(true);
+    mockExecFileSync.mockReset();
+  });
+
+  it("survives a top-of-result-set full of tests/minified — keeps deeper real refs", () => {
+    // Build a synthetic ripgrep stdout: 5 test files + 1 minified line +
+    // 2 real source lines. Pre-filter slice to 5 (the old behaviour)
+    // would have produced ZERO useful refs; over-fetch (RAW_CODE_LIMIT
+    // = 20) plus filter must surface the two real ones.
+    const minified = "deadbeef".repeat(75); // 600 hex chars
+    const lines = [
+      "/fake/repos/aztec-packages/yarn-project/foo.test.ts:1:test 1",
+      "/fake/repos/aztec-packages/yarn-project/__tests__/bar.ts:2:test 2",
+      "/fake/repos/aztec-packages/yarn-project/baz.spec.ts:3:test 3",
+      "/fake/repos/aztec-packages/yarn-project/qux.e2e.ts:4:test 4",
+      "/fake/repos/aztec-packages/yarn-project/mocks/zap.ts:5:test 5",
+      `/fake/repos/aztec-packages/yarn-project/abi.ts:6:${minified}`,
+      "/fake/repos/aztec-packages/yarn-project/real-one.ts:7:export const REAL = 1;",
+      "/fake/repos/aztec-packages/yarn-project/real-two.ts:8:export function realTwo() {}",
+    ].join("\n");
+    mockExecFileSync.mockReturnValue(lines);
+
+    // Use a query that won't strongly hit the static catalog so the
+    // fallback (codeMatches) path is taken.
+    const result = lookupError("xyzzy_unknown_query_for_test_only");
+
+    expect(result.codeMatches).toHaveLength(2);
+    expect(result.codeMatches.map((m) => m.file)).toEqual([
+      "aztec-packages/yarn-project/real-one.ts",
+      "aztec-packages/yarn-project/real-two.ts",
+    ]);
+
+    // Lock in the over-fetch contract: the raw cap must be wide enough
+    // for the filter to have headroom. searchCode passes
+    // ``String(maxResults * 2)`` to rg via -m, so RAW_CODE_LIMIT (20)
+    // surfaces as ``-m 40`` on the wire.
+    const calls = mockExecFileSync.mock.calls;
+    expect(calls.length).toBeGreaterThan(0);
+    const args = calls[calls.length - 1][1] as string[];
+    const mIdx = args.indexOf("-m");
+    expect(mIdx).toBeGreaterThanOrEqual(0);
+    expect(args[mIdx + 1]).toBe("40");
+  });
+
+  it("caps to 2 even when many useful refs are returned", () => {
+    const lines = Array.from({ length: 10 }, (_, i) =>
+      `/fake/repos/aztec-packages/yarn-project/foo${i}.ts:${i}:export const F${i} = ${i};`,
+    ).join("\n");
+    mockExecFileSync.mockReturnValue(lines);
+
+    const result = lookupError("xyzzy_unknown_query_for_test_only_2");
+
+    expect(result.codeMatches).toHaveLength(2);
   });
 });

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock dependencies before importing the module under test
 vi.mock("child_process", () => ({
-  execSync: vi.fn(),
+  execFileSync: vi.fn(),
 }));
 
 vi.mock("fs", () => ({
@@ -19,7 +19,7 @@ vi.mock("../../src/utils/git.js", () => ({
   getRepoPath: vi.fn((name: string) => `/fake/repos/${name}`),
 }));
 
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import { globbySync } from "globby";
 import { getRepoPath } from "../../src/utils/git.js";
@@ -33,11 +33,18 @@ import {
   getResultPriority,
 } from "../../src/utils/search.js";
 
-const mockExecSync = vi.mocked(execSync);
+const mockExecFileSync = vi.mocked(execFileSync);
 const mockExistsSync = vi.mocked(existsSync);
 const mockReadFileSync = vi.mocked(readFileSync);
 const mockGlobbySync = vi.mocked(globbySync);
 const mockGetRepoPath = vi.mocked(getRepoPath);
+
+// Helper: pull the argv array from the most recent execFileSync call.
+function lastRgArgs(): string[] {
+  const calls = mockExecFileSync.mock.calls;
+  if (calls.length === 0) throw new Error("execFileSync was not called");
+  return calls[calls.length - 1][1] as string[];
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -81,7 +88,7 @@ describe("searchCode", () => {
   describe("ripgrep path", () => {
     it("parses rg output correctly", () => {
       mockExistsSync.mockReturnValue(true);
-      mockExecSync.mockReturnValue(
+      mockExecFileSync.mockReturnValue(
         "/fake/repos/aztec-packages/src/main.nr:10:fn main() {\n" +
           "/fake/repos/aztec-packages/src/lib.nr:20:use dep::aztec;\n"
       );
@@ -104,7 +111,7 @@ describe("searchCode", () => {
 
     it("respects maxResults", () => {
       mockExistsSync.mockReturnValue(true);
-      mockExecSync.mockReturnValue(
+      mockExecFileSync.mockReturnValue(
         "/fake/repos/r/a.nr:1:line1\n" +
           "/fake/repos/r/b.nr:2:line2\n" +
           "/fake/repos/r/c.nr:3:line3\n"
@@ -116,52 +123,102 @@ describe("searchCode", () => {
 
     it("passes -i flag for case-insensitive search", () => {
       mockExistsSync.mockReturnValue(true);
-      mockExecSync.mockReturnValue("");
+      mockExecFileSync.mockReturnValue("");
 
       searchCode("test", { caseSensitive: false });
 
-      const call = mockExecSync.mock.calls[0][0] as string;
-      expect(call).toContain("-i");
+      expect(lastRgArgs()).toContain("-i");
     });
 
     it("does not pass -i flag when caseSensitive is true", () => {
       mockExistsSync.mockReturnValue(true);
-      mockExecSync.mockReturnValue("");
+      mockExecFileSync.mockReturnValue("");
 
       searchCode("test", { caseSensitive: true });
 
-      const call = mockExecSync.mock.calls[0][0] as string;
-      // The -i flag should not appear in the rg flags
-      // The call format is: rg <flags> "<query>" "<path>"
-      const flagsPart = call.split('"')[0];
-      expect(flagsPart).not.toContain("-i");
+      expect(lastRgArgs()).not.toContain("-i");
     });
 
-    it("escapes shell-dangerous chars while preserving regex chars", () => {
+    it("invokes rg with execFileSync (no shell), not the shell-string form", () => {
       mockExistsSync.mockReturnValue(true);
-      mockExecSync.mockReturnValue("");
+      mockExecFileSync.mockReturnValue("");
 
-      // Regex chars like |, *, + should be preserved
+      searchCode("transfer");
+
+      const calls = mockExecFileSync.mock.calls;
+      expect(calls).toHaveLength(1);
+      // Command is the literal "rg", argv comes through as the array.
+      expect(calls[0][0]).toBe("rg");
+      expect(Array.isArray(calls[0][1])).toBe(true);
+    });
+
+    // Regression guards — these are the bug we're actually fixing.
+    it("passes a single-extension glob as one argv element", () => {
+      mockExistsSync.mockReturnValue(true);
+      mockExecFileSync.mockReturnValue("");
+
+      searchCode("foo", { filePattern: "*.nr" });
+
+      const args = lastRgArgs();
+      expect(args).toContain("*.nr");
+      // The pattern must follow ``-g`` directly — not be split, not be
+      // interpolated into another arg.
+      const gIdx = args.indexOf("-g");
+      expect(gIdx).toBeGreaterThanOrEqual(0);
+      expect(args[gIdx + 1]).toBe("*.nr");
+    });
+
+    it("passes a brace-alternation glob as one argv element (#6)", () => {
+      mockExistsSync.mockReturnValue(true);
+      mockExecFileSync.mockReturnValue("");
+
+      // The historical bug: ``*.{nr,ts}`` got brace-expanded by /bin/sh
+      // before rg ever saw it, mangling the args. Here we assert it
+      // arrives at rg as a single token.
+      searchCode("foo", { filePattern: "*.{nr,ts}" });
+
+      const args = lastRgArgs();
+      const gIdx = args.indexOf("-g");
+      expect(args[gIdx + 1]).toBe("*.{nr,ts}");
+      // And not split somewhere in the argv either.
+      expect(args).not.toContain("*.nr");
+      expect(args).not.toContain("*.ts");
+    });
+
+    it("passes the query via -e so a flag-shaped query isn't reparsed", () => {
+      mockExistsSync.mockReturnValue(true);
+      mockExecFileSync.mockReturnValue("");
+
+      // Query starts with `-` — without `-e`, rg would treat it as a flag.
+      searchCode("-g");
+
+      const args = lastRgArgs();
+      const eIdx = args.indexOf("-e");
+      expect(eIdx).toBeGreaterThanOrEqual(0);
+      expect(args[eIdx + 1]).toBe("-g");
+      // And the search path is positional after ``--``.
+      const dashIdx = args.indexOf("--");
+      expect(dashIdx).toBeGreaterThan(eIdx);
+      expect(args[dashIdx + 1]).toBeDefined();
+    });
+
+    it("preserves regex syntax in the query verbatim (no shell escaping)", () => {
+      mockExistsSync.mockReturnValue(true);
+      mockExecFileSync.mockReturnValue("");
+
       searchCode("foo|bar.*baz+");
-      let call = mockExecSync.mock.calls[0][0] as string;
-      expect(call).toContain("foo|bar.*baz+");
 
-      // Shell-dangerous chars should be escaped
-      mockExecSync.mockClear();
-      searchCode('test"$`\\!');
-      call = mockExecSync.mock.calls[0][0] as string;
-      expect(call).toContain('\\"');
-      expect(call).toContain("\\$");
-      expect(call).toContain("\\`");
-      expect(call).toContain("\\\\");
-      expect(call).toContain("\\!");
+      const args = lastRgArgs();
+      // Without a shell layer, regex chars don't need escaping. They
+      // arrive at rg exactly as the caller wrote them.
+      expect(args).toContain("foo|bar.*baz+");
     });
   });
 
   describe("manual fallback", () => {
-    it("activates when execSync throws", () => {
+    it("activates when execFileSync throws", () => {
       mockExistsSync.mockReturnValue(true);
-      mockExecSync.mockImplementation(() => {
+      mockExecFileSync.mockImplementation(() => {
         throw new Error("rg not found");
       });
       mockGlobbySync.mockReturnValue([]);
@@ -173,7 +230,7 @@ describe("searchCode", () => {
 
     it("uses globby to find and search files", () => {
       mockExistsSync.mockReturnValue(true);
-      mockExecSync.mockImplementation(() => {
+      mockExecFileSync.mockImplementation(() => {
         throw new Error("rg not found");
       });
       mockGlobbySync.mockReturnValue(["/fake/repos/myrepo/src/main.nr"]);
@@ -187,7 +244,7 @@ describe("searchCode", () => {
 
     it("handles invalid regex by escaping to literal", () => {
       mockExistsSync.mockReturnValue(true);
-      mockExecSync.mockImplementation(() => {
+      mockExecFileSync.mockImplementation(() => {
         throw new Error("rg not found");
       });
       mockGlobbySync.mockReturnValue(["/fake/repos/myrepo/src/main.nr"]);
@@ -200,7 +257,7 @@ describe("searchCode", () => {
 
     it("skips unreadable files", () => {
       mockExistsSync.mockReturnValue(true);
-      mockExecSync.mockImplementation(() => {
+      mockExecFileSync.mockImplementation(() => {
         throw new Error("rg not found");
       });
       mockGlobbySync.mockReturnValue([
@@ -217,6 +274,25 @@ describe("searchCode", () => {
       expect(results).toHaveLength(1);
       expect(results[0].file).toBe("myrepo/b.nr");
     });
+
+    it("passes a brace-alternation glob through to globby unchanged", () => {
+      // The manual fallback uses globby (micromatch under the hood),
+      // which supports brace expansion natively. Locks in that the
+      // pattern transformation (``*.{nr,ts}`` -> ``**/*.{nr,ts}``)
+      // doesn't accidentally split or escape the braces.
+      mockExistsSync.mockReturnValue(true);
+      mockExecFileSync.mockImplementation(() => {
+        throw new Error("rg not found");
+      });
+      mockGlobbySync.mockReturnValue([]);
+
+      searchCode("foo", { filePattern: "*.{nr,ts}" });
+
+      expect(mockGlobbySync).toHaveBeenCalledWith(
+        "**/*.{nr,ts}",
+        expect.any(Object),
+      );
+    });
   });
 });
 
@@ -225,25 +301,34 @@ describe("searchDocs", () => {
     mockGetRepoPath.mockImplementation((name: string) => `/fake/repos/${name}`);
   });
 
-  it("delegates to searchCode with *.{md,mdx} pattern", () => {
+  it("delegates to searchCode with *.{md,mdx} pattern as a single argv element", () => {
+    // Sibling regression case for #6: searchDocs uses a brace pattern
+    // and was silently broken on the same shell-mangling axis.
     mockExistsSync.mockReturnValue(true);
-    mockExecSync.mockReturnValue("");
+    mockExecFileSync.mockReturnValue("");
 
     searchDocs("tutorial");
 
-    const call = mockExecSync.mock.calls[0][0] as string;
-    expect(call).toContain("*.{md,mdx}");
+    const args = lastRgArgs();
+    const gIdx = args.indexOf("-g");
+    expect(args[gIdx + 1]).toBe("*.{md,mdx}");
   });
 
   it("narrows path when section exists", () => {
     mockExistsSync.mockReturnValue(true);
     mockGlobbySync.mockReturnValue(["version-v1.0.0"] as any);
-    mockExecSync.mockReturnValue("");
+    mockExecFileSync.mockReturnValue("");
 
     searchDocs("tutorial", { section: "tutorials" });
 
-    const call = mockExecSync.mock.calls[0][0] as string;
-    expect(call).toContain("aztec-packages-docs/docs/developer_versioned_docs/version-v1.0.0/tutorials");
+    const args = lastRgArgs();
+    expect(args).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          "aztec-packages-docs/docs/developer_versioned_docs/version-v1.0.0/tutorials",
+        ),
+      ]),
+    );
   });
 
   it("falls back to aztec-packages-docs when section doesn't exist", () => {
@@ -251,13 +336,14 @@ describe("searchDocs", () => {
     mockExistsSync
       .mockReturnValueOnce(false) // section path doesn't exist
       .mockReturnValueOnce(true); // search path exists
-    mockExecSync.mockReturnValue("");
+    mockExecFileSync.mockReturnValue("");
 
     searchDocs("tutorial", { section: "nonexistent" });
 
-    const call = mockExecSync.mock.calls[0][0] as string;
-    // Should search in aztec-packages-docs, not the nonexistent section
-    expect(call).toContain("/fake/repos/aztec-packages-docs");
+    const args = lastRgArgs();
+    expect(args).toEqual(
+      expect.arrayContaining([expect.stringContaining("/fake/repos/aztec-packages-docs")]),
+    );
   });
 });
 
@@ -396,7 +482,7 @@ describe("getResultPriority", () => {
 describe("search result sorting", () => {
   it("sorts ripgrep results by source priority", () => {
     mockExistsSync.mockReturnValue(true);
-    mockExecSync.mockReturnValue(
+    mockExecFileSync.mockReturnValue(
       "/fake/repos/gregoswap/src/main.nr:1:fn transfer() {\n" +
       "/fake/repos/aztec-packages/yarn-project/aztec.js/src/main.ts:5:fn transfer() {\n" +
       "/fake/repos/aztec-examples/token/src/main.nr:3:fn transfer() {\n" +
@@ -417,7 +503,7 @@ describe("search result sorting", () => {
 
   it("sorts manual search results by source priority", () => {
     mockExistsSync.mockReturnValue(true);
-    mockExecSync.mockImplementation(() => { throw new Error("rg not found"); });
+    mockExecFileSync.mockImplementation(() => { throw new Error("rg not found"); });
     mockGlobbySync.mockReturnValue([
       "/fake/repos/aztec-starter/src/main.nr",
       "/fake/repos/aztec-packages/yarn-project/aztec.js/src/lib.nr",
@@ -434,7 +520,7 @@ describe("search result sorting", () => {
 
   it("applies sorting before maxResults limit", () => {
     mockExistsSync.mockReturnValue(true);
-    mockExecSync.mockReturnValue(
+    mockExecFileSync.mockReturnValue(
       "/fake/repos/gregoswap/src/a.nr:1:match\n" +
       "/fake/repos/aztec-examples/src/b.nr:2:match\n" +
       "/fake/repos/aztec-packages/yarn-project/c.nr:3:match\n"

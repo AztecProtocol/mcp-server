@@ -2,7 +2,7 @@
  * Search utilities for finding content in cloned repositories
  */
 
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import { join, relative, extname } from "path";
 import { globbySync } from "globby";
@@ -43,28 +43,37 @@ export function searchCode(
   }
 
   try {
-    // Try ripgrep first (fast)
-    const rgFlags = [
-      caseSensitive ? "" : "-i",
-      "-n", // line numbers
+    // Build argv for ripgrep. Using execFileSync (NOT execSync) skips
+    // the shell layer, so glob patterns like ``*.{nr,ts}`` reach rg
+    // verbatim instead of being brace-expanded by ``/bin/sh`` and then
+    // glob-expanded against the node-process cwd. The query is passed
+    // via ``-e`` so a query starting with a dash isn't reparsed as an
+    // rg flag, and ``--`` ends flag parsing before the search path.
+    const rgArgs: string[] = [];
+    if (!caseSensitive) rgArgs.push("-i");
+    rgArgs.push(
+      "-n",
       "--no-heading",
       "-g",
       filePattern,
       "-m",
-      String(maxResults * 2), // Get more, then trim
-    ]
-      .filter(Boolean)
-      .join(" ");
+      String(maxResults * 2),
+      "-e",
+      query,
+      "--",
+      searchPath,
+    );
 
-    const result = execSync(`rg ${rgFlags} "${escapeShell(query)}" "${searchPath}"`, {
+    const result = execFileSync("rg", rgArgs, {
       encoding: "utf-8",
       maxBuffer: 10 * 1024 * 1024,
       timeout: 30000,
     });
 
     return parseRgOutput(result, maxResults);
-  } catch (error) {
-    // Ripgrep not found or no matches, fall back to manual search
+  } catch {
+    // Ripgrep not found, no matches (rg exits 1), or other failure:
+    // fall back to the in-process globby + readFile loop.
     return manualSearch(query, searchPath, filePattern, maxResults, caseSensitive);
   }
 }
@@ -206,14 +215,6 @@ export function getResultPriority(result: SearchResult): number {
 }
 
 // --- Helper functions ---
-
-/**
- * Escape a string for safe use inside double quotes in a shell command.
- * Preserves regex syntax (|, *, +, etc.) while preventing shell injection.
- */
-function escapeShell(str: string): string {
-  return str.replace(/["$`\\!]/g, "\\$&");
-}
 
 function parseRgOutput(output: string, maxResults: number): SearchResult[] {
   const results: SearchResult[] = [];
