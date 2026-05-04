@@ -32,6 +32,20 @@ import { checkVersionGate, formatMismatchMessage } from "../utils/version-check.
 const STRONG_MATCH_THRESHOLD = 70;
 
 /**
+ * A line is "path-shaped" if it looks like a filesystem path rather
+ * than a code/docs line. Strips a leading markdown heading marker so
+ * ``# aztec-nr/.../foo.nr`` is recognized as path-shaped just like
+ * the bare ``aztec-nr/.../foo.nr``. Path-shaped means: contains ``/``
+ * and has no whitespace. Real signature lines (``pub fn foo(...)``,
+ * ``struct Bar { ... }``, ``pub use a::b;``) always have whitespace,
+ * so they never trip this predicate.
+ */
+function lineIsPathShaped(line: string): boolean {
+  const cleaned = line.replace(/^#+\s*/, "").trim();
+  return cleaned.length > 0 && cleaned.includes("/") && !/\s/.test(cleaned);
+}
+
+/**
  * Drop semantic chunks whose body is empty or just the file path.
  *
  * Why this exists client-side even though docsgpt's ``/api/search``
@@ -43,6 +57,14 @@ const STRONG_MATCH_THRESHOLD = 70;
  *
  * Mirrors the Python helper in ``application/api/answer/routes/search.py``
  * (``_is_empty_apiref_chunk``) — same content-shape predicate.
+ *
+ * The predicate is deliberately metadata-free. An earlier draft used
+ * ``match.source`` / ``match.title`` as a "heading-equivalent" set
+ * to strip a rendered file heading before checking the rest, but
+ * docsgpt's ``/api/search`` rewrites ``source`` to a public URL via
+ * ``_aztec_source_url`` — so the heading string never matches the
+ * post-rewrite source field. The shape-only check below works
+ * regardless of metadata transformations.
  */
 function isUsefulSemanticChunk(match: SemanticSearchResult): boolean {
   const text = (match.text ?? "").trim();
@@ -54,29 +76,8 @@ function isUsefulSemanticChunk(match: SemanticSearchResult): boolean {
     .filter((l) => l.length > 0);
   if (lines.length === 0) return false;
 
-  // Sourceish: any of the strings the rendered file-heading might have
-  // matched (source path / filename-equivalent title). Strip a leading
-  // "#" / "##" markdown heading marker before comparing. Deliberately
-  // does NOT include match.text — that would create a fixed point
-  // (text === sourceish[0]) that filters single-line legitimate
-  // chunks that happen to be one line long.
-  const sourceish = new Set(
-    [match.source, match.title]
-      .map((s) => (s ?? "").trim())
-      .filter(Boolean)
-  );
-  const firstStripped = lines[0].replace(/^#+\s*/, "").trim();
-  let body = lines;
-  if (sourceish.has(firstStripped) || sourceish.has(lines[0])) {
-    body = body.slice(1);
-  }
-
-  if (body.length === 0) return false;
-
-  // Body still looks like a file path: every remaining line is path-
-  // shaped (contains "/" and no whitespace). A real signature line
-  // ("pub fn ..., struct Foo, ...") always has whitespace.
-  if (body.every((l) => l.includes("/") && !/\s/.test(l))) return false;
+  // All non-empty lines are path-shaped → no real API content.
+  if (lines.every(lineIsPathShaped)) return false;
 
   return true;
 }

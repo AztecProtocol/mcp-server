@@ -304,6 +304,30 @@ describe("lookupAztecError — content-thin chunk filter", () => {
     return { text, title: "foo.nr", source };
   }
 
+  it("drops chunks with `#`-prefixed path heading even when source field is a public URL", async () => {
+    /**
+     * Regression for codex review: `/api/search` rewrites the chunk's
+     * `source` field to a public URL via `_aztec_source_url`. A chunk
+     * whose body is `# aztec-nr/.../foo.nr` (path heading only) won't
+     * match the URL-rewritten source field by string equality. The
+     * earlier filter would fail to strip the heading, then fall through
+     * to the path-shape check — which also failed because `# ...` has
+     * whitespace from the markdown marker. The new shape-only filter
+     * catches this directly.
+     */
+    const client = makeClient({
+      search: vi.fn().mockResolvedValue([
+        {
+          text: "# aztec-nr/aztec/src/context/foo.nr\n",
+          title: "foo.nr",
+          source: "https://github.com/AztecProtocol/aztec-packages/blob/v4.2.0/noir-projects/aztec-nr/aztec/src/context/foo.nr",
+        },
+      ]),
+    });
+    const result = await lookupAztecError({ query: "obscure" }, client);
+    expect(result.semanticHealth).toBe("no_results");
+  });
+
   it("treats raw output of all path-only chunks as 'no_results'", async () => {
     const client = makeClient({
       search: vi.fn().mockResolvedValue([
