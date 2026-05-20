@@ -4,7 +4,7 @@ An MCP (Model Context Protocol) server that provides local access to Aztec docum
 
 ## Features
 
-- **Version Support**: Clone specific Aztec release tags (e.g., `v4.2.0`)
+- **Version Support**: Clone specific Aztec release tags (e.g., `v4.3.0`)
 - **Local Repository Cloning**: Automatically clones Aztec repositories with sparse checkout for efficiency
 - **Fast Code Search**: Search Noir contracts and TypeScript files using ripgrep (with fallback)
 - **Documentation Search**: Search Aztec documentation locally; with an API key, semantic vector search across the full corpora (framework docs, examples, Noir stdlib, TypeScript SDK, protocol circuits)
@@ -73,7 +73,7 @@ Add to your `.mcp.json`. The minimal config is just the command; add `env.API_KE
 | `API_KEY`             | unset                                | Personal API key from `/mcp-key` in the Noir Discord (<https://discord.gg/xMud5StFyA>). Unset → local-only mode. |
 | `API_URL`             | `https://aztec.adjacentpossible.dev` | DocsGPT backend the semantic search hits. Override to point at a self-hosted instance.                              |
 | `REQUEST_TIMEOUT`     | `60000`                              | Semantic-search request timeout (ms).                                                                               |
-| `AZTEC_DEFAULT_VERSION` | `v4.2.0-aztecnr-rc.2`              | Default version tag for `aztec_sync_repos`.                                                                         |
+| `AZTEC_DEFAULT_VERSION` | `v4.3.0`                             | Default version tag for `aztec_sync_repos`.                                                                         |
 | `AZTEC_MCP_REPOS_DIR` | `~/.aztec-mcp/repos/`                | Where local clones live.                                                                                            |
 
 ## Available Tools
@@ -91,14 +91,14 @@ Clones:
 
 **Parameters:**
 
-- `version` (string): Aztec version tag to clone (e.g., `v4.2.0`). Defaults to latest supported version.
+- `version` (string): Aztec version tag to clone (e.g., `v4.3.0`). Defaults to latest supported version.
 - `force` (boolean): Force re-clone even if repos exist
 - `repos` (string[]): Specific repos to sync
 
 **Example - Clone specific version:**
 
 ```
-aztec_sync_repos({ version: "v4.2.0" })
+aztec_sync_repos({ version: "v4.3.0" })
 ```
 
 ### `aztec_status`
