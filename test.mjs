@@ -23,7 +23,7 @@ async function test() {
   // Test 2: Sync repos (this will take a while)
   console.log("2. Syncing repositories (this may take a few minutes)...");
   const syncResult = await syncRepos({
-    version: "v4.3.0",
+    version: "v5.0.0-rc.1",
     force: true  // Force re-clone to get all repos at the tag
   });
   console.log(`   Success: ${syncResult.success}`);
