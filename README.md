@@ -105,6 +105,18 @@ aztec_sync_repos({ version: "v4.3.0" })
 
 Check the status of cloned repositories.
 
+
+### `aztec_network_status`
+
+Probe a local Aztec sandbox / node / PXE / L1 RPC for reachability, latency, and a structured
+ready|degraded|down taxonomy agents can branch on. Complements `aztec_status` (cloned repos only).
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `urls` | No | RPC base URLs to probe (defaults: `:8080` PXE, `:8081` node, `:8545` L1) |
+| `roles` | No | `pxe` / `node` / `l1` / `custom` aligned with `urls` |
+| `timeoutMs` | No | Per-request timeout (default 3000) |
+
 ### `aztec_search_code`
 
 Search Aztec contract code and source files. Supports regex patterns.

@@ -11,6 +11,7 @@
  *   aztec_lookup_error — Error diagnosis with semantic fallback
  *   aztec_list_examples, aztec_read_example, aztec_read_file — Repo browsing
  *   aztec_sync_repos, aztec_status — Repo management
+ *   aztec_network_status — Local sandbox/node/PXE/L1 reachability
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -31,6 +32,8 @@ import {
   readAztecExample,
   readRepoFile,
   lookupAztecError,
+  checkNetworkStatus,
+  formatNetworkStatus,
 } from "./tools/index.js";
 import {
   formatSyncResult,
@@ -250,6 +253,41 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         properties: {},
       },
     },
+    // Local network / sandbox status (distinct from aztec_status repo state)
+    {
+      name: "aztec_network_status",
+      description:
+        "Check whether a local Aztec sandbox / node / PXE / L1 RPC is reachable and usable. " +
+        "Returns structured JSON with overall ready|degraded|down, per-endpoint latency, " +
+        "and an agent-branchable error taxonomy. Complements aztec_status (which only " +
+        "reports cloned repository state). Defaults: PXE http://127.0.0.1:8080, node " +
+        "http://127.0.0.1:8081, L1 http://127.0.0.1:8545.",
+      inputSchema: {
+        type: "object" as const,
+        properties: {
+          urls: {
+            type: "array",
+            items: { type: "string" },
+            description:
+              "Optional list of RPC base URLs to probe. When omitted, default sandbox endpoints are used.",
+          },
+          roles: {
+            type: "array",
+            items: {
+              type: "string",
+              enum: ["pxe", "node", "l1", "custom"],
+            },
+            description:
+              "Optional roles aligned with urls (same order). Inferred from port when omitted.",
+          },
+          timeoutMs: {
+            type: "number",
+            description:
+              "Per-request timeout in milliseconds (default 3000, clamped 200–30000).",
+          },
+        },
+      },
+    },
     // Code search (ripgrep)
     {
       name: "aztec_search_code",
@@ -392,6 +430,7 @@ function validateToolRequest(
   switch (name) {
     case "aztec_sync_repos":
     case "aztec_status":
+    case "aztec_network_status":
     case "aztec_list_examples":
       break;
     case "aztec_search_docs":
@@ -526,7 +565,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     name === "aztec_search_docs"
     && docsgptClient != null
     && args?.useLocalFallback !== true;
-  if (name !== "aztec_sync_repos" && !semanticOnlyDocsSearch) {
+  // Network probes do not need local clones — skip auto-resync wait.
+  if (
+    name !== "aztec_sync_repos" &&
+    name !== "aztec_network_status" &&
+    !semanticOnlyDocsSearch
+  ) {
     ensureAutoResync();
     if (syncInFlight) await syncInFlight.catch(() => {});
   }
@@ -558,6 +602,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "aztec_status": {
         const status = await getStatus();
         text = formatStatus(status);
+        break;
+      }
+
+      case "aztec_network_status": {
+        const network = await checkNetworkStatus({
+          urls: args?.urls as string[] | undefined,
+          roles: args?.roles as
+            | ("pxe" | "node" | "l1" | "custom")[]
+            | undefined,
+          timeoutMs: args?.timeoutMs as number | undefined,
+        });
+        text = formatNetworkStatus(network);
         break;
       }
 
