@@ -1,28 +1,7 @@
-/**
- * Version-sync gate between the MCP server's local aztec-packages
- * clone and the DocsGPT backend's indexed corpus.
- *
- * Why: an MCP user with a v4.1.0 clone querying a v4.2.0 corpus will
- * get answers from the wrong version of the docs and not realize it.
- * Surfacing the mismatch up front lets them re-sync their clone (or
- * intentionally cross-query with `allowVersionMismatch: true`).
- *
- * Design:
- *   - Per-process, in-memory cache keyed by base URL. 5-minute positive
- *     TTL — short enough that an operator rolling out a new corpus
- *     version sees the new value within minutes; long enough that
- *     repeated tool calls don't pound `/api/version`.
- *   - 30-second negative TTL for transient errors (network blips,
- *     temporary 5xx). Short so a Phase-1-deployed-after-Phase-2 MCP
- *     starts seeing real version data quickly without operator action.
- *   - 404 → `"unknown"` cached at the positive TTL, since an older
- *     docsgpt deployment that doesn't ship the endpoint won't suddenly
- *     start shipping it within seconds.
- */
-
 import { DocsGPTClient, DocsGPTClientError } from "../backends/docsgpt-client.js";
 import { DEFAULT_AZTEC_VERSION } from "../repos/config.js";
-import { getRepoTag } from "./git.js";
+import { getSourceMetadata } from "./sources.js";
+import { getRepoCommit, getRepoTag } from "./git.js";
 
 export type VersionGateResult =
   | { kind: "match"; localVersion: string; corpusVersion: string }
@@ -45,20 +24,9 @@ export function _resetVersionCache(): void {
   cache.clear();
 }
 
-/**
- * Strip the leading ``v`` and any pre-release suffix.
- * ``v4.2.0-aztecnr-rc.2`` → ``4.2.0``. ``v4.2.0`` → ``4.2.0``.
- * Used as the equality key. Patch-level differences still compare
- * unequal — we deliberately do NOT collapse to major.minor since
- * docs/APIs can change at the patch level.
- */
+/** Normalize the optional v prefix, preserving release-candidate identity. */
 export function normalizeVersion(raw: string | null | undefined): string {
-  if (!raw) return "";
-  let v = raw.trim();
-  if (v.startsWith("v")) v = v.slice(1);
-  const dash = v.indexOf("-");
-  if (dash >= 0) v = v.slice(0, dash);
-  return v;
+  return (raw ?? "").trim().replace(/^v/, "");
 }
 
 /**
@@ -89,11 +57,19 @@ async function fetchCorpusVersionCached(client: DocsGPTClient): Promise<string |
 }
 
 /**
- * Determine the local aztec-packages version. Falls back to the
+ * Determine the recorded split release or legacy aztec-packages tag. Falls back to the
  * package's `DEFAULT_AZTEC_VERSION` when no clone exists yet, so a
  * fresh install can still be gated against the corpus.
  */
 export async function getLocalVersion(): Promise<string> {
+  const metadata = getSourceMetadata();
+  const nodeCommit = metadata?.repositories?.["aztec-node"];
+  if (nodeCommit) {
+    if (await getRepoCommit("aztec-node", true) !== nodeCommit) {
+      throw new Error("aztec-node does not match the recorded release. Run aztec_sync_repos again.");
+    }
+    return metadata.aztecVersion;
+  }
   const tag = await getRepoTag("aztec-packages");
   return tag ?? DEFAULT_AZTEC_VERSION;
 }
@@ -146,7 +122,7 @@ export function formatMismatchMessage(
   corpusVersion: string
 ): string {
   return [
-    `Version mismatch: your MCP server's aztec-packages clone is at ${localVersion},`,
+    `Version mismatch: your MCP server's local release is ${localVersion},`,
     `but the DocsGPT corpus is indexed at ${corpusVersion}.`,
     ``,
     `Querying across versions can return docs that don't apply to the code on your machine.`,

@@ -8,6 +8,7 @@
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 import { createHash } from "crypto";
+import { getActiveRepoNames, getCodeRepo } from "./sources.js";
 import { REPOS_DIR } from "./git.js";
 import { searchCode } from "./search.js";
 import type { SearchResult } from "./search.js";
@@ -314,18 +315,20 @@ export function parseOperatorFaq(filePath: string): ErrorEntry[] {
 // ---------------------------------------------------------------------------
 
 function getDynamicEntries(): ErrorEntry[] {
+  const active = getActiveRepoNames();
+  const codeRepo = getCodeRepo();
   if (cachedDynamic) return cachedDynamic;
 
   const entries: ErrorEntry[] = [];
 
   // Solidity errors
   const errorsPath = join(REPOS_DIR, "aztec-packages", "l1-contracts", "src", "core", "libraries", "Errors.sol");
-  entries.push(...parseSolidityErrors(errorsPath));
+  if (!active || active.includes("aztec-packages")) entries.push(...parseSolidityErrors(errorsPath));
 
   // TX validation errors — search a few known locations
   const txErrorPaths = [
-    join(REPOS_DIR, "aztec-packages", "yarn-project", "stdlib", "src", "tx", "validator", "error_texts.ts"),
-    join(REPOS_DIR, "aztec-packages", "yarn-project", "circuit-types", "src", "tx", "validator", "error_texts.ts"),
+    join(REPOS_DIR, codeRepo, "yarn-project", "stdlib", "src", "tx", "validator", "error_texts.ts"),
+    join(REPOS_DIR, codeRepo, "yarn-project", "circuit-types", "src", "tx", "validator", "error_texts.ts"),
   ];
   for (const p of txErrorPaths) {
     const parsed = parseTxValidationErrors(p);
@@ -335,8 +338,9 @@ function getDynamicEntries(): ErrorEntry[] {
     }
   }
 
-  // Debugging doc (lives in aztec-packages-docs, cloned from `next` branch)
-  const debugPaths = [
+  const debugPaths = codeRepo === "aztec-node" ? [
+    join(REPOS_DIR, codeRepo, "docs", "docs-developers", "docs", "aztec-nr", "debugging.md"),
+  ] : [
     join(REPOS_DIR, "aztec-packages-docs", "docs", "docs-developers", "docs", "aztec-nr", "debugging.md"),
     join(REPOS_DIR, "aztec-packages", "docs", "docs-developers", "docs", "aztec-nr", "debugging.md"),
   ];
@@ -348,8 +352,9 @@ function getDynamicEntries(): ErrorEntry[] {
     }
   }
 
-  // Operator FAQ (lives in aztec-packages-docs, cloned from `next` branch)
-  const faqPaths = [
+  const faqPaths = codeRepo === "aztec-node" ? [
+    join(REPOS_DIR, codeRepo, "docs", "docs-operate", "operators", "operator-faq.md"),
+  ] : [
     join(REPOS_DIR, "aztec-packages-docs", "docs", "docs-operate", "operators", "operator-faq.md"),
     join(REPOS_DIR, "aztec-packages", "docs", "docs-operate", "operators", "operator-faq.md"),
   ];
@@ -522,7 +527,7 @@ export function lookupError(
     try {
       const raw = searchCode(query, {
         filePattern: "*.ts",
-        repo: "aztec-packages",
+        repo: getCodeRepo(),
         maxResults: RAW_CODE_LIMIT,
       });
       codeMatches = raw.filter(isUsefulCodeRef).slice(0, KEEP_CODE_LIMIT);

@@ -73,6 +73,9 @@ export function formatStatus(status: {
       );
     }
     lines.push(`Aztec version: ${status.syncMetadata.aztecVersion}`);
+    if (status.syncMetadata.pendingVersion) {
+      lines.push(`Sync incomplete for ${status.syncMetadata.pendingVersion}; run aztec_sync_repos again before searching.`);
+    }
   }
 
   lines.push("");
@@ -81,7 +84,8 @@ export function formatStatus(status: {
   for (const repo of status.repos) {
     const icon = repo.cloned ? "✓" : "○";
     const commit = repo.commit ? ` (${repo.commit})` : "";
-    lines.push(`  ${icon} ${repo.name}${commit}`);
+    const inactive = status.syncMetadata?.repositories && !status.syncMetadata.repositories[repo.name];
+    lines.push(`  ${icon} ${repo.name}${commit}${inactive ? " [not active for this release]" : ""}`);
     lines.push(`    ${repo.description}`);
   }
 

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+const mockBeginVersionSync = vi.fn();
 const mockCloneRepo = vi.fn();
 const mockGetReposStatus = vi.fn();
 const mockGetNoirCommitFromAztec = vi.fn();
@@ -78,6 +79,7 @@ vi.mock("../../src/repos/config.js", () => ({
 }));
 
 vi.mock("../../src/utils/git.js", () => ({
+  ensureReposDir: vi.fn(),
   cloneRepo: (...args: any[]) => mockCloneRepo(...args),
   getReposStatus: (...args: any[]) => mockGetReposStatus(...args),
   getNoirCommitFromAztec: () => mockGetNoirCommitFromAztec(),
@@ -86,6 +88,7 @@ vi.mock("../../src/utils/git.js", () => ({
 }));
 
 vi.mock("../../src/utils/sync-metadata.js", () => ({
+  beginVersionSync: (...args: any[]) => mockBeginVersionSync(...args),
   writeSyncMetadata: (...args: any[]) => mockWriteSyncMetadata(...args),
   stampMetadataMcpVersion: (...args: any[]) => mockStampMetadataMcpVersion(...args),
   readSyncMetadata: () => mockReadSyncMetadata(),
@@ -110,6 +113,8 @@ beforeEach(() => {
   mockCloneRepo.mockResolvedValue("Cloned");
   mockGetNoirCommitFromAztec.mockResolvedValue(null);
   mockWriteSyncMetadata.mockReset();
+  mockReadSyncMetadata.mockReturnValue(null);
+  mockBeginVersionSync.mockReset();
   mockExistsSync.mockReturnValue(true);
 });
 
@@ -435,5 +440,44 @@ describe("getStatus", () => {
 
     const status = await getStatus();
     expect(status.syncMetadata).toBeNull();
+  });
+});
+
+
+describe("downgrading from a split release", () => {
+  beforeEach(() => {
+    mockReadSyncMetadata.mockReturnValue({
+      mcpVersion: "1.6.0", syncedAt: "", aztecVersion: "v6.0.0-rc.6",
+      repositories: { "aztec-node": "node-sha", "aztec-packages": "protocol-sha" },
+    });
+  });
+
+  it("rejects partial downgrades before replacing any checkout", async () => {
+    const result = await syncRepos({ version: "v4.3.0", repos: ["aztec-packages"] });
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("requires a full sync");
+    expect(mockCloneRepo).not.toHaveBeenCalled();
+    expect(mockStampMetadataMcpVersion).not.toHaveBeenCalled();
+  });
+
+  it("marks the downgrade incomplete before checkout mutations and retains the marker on failure", async () => {
+    mockCloneRepo.mockImplementation(async (config) => {
+      expect(mockBeginVersionSync).toHaveBeenCalledWith("v4.3.0", ["aztec-packages", "aztec-examples", "noir"]);
+      if (config.name === "aztec-examples") throw new Error("network unavailable");
+      return "Cloned";
+    });
+    const result = await syncRepos({ version: "v4.3.0" });
+    expect(result.success).toBe(false);
+    expect(result.metadataSafe).toBe(false);
+    expect(mockWriteSyncMetadata).not.toHaveBeenCalled();
+    expect(mockStampMetadataMcpVersion).not.toHaveBeenCalled();
+  });
+
+  it("replaces split metadata only after all legacy sources succeed", async () => {
+    const result = await syncRepos({ version: "v4.3.0" });
+    expect(result.success).toBe(true);
+    expect(result.metadataSafe).toBe(true);
+    expect(mockBeginVersionSync).toHaveBeenCalled();
+    expect(mockWriteSyncMetadata).toHaveBeenCalledWith("v4.3.0");
   });
 });

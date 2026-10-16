@@ -2,7 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("../../src/utils/git.js", () => ({
   getRepoTag: vi.fn(),
+  getRepoCommit: vi.fn(),
 }));
+
+vi.mock("../../src/utils/sync-metadata.js", () => ({ readSyncMetadata: vi.fn(() => null) }));
 
 vi.mock("../../src/repos/config.js", () => ({
   DEFAULT_AZTEC_VERSION: "v4.2.0",
@@ -15,7 +18,8 @@ import {
   getLocalVersion,
   _resetVersionCache,
 } from "../../src/utils/version-check.js";
-import { getRepoTag } from "../../src/utils/git.js";
+import { readSyncMetadata } from "../../src/utils/sync-metadata.js";
+import { getRepoCommit, getRepoTag } from "../../src/utils/git.js";
 
 const mockGetRepoTag = vi.mocked(getRepoTag);
 
@@ -26,6 +30,7 @@ function makeClient(getCorpusVersion: any, baseUrl = "https://test.example.com")
 beforeEach(() => {
   vi.clearAllMocks();
   _resetVersionCache();
+  vi.mocked(readSyncMetadata).mockReturnValue(null);
 });
 
 describe("normalizeVersion", () => {
@@ -33,9 +38,9 @@ describe("normalizeVersion", () => {
     expect(normalizeVersion("v4.2.0")).toBe("4.2.0");
   });
 
-  it("strips pre-release suffix", () => {
-    expect(normalizeVersion("v4.2.0-aztecnr-rc.2")).toBe("4.2.0");
-    expect(normalizeVersion("4.2.0-beta")).toBe("4.2.0");
+  it("preserves pre-release suffix", () => {
+    expect(normalizeVersion("v4.2.0-aztecnr-rc.2")).toBe("4.2.0-aztecnr-rc.2");
+    expect(normalizeVersion("4.2.0-beta")).toBe("4.2.0-beta");
   });
 
   it("returns empty string for null/empty", () => {
@@ -44,8 +49,8 @@ describe("normalizeVersion", () => {
     expect(normalizeVersion(undefined)).toBe("");
   });
 
-  it("treats `v4.2.0-aztecnr-rc.2` and `v4.2.0` as equivalent", () => {
-    expect(normalizeVersion("v4.2.0-aztecnr-rc.2")).toBe(
+  it("treats `v4.2.0-aztecnr-rc.2` and `v4.2.0` as distinct", () => {
+    expect(normalizeVersion("v4.2.0-aztecnr-rc.2")).not.toBe(
       normalizeVersion("v4.2.0")
     );
   });
@@ -154,5 +159,30 @@ describe("formatMismatchMessage", () => {
     expect(msg).toContain("v4.2.0");
     expect(msg).toContain("allowVersionMismatch");
     expect(msg).toContain("aztec_sync_repos");
+  });
+});
+
+
+describe("split release identity", () => {
+  it("uses recorded release identity instead of a stale aztec-packages checkout", async () => {
+    vi.mocked(readSyncMetadata).mockReturnValue({
+      mcpVersion: "1.6.0", syncedAt: "", aztecVersion: "v6.0.0-rc.6",
+      repositories: { "aztec-node": "a".repeat(40) },
+    });
+    vi.mocked(getRepoCommit).mockResolvedValue("a".repeat(40));
+    mockGetRepoTag.mockResolvedValue("v4.3.0");
+    expect(await getLocalVersion()).toBe("v6.0.0-rc.6");
+    expect(mockGetRepoTag).not.toHaveBeenCalled();
+    const client = makeClient(vi.fn().mockResolvedValue({ aztec_corpus_version: "v6.0.0-rc.1" }));
+    expect((await checkVersionGate(client)).kind).toBe("mismatch");
+  });
+
+  it("rejects an untracked change to the pinned node checkout", async () => {
+    vi.mocked(readSyncMetadata).mockReturnValue({
+      mcpVersion: "1.6.0", syncedAt: "", aztecVersion: "v6.0.0-rc.6",
+      repositories: { "aztec-node": "a".repeat(40) },
+    });
+    vi.mocked(getRepoCommit).mockResolvedValue("b".repeat(40));
+    await expect(getLocalVersion()).rejects.toThrow("does not match the recorded release");
   });
 });
