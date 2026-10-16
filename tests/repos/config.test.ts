@@ -1,112 +1,53 @@
 import { describe, it, expect } from "vitest";
-import {
-  AZTEC_REPOS,
-  getAztecRepos,
-  getRepoConfig,
-  getRepoNames,
-  DEFAULT_AZTEC_VERSION,
-} from "../../src/repos/config.js";
+import { AZTEC_REPOS, getAztecRepos, getRepoConfig, getRepoNames, DEFAULT_AZTEC_VERSION } from "../../src/repos/config.js";
 
-describe("AZTEC_REPOS", () => {
-  it("contains 7 repos, each with name/url/description", () => {
-    expect(AZTEC_REPOS).toHaveLength(7);
-    for (const repo of AZTEC_REPOS) {
-      expect(repo.name).toBeTruthy();
-      expect(repo.url).toBeTruthy();
-      expect(repo.description).toBeTruthy();
-    }
+describe("v6 repositories", () => {
+  it("defaults to just aztec-node, with protocol and Noir sources optional", () => {
+    expect(DEFAULT_AZTEC_VERSION).toBe("v6.0.0-rc.6");
+    expect(AZTEC_REPOS.filter((repo) => !repo.optional).map((repo) => repo.name)).toEqual(["aztec-node"]);
+    expect(getRepoNames()).toEqual(["aztec-node", "aztec-packages", "noir"]);
+    expect(getRepoConfig("unknown")).toBeUndefined();
   });
 
-  it("has sparse checkout arrays on aztec-packages and noir", () => {
-    const ap = AZTEC_REPOS.find((r) => r.name === "aztec-packages");
-    const noir = AZTEC_REPOS.find((r) => r.name === "noir");
-    expect(ap?.sparse).toBeInstanceOf(Array);
-    expect(ap!.sparse!.length).toBeGreaterThan(0);
-    expect(noir?.sparse).toBeInstanceOf(Array);
-    expect(noir!.sparse!.length).toBeGreaterThan(0);
+  it("resolves the node commit during sync instead of applying an Aztec tag to it", () => {
+    const node = getRepoConfig("aztec-node")!;
+    expect(node.url).toBe("https://github.com/aztec-labs-eng/aztec-node");
+    expect(node.tag).toBeUndefined();
+    expect(node.branch).toBeUndefined();
+    expect(node.sparse).toContain("noir-projects/noir-contracts");
+    expect(node.sparse).toContain("docs/developer_versioned_docs/version-v6.0.0-rc.6");
+    expect(node.sparsePathOverrides).toBeUndefined();
   });
 
-  it("aztec-packages has sparsePathOverrides for versioned docs on next branch", () => {
-    const ap = AZTEC_REPOS.find((r) => r.name === "aztec-packages");
-    expect(ap?.sparse).not.toContain("docs");
-    expect(ap?.sparsePathOverrides).toEqual([
-      {
-        paths: [
-          `docs/developer_versioned_docs/version-${DEFAULT_AZTEC_VERSION}`,
-          "docs/static/aztec-nr-api/devnet",
-          "docs/static/typescript-api/devnet",
-          "docs/docs-developers/docs/aztec-nr",
-          "docs/docs-operate/operators",
-        ],
-        branch: "next",
-      },
-    ]);
+  it("accepts tags without a v prefix while using canonical documentation paths", () => {
+    const node = getAztecRepos("6.0.0-rc.6")[0];
+    expect(node.sparse).toContain("docs/developer_versioned_docs/version-v6.0.0-rc.6");
   });
 
-  it('noir and noir-examples have branch: "master"', () => {
-    const noir = AZTEC_REPOS.find((r) => r.name === "noir");
-    const noirExamples = AZTEC_REPOS.find((r) => r.name === "noir-examples");
-    expect(noir?.branch).toBe("master");
-    expect(noirExamples?.branch).toBe("master");
+  it("uses the split protocol layout for optional aztec-packages sources", () => {
+    const protocol = getRepoConfig("aztec-packages")!;
+    expect(protocol.optional).toBe(true);
+    expect(protocol.sparse).toContain("barretenberg/ts/bb.js/src");
+    expect(protocol.sparse).not.toContain("yarn-project");
+    expect(protocol.sparsePathOverrides).toBeUndefined();
   });
 });
 
-describe("getAztecRepos", () => {
-  it("applies version tag only to AztecProtocol repos without skipVersionTag", () => {
-    const repos = getAztecRepos();
-    const taggedRepos = repos.filter((r) => r.tag !== undefined);
-    expect(taggedRepos).toHaveLength(4);
-    for (const repo of taggedRepos) {
-      expect(repo.tag).toBe(DEFAULT_AZTEC_VERSION);
-    }
-
-    const gregoswap = repos.find((r) => r.name === "gregoswap");
-    expect(gregoswap?.tag).toBeUndefined();
+describe("legacy versions", () => {
+  it("retains the seven-repository layout and documentation overrides", () => {
+    const repos = getAztecRepos("v4.3.0");
+    expect(repos).toHaveLength(7);
+    expect(repos.some((repo) => repo.name === "aztec-node")).toBe(false);
+    const packages = repos.find((repo) => repo.name === "aztec-packages")!;
+    expect(packages.sparsePathOverrides?.[0].paths).toContain("docs/developer_versioned_docs/version-v4.3.0");
   });
 
-  it("uses custom version when provided", () => {
+  it("applies custom tags only to versioned Aztec repositories", () => {
     const repos = getAztecRepos("v2.0.0");
-    const taggedRepos = repos.filter((r) => r.tag !== undefined);
-    for (const repo of taggedRepos) {
-      expect(repo.tag).toBe("v2.0.0");
-    }
-  });
-
-  it("does not apply tags to noir-lang repos", () => {
-    const repos = getAztecRepos("v2.0.0");
-    const noirRepos = repos.filter((r) => r.url.includes("noir-lang"));
-
-    expect(noirRepos).toHaveLength(2);
-
-    for (const repo of noirRepos) {
-      expect(repo.tag).toBeUndefined();
-    }
-  });
-});
-
-describe("getRepoConfig", () => {
-  it("returns correct config for aztec-packages", () => {
-    const config = getRepoConfig("aztec-packages");
-    expect(config).toBeDefined();
-    expect(config!.name).toBe("aztec-packages");
-    expect(config!.url).toContain("AztecProtocol");
-  });
-
-  it("returns undefined for unknown name", () => {
-    expect(getRepoConfig("nonexistent")).toBeUndefined();
-  });
-});
-
-describe("getRepoNames", () => {
-  it("returns all 7 names", () => {
-    const names = getRepoNames();
-    expect(names).toHaveLength(7);
-    expect(names).toContain("aztec-packages");
-    expect(names).toContain("noir");
-    expect(names).toContain("noir-examples");
-    expect(names).toContain("aztec-examples");
-    expect(names).toContain("aztec-starter");
-    expect(names).toContain("demo-wallet");
-    expect(names).toContain("gregoswap");
+    const tagged = repos.filter((repo) => repo.tag);
+    expect(tagged).toHaveLength(4);
+    expect(tagged.every((repo) => repo.tag === "v2.0.0")).toBe(true);
+    expect(repos.filter((repo) => repo.url.includes("noir-lang")).every((repo) => !repo.tag)).toBe(true);
+    expect(repos.find((repo) => repo.name === "gregoswap")?.tag).toBeUndefined();
   });
 });

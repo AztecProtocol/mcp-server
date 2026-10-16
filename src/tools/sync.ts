@@ -5,8 +5,9 @@
 import { existsSync } from "fs";
 import { join } from "path";
 import { AZTEC_REPOS, getAztecRepos, DEFAULT_AZTEC_VERSION, RepoConfig } from "../repos/config.js";
-import { cloneRepo, getReposStatus, getNoirCommitFromAztec, getRepoPath, REPOS_DIR, Logger } from "../utils/git.js";
-import { writeSyncMetadata, stampMetadataMcpVersion, readSyncMetadata, SyncMetadata } from "../utils/sync-metadata.js";
+import { ensureReposDir, cloneRepo, getReposStatus, getNoirCommitFromAztec, getRepoPath, REPOS_DIR, Logger } from "../utils/git.js";
+import { beginVersionSync, writeSyncMetadata, stampMetadataMcpVersion, readSyncMetadata, SyncMetadata } from "../utils/sync-metadata.js";
+import { syncSplitRepos } from "./sync-split.js";
 import { clearErrorCache } from "../utils/error-lookup.js";
 
 export interface RepoSyncStatus {
@@ -27,6 +28,21 @@ export interface SyncResult {
   repos: RepoSyncStatus[];
 }
 
+function prepareLegacyMigration(version: string, repositories: RepoConfig[], isFullSync: boolean): string | null {
+  const previous = readSyncMetadata();
+  if (!previous?.repositories && !previous?.pendingVersion) return null;
+  if (!isFullSync) {
+    return "Changing from a split release to a legacy release requires a full sync. Omit repos and retry.";
+  }
+  try {
+    ensureReposDir();
+    beginVersionSync(version, repositories.map((repo) => repo.name));
+    return null;
+  } catch (error) {
+    return `Cannot persist sync intent: ${error instanceof Error ? error.message : String(error)}`;
+  }
+}
+
 /**
  * Sync all repositories (clone if missing, update if exists)
  * Syncs aztec-packages first to determine the correct Noir version
@@ -43,6 +59,10 @@ export async function syncRepos(options: {
   const configuredRepos = version ? getAztecRepos(version) : AZTEC_REPOS;
   const effectiveVersion = version || DEFAULT_AZTEC_VERSION;
 
+  if (configuredRepos.some((repo) => repo.name === "aztec-node")) {
+    return syncSplitRepos({ ...options, version: effectiveVersion }, configuredRepos);
+  }
+
   // Filter repos if specific ones requested
   let reposToSync = repoNames
     ? configuredRepos.filter((r) => repoNames.includes(r.name))
@@ -55,6 +75,15 @@ export async function syncRepos(options: {
       message: "No repositories matched the specified names",
       version: effectiveVersion,
       repos: [],
+    };
+  }
+
+  const isFullSync = !repoNames || configuredRepos.every((repo) => repoNames.includes(repo.name));
+  const migrationError = prepareLegacyMigration(effectiveVersion, reposToSync, isFullSync);
+  if (migrationError) {
+    return {
+      success: false, metadataSafe: false, version: effectiveVersion, repos: [],
+      message: migrationError,
     };
   }
 
@@ -188,7 +217,6 @@ export async function syncRepos(options: {
   // Metadata is safe to write when all repos succeeded and every configured
   // repo was included (explicit full list counts as full sync). Docs-missing
   // is cosmetic — repos are usable and auto-resync should not keep retrying.
-  const isFullSync = !repoNames || configuredRepos.every((r) => repoNames.includes(r.name));
   let metadataSafe = allSuccess && isFullSync;
   let metadataWriteFailed = false;
 
@@ -243,9 +271,12 @@ export async function getStatus(): Promise<{
   }[];
   syncMetadata: SyncMetadata | null;
 }> {
-  const statusMap = await getReposStatus(AZTEC_REPOS);
+  const metadata = readSyncMetadata();
+  const version = metadata?.pendingVersion || metadata?.aztecVersion;
+  const configs = version ? getAztecRepos(version) : AZTEC_REPOS;
+  const statusMap = await getReposStatus(configs);
 
-  const repos = AZTEC_REPOS.map((config) => {
+  const repos = configs.map((config) => {
     const status = statusMap.get(config.name);
     return {
       name: config.name,
@@ -258,6 +289,6 @@ export async function getStatus(): Promise<{
   return {
     reposDir: REPOS_DIR,
     repos,
-    syncMetadata: readSyncMetadata(),
+    syncMetadata: metadata,
   };
 }

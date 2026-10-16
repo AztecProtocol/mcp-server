@@ -6,6 +6,7 @@ import { execFileSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import { join, relative, extname } from "path";
 import { globbySync } from "globby";
+import { getActiveRepoNames, getCodeRepo, getDocsSource, narrowDocsPaths } from "./sources.js";
 import { REPOS_DIR, getRepoPath } from "./git.js";
 
 export interface SearchResult {
@@ -36,6 +37,12 @@ export function searchCode(
 ): SearchResult[] {
   const { filePattern = "*.nr", repo, maxResults = 50, caseSensitive = false } = options;
 
+  const active = getActiveRepoNames();
+  if (active && repo && !active.includes(repo.split("/")[0])) return [];
+  if (active && !repo) {
+    return active.flatMap((name) => searchCode(query, { ...options, repo: name }))
+      .sort((a, b) => getResultPriority(a) - getResultPriority(b)).slice(0, maxResults);
+  }
   const searchPath = repo ? getRepoPath(repo) : REPOS_DIR;
 
   if (!existsSync(searchPath)) {
@@ -90,6 +97,13 @@ export function searchDocs(
 ): SearchResult[] {
   const { section, maxResults = 30 } = options;
 
+  const source = getDocsSource();
+  if (source.paths) {
+    return narrowDocsPaths(source.paths, section)
+      .flatMap((repo) => searchCode(query, { filePattern: "*.{md,mdx}", repo, maxResults }))
+      .slice(0, maxResults);
+  }
+
   // Search versioned docs under developer_versioned_docs, narrowing by section if possible
   let repo: string | undefined;
   const versionedDocsGlob = join(REPOS_DIR, "aztec-packages-docs", "docs", "developer_versioned_docs");
@@ -120,21 +134,23 @@ export function searchDocs(
 export function listExamples(category?: string): FileInfo[] {
   const examples: FileInfo[] = [];
 
+  const active = getActiveRepoNames();
+  const codeRepo = getCodeRepo();
+
   // Search in aztec-examples
   const examplesPath = getRepoPath("aztec-examples");
-  if (existsSync(examplesPath)) {
+  if ((!active || active.includes("aztec-examples")) && existsSync(examplesPath)) {
     const contracts = findContracts(examplesPath, "aztec-examples");
     examples.push(...contracts);
   }
 
-  // Search in aztec-packages noir-contracts
   const noirContractsPath = join(
-    getRepoPath("aztec-packages"),
+    getRepoPath(codeRepo),
     "noir-projects",
     "noir-contracts"
   );
   if (existsSync(noirContractsPath)) {
-    const contracts = findContracts(noirContractsPath, "aztec-packages");
+    const contracts = findContracts(noirContractsPath, codeRepo);
     examples.push(...contracts);
   }
 
@@ -198,7 +214,7 @@ export function findExample(name: string): FileInfo | null {
 export function getResultPriority(result: SearchResult): number {
   const { repo, file } = result;
 
-  if (repo === "aztec-packages") {
+  if (repo === "aztec-packages" || repo === "aztec-node") {
     if (/\baztec-nr\b/.test(file) || /\byarn-project\b/.test(file)) return 1;
     if (/\bnoir-contracts\b/.test(file)) return 2;
     // Other aztec-packages paths (boxes, playground, etc.)

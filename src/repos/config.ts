@@ -7,6 +7,8 @@ export interface RepoConfig {
   name: string;
   /** Git URL to clone from */
   url: string;
+  /** Excluded from the default sync; available through repos. */
+  optional?: boolean;
   /** Branch to checkout (defaults to main/master) */
   branch?: string;
   /** Tag to checkout (overrides branch if specified) */
@@ -31,7 +33,7 @@ export interface RepoConfig {
 }
 
 /** Default Aztec version (tag) to use - can be overridden via AZTEC_DEFAULT_VERSION env var */
-export const DEFAULT_AZTEC_VERSION = process.env.AZTEC_DEFAULT_VERSION || "v4.3.0";
+export const DEFAULT_AZTEC_VERSION = process.env.AZTEC_DEFAULT_VERSION || "v6.0.0-rc.6";
 
 /**
  * Base Aztec repository configurations (without version)
@@ -134,10 +136,41 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
 
 /**
  * Get Aztec repositories configured for a specific version
- * @param version - The Aztec version tag (e.g., "v4.3.0")
+ * @param version - The Aztec version tag (e.g., "v6.0.0-rc.6")
  */
 export function getAztecRepos(version?: string): RepoConfig[] {
   const tag = version || DEFAULT_AZTEC_VERSION;
+
+  if (Number(tag.replace(/^v/, "").split(".")[0]) >= 6) {
+    return [
+      {
+        name: "aztec-node",
+        url: "https://github.com/aztec-labs-eng/aztec-node",
+        description: "Aztec SDK, Aztec.nr, contracts, and docs pinned by the release's labs gitlink",
+        sparse: [
+          "noir-projects/aztec-nr",
+          "noir-projects/noir-contracts",
+          "yarn-project",
+          "playground",
+          "docs/docs-developers/docs",
+          "docs/docs-operate",
+          "docs/docs-participate",
+          `docs/developer_versioned_docs/version-${tag.startsWith("v") ? tag : `v${tag}`}`,
+        ],
+        searchPatterns: { code: ["*.nr", "*.ts"], docs: ["*.md", "*.mdx"] },
+      },
+      {
+        name: "aztec-packages",
+        url: "https://github.com/AztecProtocol/aztec-packages",
+        tag,
+        optional: true,
+        description: "Optional Aztec protocol, proving system, and L1 sources",
+        sparse: ["noir-projects/fnd", "protocol", "barretenberg/ts/bb.js/src", "l1-contracts/src"],
+        searchPatterns: { code: ["*.nr", "*.ts", "*.sol"], docs: ["*.md", "*.mdx"] },
+      },
+      { ...BASE_REPOS.find((repo) => repo.name === "noir")!, optional: true },
+    ];
+  }
 
   return BASE_REPOS.map((repo) => ({
     ...repo,

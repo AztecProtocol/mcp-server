@@ -285,14 +285,15 @@ describe("searchAztecDocs — version-sync gate", () => {
     expect(client.search).not.toHaveBeenCalled();
   });
 
-  it("treats `v4.2.0-aztecnr-rc.2` and `v4.2.0` as matching after normalization", async () => {
+  it("treats `v4.2.0-aztecnr-rc.2` and `v4.2.0` as different releases", async () => {
     mockGetRepoTag.mockResolvedValue("v4.2.0-aztecnr-rc.2");
     const client = makeClient({
       getCorpusVersion: vi.fn().mockResolvedValue({ aztec_corpus_version: "v4.2.0" }),
     });
 
     const result = await searchAztecDocs({ query: "test" }, client);
-    expect(result.kind).toBe("semantic");
+    expect(result.kind).toBe("version-mismatch");
+    expect(client.search).not.toHaveBeenCalled();
   });
 
   it("on mismatch + useLocalFallback=true, falls through to ripgrep instead of refusing", async () => {

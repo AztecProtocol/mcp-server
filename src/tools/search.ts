@@ -12,6 +12,7 @@ import {
   FileInfo,
 } from "../utils/search.js";
 import { isRepoCloned } from "../utils/git.js";
+import { getActiveRepoNames, getDocsSource } from "../utils/sources.js";
 import { getRepoNames } from "../repos/config.js";
 import { DocsGPTClient, DocsGPTClientError } from "../backends/docsgpt-client.js";
 import type { SemanticSearchResult } from "../backends/docsgpt-client.js";
@@ -32,6 +33,10 @@ export function searchAztecCode(options: {
 } {
   const { query, filePattern = "*.nr", repo, maxResults = 30 } = options;
 
+  const active = getActiveRepoNames();
+  if (repo && active && !active.includes(repo)) {
+    return { success: false, results: [], message: `Repository '${repo}' is not active for this release. Run aztec_sync_repos with repos to enable optional sources.` };
+  }
   // Check if repos are cloned
   if (repo && !isRepoCloned(repo)) {
     return {
@@ -41,7 +46,7 @@ export function searchAztecCode(options: {
     };
   }
 
-  const anyCloned = getRepoNames().some(isRepoCloned);
+  const anyCloned = (getActiveRepoNames() ?? getRepoNames()).some(isRepoCloned);
   if (!anyCloned) {
     return {
       success: false,
@@ -193,8 +198,9 @@ function ripgrepFallback(
 ): DocsSearchResult {
   const { query, section, maxResults = 20 } = options;
 
-  if (!isRepoCloned("aztec-packages-docs")) {
-    const fallbackError = "aztec-packages-docs is not cloned. Run aztec_sync_repos first to get documentation.";
+  const source = getDocsSource();
+  if (!isRepoCloned(source.repo)) {
+    const fallbackError = `${source.repo} is not cloned. Run aztec_sync_repos first to get documentation.`;
     if (semanticError !== undefined) {
       return {
         kind: "error",
@@ -225,7 +231,7 @@ function ripgrepFallback(
           : "") +
         (results.length > 0
           ? `Found ${results.length} documentation matches`
-          : "No documentation matches found"),
+          : "No documentation matches found") + (source.notice ? `\n${source.notice}` : ""),
     },
   };
 }
@@ -240,7 +246,7 @@ export function listAztecExamples(options: { category?: string }): {
 } {
   const { category } = options;
 
-  const anyCloned = getRepoNames().some(isRepoCloned);
+  const anyCloned = (getActiveRepoNames() ?? getRepoNames()).some(isRepoCloned);
   if (!anyCloned) {
     return {
       success: false,

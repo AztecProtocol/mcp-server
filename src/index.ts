@@ -90,15 +90,15 @@ const SEMANTIC_INSTRUCTIONS =
   "natural-language documentation queries; `aztec_search_code` for " +
   "regex-based code search; `aztec_lookup_error` for error diagnosis. " +
   "The server enforces a version-sync gate between the user's local " +
-  "aztec-packages clone tag and the corpus version it queries — if the " +
+  "release version and the corpus version it queries — if the " +
   "user gets a `version-mismatch` result, they can either run " +
   "`aztec_sync_repos` with the corpus version, or pass " +
   "`allowVersionMismatch: true` to query across versions intentionally.";
 
 const LOCAL_ONLY_INSTRUCTIONS =
   "This Aztec MCP server is running in LOCAL-ONLY mode (no API_KEY " +
-  "configured). It can answer questions from cloned aztec-packages, " +
-  "aztec-examples, and aztec-starter repositories using ripgrep search " +
+  "configured). It can answer questions from the pinned aztec-node checkout " +
+  "and optional protocol or Noir sources using ripgrep search " +
   "and a static error catalog. It does NOT have semantic search across " +
   "the full Aztec corpora (Aztec.nr framework, Noir stdlib, contract " +
   "examples, TypeScript SDK, protocol circuits, etc.) and does NOT have " +
@@ -203,7 +203,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
                   type: "boolean",
                   description:
                     "Override the version-sync gate. By default the search refuses to run when the local " +
-                    "aztec-packages clone tag differs from the corpus version the DocsGPT backend has indexed. " +
+                    "release version differs from the corpus version the DocsGPT backend has indexed. " +
                     "Set true to query anyway (results reflect the corpus version, not your local clone).",
                 },
               }
@@ -217,7 +217,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       name: "aztec_sync_repos",
       description:
         "Clone or update Aztec repositories locally. Run this first to enable searching. " +
-        "Clones: aztec-packages (docs, aztec-nr, contracts), aztec-examples, aztec-starter. " +
+        "For v6, sparsely clones aztec-node at the release-pinned labs commit. " +
+        "Protocol sources (aztec-packages) and Noir are optional. " +
         "Specify a version to clone a specific Aztec release tag.",
       inputSchema: {
         type: "object" as const,
@@ -225,7 +226,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           version: {
             type: "string",
             description:
-              "Aztec version tag to clone (e.g., 'v4.3.0'). Defaults to latest supported version.",
+              "Aztec version tag to clone (e.g., 'v6.0.0-rc.6'). Defaults to latest supported version.",
           },
           force: {
             type: "boolean",
@@ -235,7 +236,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             type: "array",
             items: { type: "string" },
             description:
-              "Specific repos to sync. Options: aztec-packages, aztec-examples, aztec-starter",
+              "For v6: aztec-node (always included), aztec-packages (optional protocol/L1 sources), noir (optional language sources). Older releases use the legacy repository set.",
           },
         },
       },
@@ -271,7 +272,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           repo: {
             type: "string",
             description:
-              "Specific repo to search. Options: aztec-packages, aztec-examples, aztec-starter",
+              "Specific active repo to search. For v6: aztec-node, plus aztec-packages or noir if enabled during sync.",
           },
           maxResults: {
             type: "number",
@@ -323,7 +324,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           path: {
             type: "string",
             description:
-              "File path relative to repos directory (e.g., 'aztec-packages/docs/docs/tutorials/...')",
+              "File path relative to repos directory (e.g., 'aztec-node/noir-projects/noir-contracts/contracts/app/token_contract/src/main.nr')",
           },
         },
         required: ["path"],
@@ -492,7 +493,7 @@ function ensureAutoResync(): void {
         log(`Auto-resync partial: ${syncResult.message}`, "info");
       } else {
         log(
-          `Auto-resync failed: ${syncResult.message}. Local tools will use existing checkouts.`,
+          `Auto-resync failed: ${syncResult.message}`,
           "warning"
         );
       }

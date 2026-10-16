@@ -201,8 +201,23 @@ describe("cloneRepo", () => {
       expect.arrayContaining(["--filter=blob:none", "--sparse", "--no-checkout"])
     );
     expect(mockGitInstance.raw).toHaveBeenCalledWith(["config", "gc.auto", "0"]);
-    expect(mockGitInstance.fetch).toHaveBeenCalledWith(["origin", "abc123def"]);
+    expect(mockGitInstance.fetch).toHaveBeenCalledWith(["--depth=1", "origin", "abc123def"]);
     expect(mockGitInstance.checkout).toHaveBeenCalledWith("abc123def");
+  });
+
+  it("removes an incomplete fresh checkout if sparse population fails after checkout", async () => {
+    mockExistsSync.mockReturnValue(false);
+    mockGitInstance.clone.mockResolvedValue(undefined);
+    mockGitInstance.fetch.mockResolvedValue(undefined);
+    mockGitInstance.checkout.mockResolvedValue(undefined);
+    mockGitInstance.raw.mockImplementation(async (args: string[]) => {
+      if (args[0] === "sparse-checkout") throw new Error("blob download failed");
+    });
+    await expect(cloneRepo({ ...sparseConfig, tag: undefined, commit: "a".repeat(40) }))
+      .rejects.toThrow("blob download failed");
+    expect(mockGitInstance.checkout).toHaveBeenCalled();
+    expect(mockRmSync).toHaveBeenCalledWith(`${REPOS_DIR}/aztec-packages`, { recursive: true, force: true });
+    mockGitInstance.raw.mockReset();
   });
 
   it("sparse + branch: clones with depth=1 and -b flag", async () => {
@@ -314,14 +329,7 @@ describe("cloneRepo", () => {
   });
 
   it("force=true clones to temp dir then swaps", async () => {
-    // existsSync calls:
-    // 1) needsReclone -> isRepoCloned(.git) -> false (needs reclone)
-    // 2) existsSync(repoPath) for needsForceReclone -> true (repo exists)
-    // 3) existsSync(repoPath) before swap -> true (old checkout exists)
-    mockExistsSync
-      .mockReturnValueOnce(false) // needsReclone -> isRepoCloned -> not at right version
-      .mockReturnValueOnce(true)  // existsSync(repoPath) -> repo exists, so needsForceReclone=true
-      .mockReturnValueOnce(true); // existsSync(repoPath) before swap -> old checkout exists
+    mockExistsSync.mockImplementation((path) => String(path) === `${REPOS_DIR}/aztec-packages`);
 
     mockGitInstance.clone.mockResolvedValue(undefined);
     mockGitInstance.raw.mockResolvedValue(undefined);

@@ -6,6 +6,8 @@ const mockExistsSync = vi.fn();
 const mockReaddirSync = vi.fn();
 
 vi.mock("fs", () => ({
+  renameSync: vi.fn(),
+  rmSync: vi.fn(),
   readFileSync: (...args: any[]) => mockReadFileSync(...args),
   writeFileSync: (...args: any[]) => mockWriteFileSync(...args),
   existsSync: (...args: any[]) => mockExistsSync(...args),
@@ -20,7 +22,10 @@ vi.mock("../../src/version.js", () => ({
   MCP_VERSION: "2.0.0",
 }));
 
+import { renameSync, rmSync } from "fs";
+
 import {
+  beginVersionSync,
   getMetadataPath,
   writeSyncMetadata,
   readSyncMetadata,
@@ -47,7 +52,7 @@ describe("writeSyncMetadata", () => {
 
     expect(mockWriteFileSync).toHaveBeenCalledOnce();
     const [path, content] = mockWriteFileSync.mock.calls[0];
-    expect(path).toBe("/fake/repos/.sync-metadata.json");
+    expect(path).toBe("/fake/repos/.sync-metadata.json.tmp");
 
     const parsed = JSON.parse(content);
     expect(parsed.mcpVersion).toBe("2.0.0");
@@ -389,4 +394,33 @@ describe("getSyncState", () => {
 
     expect(getSyncState()).toEqual({ kind: "legacyUnknownVersion" });
   });
+});
+
+
+describe("split sync recovery", () => {
+  it("preserves the previous release while marking an incomplete migration", () => {
+    const previous = { mcpVersion: "2.0.0", syncedAt: "old", aztecVersion: "v4.3.0" };
+    mockReadFileSync.mockReturnValue(JSON.stringify(previous));
+    beginVersionSync("v6.0.0-rc.6", ["aztec-node", "noir"]);
+    const pending = JSON.parse(mockWriteFileSync.mock.calls[0][1]);
+    expect(pending).toEqual({ ...previous, pendingVersion: "v6.0.0-rc.6", pendingRepositories: ["aztec-node", "noir"] });
+    mockReadFileSync.mockReturnValue(JSON.stringify(pending));
+    expect(getSyncState()).toEqual({ kind: "needsAutoResync", aztecVersion: "v6.0.0-rc.6" });
+  });
+
+  it("replaces pending state with the completed release and exact active commits", () => {
+    writeSyncMetadata("v6.0.0-rc.6", { "aztec-node": "a".repeat(40) });
+    const saved = JSON.parse(mockWriteFileSync.mock.calls[0][1]);
+    expect(saved.pendingVersion).toBeUndefined();
+    expect(saved.repositories).toEqual({ "aztec-node": "a".repeat(40) });
+  });
+});
+
+
+it("does not replace the pending metadata record when the atomic rename fails", () => {
+  vi.mocked(renameSync).mockImplementationOnce(() => { throw new Error("rename failed"); });
+  expect(() => writeSyncMetadata("v6.0.0-rc.6", { "aztec-node": "a".repeat(40) })).toThrow("rename failed");
+  expect(mockWriteFileSync.mock.calls[0][0]).toBe("/fake/repos/.sync-metadata.json.tmp");
+  expect(renameSync).toHaveBeenCalledWith("/fake/repos/.sync-metadata.json.tmp", "/fake/repos/.sync-metadata.json");
+  expect(rmSync).toHaveBeenCalledWith("/fake/repos/.sync-metadata.json.tmp", { force: true });
 });

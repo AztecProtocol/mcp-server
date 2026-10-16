@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+vi.mock("../../src/utils/sync-metadata.js", () => ({ readSyncMetadata: vi.fn(() => null) }));
+
 // Mock dependencies before importing the module under test
 vi.mock("child_process", () => ({
   execFileSync: vi.fn(),

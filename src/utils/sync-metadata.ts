@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, existsSync, readdirSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync, renameSync, rmSync } from "fs";
 import { join } from "path";
 import { REPOS_DIR } from "./git.js";
 import { MCP_VERSION } from "../version.js";
@@ -7,6 +7,12 @@ export interface SyncMetadata {
   mcpVersion: string;
   syncedAt: string;
   aztecVersion: string;
+  /** Active checkouts and their exact commits for a split-repository release. */
+  repositories?: Record<string, string>;
+  /** Blocks version-sensitive reads until a split sync completes. */
+  pendingVersion?: string;
+  /** Requested checkouts to retry if a migration is interrupted. */
+  pendingRepositories?: string[];
   autoResyncAttempt?: {
     targetMcpVersion: string;
     attemptedAt: string;
@@ -32,14 +38,35 @@ export function invalidateSyncStateCache(): void {
   cachedSyncState = null;
 }
 
-export function writeSyncMetadata(aztecVersion: string): void {
+function replaceMetadataAtomically(metadata: SyncMetadata): void {
+  const temporaryPath = `${getMetadataPath()}.tmp`;
+  try {
+    writeFileSync(temporaryPath, JSON.stringify(metadata, null, 2));
+    renameSync(temporaryPath, getMetadataPath());
+  } finally {
+    rmSync(temporaryPath, { force: true });
+  }
+  invalidateSyncStateCache();
+}
+
+export function writeSyncMetadata(aztecVersion: string, repositories?: Record<string, string>): void {
   const metadata: SyncMetadata = {
     mcpVersion: MCP_VERSION,
     syncedAt: new Date().toISOString(),
     aztecVersion,
+    ...(repositories ? { repositories } : {}),
   };
-  writeFileSync(getMetadataPath(), JSON.stringify(metadata, null, 2));
-  invalidateSyncStateCache();
+  replaceMetadataAtomically(metadata);
+}
+
+/** Persist intent before replacing checkouts so a failed migration cannot mix releases. */
+export function beginVersionSync(aztecVersion: string, repositories: string[]): void {
+  const metadata = readSyncMetadata() ?? {
+    mcpVersion: MCP_VERSION, syncedAt: "", aztecVersion,
+  };
+  metadata.pendingVersion = aztecVersion;
+  metadata.pendingRepositories = repositories;
+  replaceMetadataAtomically(metadata);
 }
 
 export function readSyncMetadata(): SyncMetadata | null {
@@ -73,8 +100,7 @@ export function writeAutoResyncAttempt(
     attemptedAt: new Date().toISOString(),
     result,
   };
-  writeFileSync(getMetadataPath(), JSON.stringify(metadata, null, 2));
-  invalidateSyncStateCache();
+  replaceMetadataAtomically(metadata);
 }
 
 /**
@@ -94,8 +120,7 @@ export function stampMetadataMcpVersion(aztecVersion: string): void {
     metadata.aztecVersion = aztecVersion;
   }
   delete metadata.autoResyncAttempt;
-  writeFileSync(getMetadataPath(), JSON.stringify(metadata, null, 2));
-  invalidateSyncStateCache();
+  replaceMetadataAtomically(metadata);
 }
 
 /**
@@ -129,6 +154,14 @@ function computeSyncState(): SyncState {
     } catch {
       return { kind: "noRepos" };
     }
+  }
+  if (metadata.pendingVersion) {
+    const attempt = metadata.autoResyncAttempt;
+    if (attempt?.result === "retryable" &&
+        Date.now() - new Date(attempt.attemptedAt).getTime() < 30 * 60_000) {
+      return { kind: "upToDate" };
+    }
+    return { kind: "needsAutoResync", aztecVersion: metadata.pendingVersion };
   }
   if (metadata.mcpVersion === MCP_VERSION) {
     return { kind: "upToDate" };

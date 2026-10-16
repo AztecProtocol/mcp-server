@@ -130,6 +130,12 @@ export function isRepoCloned(repoName: string): boolean {
   return existsSync(join(repoPath, ".git"));
 }
 
+function removeAttemptOwnedCheckout(path: string, existedBeforeAttempt: boolean, isTemporaryReplacement: boolean): void {
+  if (isTemporaryReplacement || !existedBeforeAttempt) {
+    rmSync(path, { recursive: true, force: true });
+  }
+}
+
 /**
  * Clone a repository with optional sparse checkout and tag support
  */
@@ -157,6 +163,7 @@ export async function cloneRepo(
 
   // Clone to a temp dir when replacing an existing repo, so failure leaves the old repo intact
   const clonePath = needsForceReclone ? repoPath + ".tmp" : repoPath;
+  const clonePathExisted = existsSync(clonePath);
 
   if (needsForceReclone) {
     log?.(`${config.name}: Safe re-clone (force=${force}, versionMismatch=${versionMismatch})`, "debug");
@@ -183,21 +190,21 @@ export async function cloneRepo(
     if (isSparse) {
       // Clone with sparse checkout for large repos
       if (config.commit) {
-        // For commits, we need full history to fetch the commit
         await git.clone(config.url, clonePath, [
           "--filter=blob:none",
           "--sparse",
           "--no-checkout",
+          "--depth=1",
         ]);
 
         const repoGit = simpleGit({ baseDir: clonePath, progress: progressHandler });
         await repoGit.raw(["config", "gc.auto", "0"]);
-        log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
-        await repoGit.raw(["sparse-checkout", "set", "--skip-checks", ...config.sparse!]);
         log?.(`${config.name}: Fetching commit ${config.commit.substring(0, 7)}`, "info");
-        await repoGit.fetch(["origin", config.commit]);
+        await repoGit.fetch(["--depth=1", "origin", config.commit]);
         log?.(`${config.name}: Checking out commit`, "debug");
         await repoGit.checkout(config.commit);
+        log?.(`${config.name}: Setting sparse checkout paths: ${config.sparse!.join(", ")}`, "debug");
+        await repoGit.raw(["sparse-checkout", "set", "--skip-checks", ...config.sparse!]);
       } else if (config.tag) {
         await git.clone(config.url, clonePath, [
           "--filter=blob:none",
@@ -250,10 +257,7 @@ export async function cloneRepo(
       }
     }
   } catch (error) {
-    // On failure: clean up temp dir, leave original repo intact
-    if (needsForceReclone) {
-      rmSync(clonePath, { recursive: true, force: true });
-    }
+    removeAttemptOwnedCheckout(clonePath, clonePathExisted, needsForceReclone);
     throw error;
   }
 

@@ -4,13 +4,13 @@ An MCP (Model Context Protocol) server that provides local access to Aztec docum
 
 ## Features
 
-- **Version Support**: Clone specific Aztec release tags (e.g., `v4.3.0`)
-- **Local Repository Cloning**: Automatically clones Aztec repositories with sparse checkout for efficiency
+- **Version Support**: Clone specific Aztec release tags (e.g., `v6.0.0-rc.6`)
+- **Lightweight v6 Sync**: Clones only selected paths from `aztec-node`, pinned to the `labs` commit recorded in the requested `aztec-packages` release. Protocol and Noir sources are optional.
 - **Fast Code Search**: Search Noir contracts and TypeScript files using ripgrep (with fallback)
 - **Documentation Search**: Search Aztec documentation locally; with an API key, semantic vector search across the full corpora (framework docs, examples, Noir stdlib, TypeScript SDK, protocol circuits)
 - **Error Lookup**: Static catalog (Solidity / circuit / TX / AVM errors) plus optional semantic fallback for unrecognized errors when an API key is configured
 - **Example Discovery**: List and read Aztec contract examples
-- **Version-sync Gate**: When using the hosted semantic backend, the server detects mismatches between your local clone tag and the indexed corpus and refuses to query across versions unless explicitly overridden
+- **Version-sync Gate**: When using the hosted semantic backend, the server detects mismatches between your local release and the indexed corpus and refuses to query across versions unless explicitly overridden
 
 ## API Key (optional, recommended)
 
@@ -73,7 +73,7 @@ Add to your `.mcp.json`. The minimal config is just the command; add `env.API_KE
 | `API_KEY`             | unset                                | Personal API key from `/mcp-key` in the Noir Discord (<https://discord.gg/xMud5StFyA>). Unset → local-only mode. |
 | `API_URL`             | `https://aztec.adjacentpossible.dev` | DocsGPT backend the semantic search hits. Override to point at a self-hosted instance.                              |
 | `REQUEST_TIMEOUT`     | `60000`                              | Semantic-search request timeout (ms).                                                                               |
-| `AZTEC_DEFAULT_VERSION` | `v4.3.0`                             | Default version tag for `aztec_sync_repos`.                                                                         |
+| `AZTEC_DEFAULT_VERSION` | `v6.0.0-rc.6`                             | Default version tag for `aztec_sync_repos`.                                                                         |
 | `AZTEC_MCP_REPOS_DIR` | `~/.aztec-mcp/repos/`                | Where local clones live.                                                                                            |
 
 ## Available Tools
@@ -83,23 +83,39 @@ Add to your `.mcp.json`. The minimal config is just the command; add `env.API_KE
 Clone or update Aztec repositories locally. **Run this first** to enable other tools.
 
 ```
-Clones:
-- aztec-packages (docs, aztec-nr, noir-contracts) - sparse checkout
-- aztec-examples (full)
-- aztec-starter (full)
+Default for v6:
+- aztec-node: SDK, Aztec.nr, contract examples, playground, and documentation
+
+Optional:
+- aztec-packages: protocol, proving-system TypeScript, and L1 sources
+- noir: language docs, standard library, and tooling
 ```
 
 **Parameters:**
 
-- `version` (string): Aztec version tag to clone (e.g., `v4.3.0`). Defaults to latest supported version.
+- `version` (string): Aztec version tag to clone (e.g., `v6.0.0-rc.6`). Defaults to latest supported version.
 - `force` (boolean): Force re-clone even if repos exist
-- `repos` (string[]): Specific repos to sync
+- `repos` (string[]): For v6, select optional `aztec-packages` and/or `noir` sources. `aztec-node` is always included to keep SDK and documentation aligned with the release. Older versions retain their legacy repository configuration.
 
 **Example - Clone specific version:**
 
 ```
-aztec_sync_repos({ version: "v4.3.0" })
+aztec_sync_repos({ version: "v6.0.0-rc.6" })
 ```
+
+The default sync uses a temporary, shallow, blob-filtered Git fetch to read the release's `labs` and Noir gitlinks. It then removes that temporary Git data and makes one persistent shallow, partial, sparse checkout of `https://github.com/aztec-labs-eng/aztec-node` at the pinned commit.
+
+To include protocol/L1 and Noir sources:
+
+```
+aztec_sync_repos({ version: "v6.0.0-rc.6", repos: ["aztec-packages", "noir"] })
+```
+
+The `v6.0.0-rc.6` release pins `aztec-node` at `1b6de149f4fe1cde3c5fb876d3822289f490cd2a`. That checkout has no exact `rc.6` documentation snapshot, so local documentation search uses its unversioned docs and reports the commit as provenance. It does not substitute an older snapshot.
+
+Sync metadata records the release and active checkout commits. Searches exclude leftover repositories from previous releases. Optional sources remain active on a same-version resync if their commits still match; when changing versions, specify the optional sources again. Interrupted v6 syncs block version-sensitive searches until sync succeeds, and retries preserve the requested optional repositories. Downgrading to a legacy release requires a full sync (omit `repos`) to avoid mixing releases. Existing installs should run `aztec_sync_repos` with the version above to migrate.
+
+The companion repositories `aztec-examples`, `aztec-starter`, and `demo-wallet` are not offered for v6 because matching release tags are unavailable. Contract examples come from the pinned `aztec-node` checkout.
 
 ### `aztec_status`
 
@@ -133,7 +149,7 @@ Search Aztec documentation. Local ripgrep by default; semantic vector search whe
 - `maxResults` (number): Maximum results (default: 20 local; 5 semantic, max 20)
 - `chunks` (number, semantic only): Number of result chunks (1-20). If omitted, `maxResults` is used.
 - `useLocalFallback` (boolean, semantic only): If the semantic backend fails, fall back to local ripgrep. Default `false` so backend errors surface clearly.
-- `allowVersionMismatch` (boolean, semantic only): Override the version-sync gate. Default `false`. The gate refuses to search when your local `aztec-packages` clone tag differs from the corpus version the backend has indexed.
+- `allowVersionMismatch` (boolean, semantic only): Override the version-sync gate. Default `false`. The gate refuses to search when your local release version differs from the corpus version the backend has indexed, including release-candidate suffixes (`rc.1` and `rc.6` are distinct).
 
 ### `aztec_list_examples`
 
@@ -203,7 +219,7 @@ Set the default Aztec version with the `AZTEC_DEFAULT_VERSION` environment varia
       "command": "npx",
       "args": ["-y", "@aztec/mcp-server@latest"],
       "env": {
-        "AZTEC_DEFAULT_VERSION": "v3.0.0-devnet.6-plugin.1"
+        "AZTEC_DEFAULT_VERSION": "v6.0.0-rc.6"
       }
     }
   }
@@ -223,6 +239,10 @@ npm install
 # Build
 npm run build
 
+npm test
+
+node test.mjs
+
 # Run locally
 node dist/index.js
 ```
@@ -235,11 +255,13 @@ node dist/index.js
 
 ## Cloned Repositories
 
-| Repository                                                        | Description       | Checkout                               |
-| ----------------------------------------------------------------- | ----------------- | -------------------------------------- |
-| [aztec-packages](https://github.com/AztecProtocol/aztec-packages) | Main monorepo     | Sparse: docs, aztec-nr, noir-contracts |
-| [aztec-examples](https://github.com/AztecProtocol/aztec-examples) | Official examples | Full                                   |
-| [aztec-starter](https://github.com/AztecProtocol/aztec-starter)   | Starter template  | Full                                   |
+| Repository | v6 use | Checkout |
+| --- | --- | --- |
+| [aztec-node](https://github.com/aztec-labs-eng/aztec-node) | Default: SDK, Aztec.nr, contracts, docs | Shallow, partial, sparse; pinned by the release's `labs` gitlink |
+| [aztec-packages](https://github.com/AztecProtocol/aztec-packages) | Optional: protocol and L1 sources | Shallow, partial, sparse; pinned to the release commit |
+| [noir](https://github.com/noir-lang/noir) | Optional: language documentation and tooling | Shallow, partial, sparse; pinned by the release's Noir gitlink |
+
+Versions before v6 retain the existing monorepo and companion repository configuration.
 
 ## License
 
