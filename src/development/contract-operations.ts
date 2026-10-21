@@ -56,7 +56,6 @@ export interface LoadedArtifact {
   path: string; bytes: Buffer; contentHash: string; artifact: any; classId: string; contractName: string; provenanceHash?: string;
 }
 
-/** Worker-only artifact loading shared with deployment; never imports caller-selected code. */
 export async function loadArtifact(context: RuntimeContext, path: string): Promise<LoadedArtifact> {
   const selected = await artifactBytes(path);
   return { ...selected, ...await parseArtifact(context, selected.bytes) };
@@ -94,13 +93,11 @@ async function saveSnapshot(context: RuntimeContext, bytes: Buffer, contentHash:
   }
 }
 
-/** Preserve exact deployment input before submission without claiming it is deployed or registered. */
 export async function saveArtifactSnapshot(context: RuntimeContext, selected: LoadedArtifact): Promise<void> {
   if (digest(selected.bytes) !== selected.contentHash) fail("registration-store-corrupt");
   await saveSnapshot(context, selected.bytes, selected.contentHash);
 }
 
-/** Persist a validated association after the caller has registered the matching instance. */
 export async function recordContractAssociation(context: RuntimeContext, value: string, selected: LoadedArtifact, observedBlock: number): Promise<ContractAssociation> {
   const address = (await addressValue(context, value)).toString();
   const existing = await associationFor(context, address);
@@ -205,7 +202,6 @@ export async function inspectContract(input: ContractInspectionInput, context: R
   };
 }
 
-/** Subsequent operations use the persisted snapshot, even if its original source was rebuilt. */
 export async function loadRegisteredContract(context: RuntimeContext, value: string) {
   const address = await addressValue(context, value);
   const association = await associationFor(context, address.toString());

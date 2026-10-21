@@ -26,7 +26,6 @@ export const CANDIDATE_RUNTIME_PROFILE: SupportedRuntimeProfile = Object.freeze(
 
 const SUPPORTED_RUNTIME_PROFILES: readonly SupportedRuntimeProfile[] = Object.freeze([CANDIDATE_RUNTIME_PROFILE]);
 
-/** Installation paths are machine-local; identities and provenance define the tuple. */
 export function runtimeIdentity(report: ToolchainReport): string {
   return createHash("sha256").update(JSON.stringify({
     target: report.target,
@@ -47,7 +46,6 @@ function canonicalField(value: unknown): string | undefined {
   return `0x${BigInt(value).toString(16).padStart(64, "0")}`;
 }
 
-/** Compare protocol components, allowing the same local protocol at a new rollup address. */
 export function networkProfileMismatches(expected: NodeCompatibilityProfile, observed: ObservedNetwork): (keyof NodeCompatibilityProfile)[] {
   const mismatches: (keyof NodeCompatibilityProfile)[] = [];
   for (const field of ["nodeVersion", "l1ChainId", "rollupVersion", "realProofs"] as const) {
@@ -66,7 +64,6 @@ export class RuntimeSupportError extends Error {
   }
 }
 
-/** Production gate: a known SDK tuple must also match its accepted node protocol profile. */
 export function validateSupportedNetwork(identity: string, observed: ObservedNetwork): SupportedRuntimeProfile {
   const profile = getSupportedRuntimeProfile(identity);
   if (!profile) throw new RuntimeSupportError("unsupported-runtime", "The selected component tuple has not completed development acceptance.");

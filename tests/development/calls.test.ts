@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { FIELD_MODULUS, validateFunctionArguments, type AbiType } from "../../src/development/abi.js";
+import { BN254_SCALAR_FIELD_MODULUS, validateFunctionArguments, type AbiType } from "../../src/development/abi.js";
 import { executeCall } from "../../src/development/call-operations.js";
 import { registerContract } from "../../src/development/contract-operations.js";
 import type { RuntimeContext } from "../../src/development/runtime-worker.js";
@@ -22,8 +22,8 @@ describe("strict ABI inputs", () => {
     expect(() => arg({ kind: "integer", width: 8, sign: "signed" }, -129)).toThrow("i8");
   });
   it("rejects out-of-range fields, coerced booleans, malformed addresses and strings", () => {
-    expect(arg({ kind: "field" }, (FIELD_MODULUS - 1n).toString())).toBe(FIELD_MODULUS - 1n);
-    for (const value of [FIELD_MODULUS.toString(), -1, true]) expect(() => arg({ kind: "field" }, value)).toThrow();
+    expect(arg({ kind: "field" }, (BN254_SCALAR_FIELD_MODULUS - 1n).toString())).toBe(BN254_SCALAR_FIELD_MODULUS - 1n);
+    for (const value of [BN254_SCALAR_FIELD_MODULUS.toString(), -1, true]) expect(() => arg({ kind: "field" }, value)).toThrow();
     for (const value of ["false", 0, {}, null]) expect(() => arg({ kind: "boolean" }, value)).toThrow("JSON boolean");
     expect(arg(addressType, alice)).toEqual({ inner: 2n });
     expect(() => arg(addressType, "0x2")).toThrow("32-byte");

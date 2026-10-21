@@ -11,13 +11,11 @@ export interface ArtifactIdentity {
   contractName?: string;
 }
 export const hash = (data: string | Buffer) => createHash("sha256").update(data).digest("hex");
-/** Follow local manifest dependencies and hash source/manifest contents, never incremental output. */
 export async function projectProvenance(project: string, runtime: ToolchainReport, options: unknown, includeGitDependencies = true): Promise<string> {
   return (await fingerprintProject(project, runtime, options, includeGitDependencies)).hash;
 }
 export interface ProjectProvenanceSnapshot { hash: string; unresolvedGitDependencies: string[] }
-/** Capture missing cache roots so first-time compiler downloads can be distinguished from changed inputs. */
-export function captureProjectProvenance(project: string, runtime: ToolchainReport, options: unknown, treatAsUnresolved: ReadonlySet<string> = new Set()): Promise<ProjectProvenanceSnapshot> {
+export function projectProvenanceSnapshot(project: string, runtime: ToolchainReport, options: unknown, treatAsUnresolved: ReadonlySet<string> = new Set()): Promise<ProjectProvenanceSnapshot> {
   return fingerprintProject(project, runtime, options, true, treatAsUnresolved);
 }
 async function fingerprintProject(project: string, runtime: ToolchainReport, options: unknown, includeGitDependencies: boolean, treatAsUnresolved: ReadonlySet<string> = new Set()): Promise<ProjectProvenanceSnapshot> {
@@ -104,7 +102,6 @@ export async function collectArtifacts(project: string, provenanceHash: string, 
 }
 
 export interface QuarantinedArtifact { originalPath: string; path: string; contentHash: string }
-/** Keep obsolete compiler outputs recoverable without certifying them as outputs of a new build. */
 export async function quarantineArtifacts(project: string, artifacts: readonly ArtifactIdentity[]): Promise<QuarantinedArtifact[]> {
   if (!artifacts.length) return [];
   const directory = join(project, ".aztec-mcp", "build-artifacts", randomUUID());

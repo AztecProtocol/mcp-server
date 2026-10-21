@@ -51,7 +51,6 @@ function decodedResult(value: unknown): unknown {
   return JSON.parse(json);
 }
 
-/** Simulate through public wallet APIs, preserving selected-account scope and no-send evidence. */
 export async function executeCall(input: ContractCallInput, context: RuntimeContext, operation: "simulate" | "view"): Promise<ContractCallResult> {
   validateCallInput(input);
   const loaded = await loadRegisteredContract(context, input.address);
@@ -74,8 +73,6 @@ export async function executeCall(input: ContractCallInput, context: RuntimeCont
   try {
     const { Contract } = await context.loadModule("@aztec-labs/aztec.js/contracts");
     const contract = await Contract.at(loaded.address, loaded.artifact, context.wallet);
-    // EmbeddedWallet.syncChainTip is explicitly proposed. These public methods sync PXE and
-    // contract/account state before executing; they do not prove or submit a transaction.
     simulated = await contract.methods[abi.name](...args).simulate({ from: account, includeMetadata: true });
   } catch (error) {
     const assertion = contractAssertion(error, abi);

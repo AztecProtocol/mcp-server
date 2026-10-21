@@ -3,7 +3,7 @@ import { access, realpath, readFile, mkdir, writeFile, readdir } from "node:fs/p
 import { dirname, isAbsolute, join } from "node:path";
 import { validateSupportedRuntime, type RuntimeValidator } from "./policy.js";
 import { Jobs, JobFailure, runJobProcess, type JobSnapshot } from "./jobs.js";
-import { collectArtifacts, projectProvenance, captureProjectProvenance, quarantineArtifacts, type QuarantinedArtifact } from "./artifacts.js";
+import { collectArtifacts, projectProvenance, projectProvenanceSnapshot, quarantineArtifacts, type QuarantinedArtifact } from "./artifacts.js";
 import type { ToolchainReport } from "./toolchain.js";
 export interface BuildArguments {
   operation: "compile" | "test";
@@ -90,7 +90,7 @@ export class BuildService {
         context.phase("fingerprint");
         const options = { operation: "compile", package: args.operation === "compile" ? args.package : undefined };
         const sourceHash = await projectProvenance(project, runtime, options, false);
-        const inputsBefore = await captureProjectProvenance(project, runtime, options);
+        const inputsBefore = await projectProvenanceSnapshot(project, runtime, options);
         const before = inputsBefore.hash;
         const receiptPath = join(project, ".aztec-mcp", "build.json");
         let receipt: {
@@ -133,9 +133,9 @@ export class BuildService {
         const after = await projectProvenance(project, runtime, options, false);
         if (after !== sourceHash)
           throw new JobFailure("sources-changed", "Build inputs changed during compilation; rebuild before using artifacts.");
-        const inputsAfter = await captureProjectProvenance(project, runtime, options);
+        const inputsAfter = await projectProvenanceSnapshot(project, runtime, options);
         const comparableAfter = inputsBefore.unresolvedGitDependencies.length
-          ? await captureProjectProvenance(project, runtime, options, new Set(inputsBefore.unresolvedGitDependencies))
+          ? await projectProvenanceSnapshot(project, runtime, options, new Set(inputsBefore.unresolvedGitDependencies))
           : inputsAfter;
         if (comparableAfter.hash !== before)
           throw new JobFailure("sources-changed", "Cached dependency inputs changed during compilation; rebuild before using artifacts.");

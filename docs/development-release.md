@@ -4,7 +4,7 @@
 
 ## Boundary
 
-The tool never signs, never submits a transaction and never contacts a network. It writes three files and stops. You run the deploy script with your own `aztec-wallet`, your own keys and your own funds. The files hold names, paths and hashes only, never keys or secrets. The node URL is written into the files and is not contacted.
+The tool never signs, never submits a transaction and never contacts a network. It writes three files and stops. You run the deploy script with your own `aztec-wallet`, your own keys and your own funds. The files hold names, paths and hashes only, never keys or secrets. The tool writes the node URL into the files and does not contact it.
 
 ## Package a build
 
@@ -49,15 +49,15 @@ The tool runs these checks in order. A failure returns an error with the listed 
 1. The runtime is supported: `unsupported-runtime`.
 2. The build job exists, is completed, and has the same selection: `invalid-build`.
 3. The artifact belongs to the job, and its bytes and project inputs are unchanged: `stale-artifact`.
-4. The output directory is created: `output-exists` when it exists, `output-parent-missing` when the parent is missing, `output-not-canonical` when it resolves to a different path. In the last case the tool removes the new directory.
+4. The tool creates the output directory: `output-exists` when it exists, `output-parent-missing` when the parent is missing, `output-not-canonical` when it resolves to a different path. In the last case the tool removes the new directory.
 
 On macOS, `/tmp` is a symbolic link. Pass the resolved path, for example `/private/tmp/token-1`.
 
-The tool renders all three files before it creates the directory. A value that the wallet could read as an option is an invalid input. The boundary rejects such values before any work; the renderer also refuses them (`invalid-script-value`). If a write fails, the tool removes the files and the directory and reports the original error.
+The tool renders all three files before it creates the directory. A value that the wallet could read as an option is an invalid input. The boundary rejects such values before any work. The renderer also refuses them with `invalid-script-value`. If a write fails, the tool removes the files and the directory and reports the original error.
 
 ## Files written
 
-The tool writes `manifest.json`, `deploy.sh` and `CHECKLIST.md` into the new directory (mode `0o700`). Each file is written to a temporary name and renamed into place.
+The tool writes `manifest.json`, `deploy.sh` and `CHECKLIST.md` into the new directory (mode `0o700`). The tool writes each file to a temporary name and renames it into place.
 
 - `manifest.json` (mode `0o600`): the build job, the artifact path and SHA-256 hash, the deployment values, the fee method and the toolchain. The result returns the same object.
 - `deploy.sh` (mode `0o700`): a variable block followed by one `aztec-wallet deploy` command. The script checks the artifact hash first and stops if the artifact changed. Every value is single-quoted.
@@ -67,9 +67,9 @@ The result lists the directory, the three file paths and the manifest.
 
 ## Checklist flow
 
-1. Before you run: compare the version of the node with the CLI version, confirm the account exists (and see how to create it), confirm the fee method and its funding or sponsor address, and read the script.
+1. Before you run, compare the node version with the CLI version. Confirm that the account exists, or create it with the listed command. Confirm the fee method and its funding or sponsor address. Read the script.
 2. Run: `bash <outputDirectory>/deploy.sh`.
-3. After: record the printed address and transaction hash, confirm the receipt with `get-tx`, register the contract in other wallets with `register-contract`, and keep the manifest with the deployed address.
+3. After the run, record the printed address and transaction hash, confirm the receipt with `get-tx`, register the contract in other wallets with `register-contract`, and keep the manifest with the deployed address.
 
 ## Verify against the installed CLI
 
@@ -81,6 +81,6 @@ npm test -- tests/development/release-drift.test.ts tests/development/release-li
 ```
 
 - `release-drift.test.ts` reads the installed `@aztec-labs/cli-wallet` and checks that the `deploy` command, every flag in the rendered script, both fee methods and the commands in the checklist are declared. The flag list comes from the renderer output, so it cannot drift from the generator.
-- `release-live.test.ts` compiles `tests/fixtures/development/private-token`, packages it into a new directory and runs `bash -n` on `deploy.sh`. The script is never executed.
+- `release-live.test.ts` compiles `tests/fixtures/development/private-token`, packages it into a new directory and runs `bash -n` on `deploy.sh`. The test never executes the script.
 
 Both tests skip when `AZTEC_MCP_CANDIDATE_RECORD` is not set. On 2026-10-21, with CLI 6.0.0-rc.3, both tests passed.

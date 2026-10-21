@@ -55,7 +55,6 @@ function validate(input: ContractInspectionInput) {
   if (input.artifactPath !== undefined && !isAbsolute(input.artifactPath)) throw new SessionError("invalid-artifact-path", "Provide an absolute artifact JSON path.");
 }
 
-/** Structured parent API; SDK objects stay inside the persistent worker. */
 export class ContractService {
   constructor(private readonly sessions: SessionService) {}
   simulate(sessionId: string, input: ContractCallInput): Promise<ContractCallResult> {

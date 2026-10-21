@@ -27,12 +27,12 @@ export async function assertFreshArtifact(input: FreshArtifactOptions): Promise<
     artifacts?: ArtifactIdentity[];
   } | undefined;
   if (build.status !== "completed" || (build.kind !== "compile" && build.kind !== "test") || !result?.projectPath)
-    throw new FreshnessError("invalid-build", `Build job ${input.buildJobId} is not a completed compile or test job; select a successful build.`);
+    throw new FreshnessError("invalid-build", `Build job ${input.buildJobId} is not a completed compile or test job. Select a successful build.`);
   if (input.projectPath !== undefined && result.projectPath !== input.projectPath)
-    throw new FreshnessError("invalid-build", "The build job belongs to a different project; select a build from this session's canonical project.");
+    throw new FreshnessError("invalid-build", "The build job belongs to a different project. Select a build from this session's canonical project.");
   if (result.toolchain?.installationRoot !== input.runtime.installationRoot || result.toolchain?.nodeExecutable !== input.runtime.runtimeNode.path)
-    throw new FreshnessError("invalid-build", "The build was made with a different installation or Node executable; compile again with this runtime.");
-  const stale = () => new FreshnessError("stale-artifact", "The selected artifact or its sources, dependencies, toolchain or options changed; compile again.");
+    throw new FreshnessError("invalid-build", "The build was made with a different installation or Node executable. Compile again with this runtime.");
+  const stale = () => new FreshnessError("stale-artifact", "The selected artifact or its sources, dependencies, toolchain or options changed. Compile again.");
   const missing = (error: unknown) => { throw ["ENOENT", "ENOTDIR"].includes((error as NodeJS.ErrnoException).code ?? "") ? stale() : error; };
   const path = await realpath(input.artifactPath).catch(missing);
   const artifact = result.artifacts?.find(a => a.path === path);

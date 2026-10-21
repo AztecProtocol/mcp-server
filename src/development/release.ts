@@ -125,13 +125,13 @@ export function renderChecklist(manifest: ReleaseManifest, scriptPath: string): 
     "",
     "## Before you run",
     "",
-    `1. Confirm the target node version matches the toolchain. The CLI version is \`${toolchain.cli.identity ?? "unknown"}\`. Ask the node for its version and compare \`nodeVersion\` with it. A mismatch can make the deployment fail.`,
+    `1. Confirm the target node version matches the toolchain. The CLI version is \`${toolchain.cli.identity ?? "unknown"}\`. Run the command below and compare \`nodeVersion\` in the response with the CLI version. A mismatch can make the deployment fail.`,
     "",
     "   ```bash",
     `   curl -s -X POST ${node} -H 'content-type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"node_getNodeInfo","params":[]}'`,
     "   ```",
     "",
-    `2. Confirm the account \`${deployment.account}\` exists in this wallet's data directory. If the account does not exist yet, create it. \`create-account\` registers and deploys the account in one step. Use \`deploy-account\` only for an account that was registered with \`--register-only\`.`,
+    `2. Confirm the account \`${deployment.account}\` exists in this wallet's data directory. If the account does not exist yet, create it. \`create-account\` registers and deploys the account in one step. Use \`deploy-account\` only for an account that you registered with \`--register-only\`.`,
     "",
     "   ```bash",
     `   ${wallet} create-account --node-url ${node} --alias ${account} --payment ${payment}`,
@@ -139,7 +139,7 @@ export function renderChecklist(manifest: ReleaseManifest, scriptPath: string): 
     "   ```",
     "",
     `3. ${feeStep}`,
-    `4. Read the script \`${scriptPath}\`. Every value in its variable block is yours to change.`,
+    `4. Read the script \`${scriptPath}\`. You can change every value in its variable block.`,
     "",
     "## Run",
     "",
@@ -164,20 +164,20 @@ export function renderChecklist(manifest: ReleaseManifest, scriptPath: string): 
     `   ${wallet} register-contract <address> ${quote(artifact.path)} --node-url ${node}`,
     "   ```",
     "",
-    `4. Keep \`${join(dirname(scriptPath), "manifest.json")}\` with the deployed address. It ties the deployment to the verified build.`,
+    `4. Keep \`${join(dirname(scriptPath), "manifest.json")}\` with the deployed address. It records which verified build the deployment used.`,
   ];
   return `${lines.join("\n")}\n`;
 }
 async function createOutputDirectory(path: string): Promise<void> {
   try { await mkdir(path, { mode: 0o700 }); } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
-    if (code === "EEXIST") throw new ReleaseError("output-exists", "outputDirectory already exists; select a new directory.");
+    if (code === "EEXIST") throw new ReleaseError("output-exists", "outputDirectory already exists. Select a new directory.");
     if (code === "ENOENT") throw new ReleaseError("output-parent-missing", "The parent of outputDirectory does not exist.");
     throw error;
   }
   if (await realpath(path) !== path) {
     await rmdir(path);
-    throw new ReleaseError("output-not-canonical", "outputDirectory resolves to a different path; pass the resolved path (realpath) instead.");
+    throw new ReleaseError("output-not-canonical", "outputDirectory resolves to a different path. Pass the path that realpath prints.");
   }
 }
 async function writeExclusive(path: string, content: string, mode: number): Promise<void> {

@@ -5,6 +5,7 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { createServer } from "../dist/server.js";
 import { createDevelopmentBoundary } from "../dist/development/index.js";
 import { inspectToolchain } from "../dist/development/toolchain.js";
+const SDK_HASHING_BACKEND_INITIALIZATIONS = 1;
 
 const [configurationPath, outputPath] = process.argv.slice(2);
 if (!configurationPath || !outputPath) throw new Error("Usage: node scripts/validate-real-proving.mjs CONFIG.json EVIDENCE.json");
@@ -61,7 +62,7 @@ try {
   assert.notEqual(fast.sessionId, opened.sessionId); assert.equal(fast.proverEnabled, false);
   report.fastTelemetry = fast.environment.proofTelemetry;
   assert.equal(report.fastTelemetry.realProofRequests, 0); assert.equal(report.fastTelemetry.srsInitializationRequests, 0);
-  assert.equal(report.fastTelemetry.asyncBackendInitializations, 1); // Required SDK Poseidon hashing singleton.
+  assert.equal(report.fastTelemetry.asyncBackendInitializations, SDK_HASHING_BACKEND_INITIALIZATIONS);
   report.fastModeRestoredThroughLifecycle = true;
   await call("aztec_dev_session", { operation: "close", sessionId: fast.sessionId });
   report.status = "passed";

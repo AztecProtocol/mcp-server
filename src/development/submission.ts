@@ -5,7 +5,6 @@ type ObservedSubmission = Omit<SubmissionOutcome, "address" | "registered">;
 type SubmittedHash = { txHash: { toString(): string } };
 const HEX32 = /^0x[0-9a-fA-F]{64}$/;
 
-/** Observe one public node submission for either deployment or contract send; never retry. */
 export async function observeSubmission(
   context: Pick<RuntimeContext, "node" | "rpcEvidence">,
   submit: () => Promise<SubmittedHash>,

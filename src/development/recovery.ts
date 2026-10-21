@@ -77,7 +77,6 @@ async function verifyArtifact(record: TransactionRecord) {
   }
 }
 
-/** Reconcile persisted evidence by receipt lookup only; this class never calls a submit operation. */
 export class RecoveryService {
   private queue: Promise<unknown> = Promise.resolve();
   private admitted = new Map<string, number>();

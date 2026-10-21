@@ -82,7 +82,6 @@ async function main() {
         // The native backend inherits CRS_PATH; its crsPath option applies only to WASM.
         process.env.CRS_PATH = proving.crsPath;
       }
-      // Install guards before any SDK import can initialize its required hashing singleton.
       const { Barretenberg } = await loadModule("@aztec-foundation/bb.js");
       const originalBackend = Barretenberg.new;
       Barretenberg.new = async function (options: Record<string, unknown> = {}) {

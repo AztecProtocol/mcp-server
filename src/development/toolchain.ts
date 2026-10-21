@@ -83,7 +83,6 @@ function atLeast(actual: string, minimum: string): boolean {
   return true;
 }
 
-/** Inspect an installation without importing its SDK, opening a wallet, or consulting PATH. */
 export async function inspectToolchain(selection: ToolchainSelection): Promise<ToolchainReport> {
   const report: ToolchainReport = {
     target: TARGET, installationRoot: selection.installationRoot, supported: false,
@@ -273,6 +272,18 @@ async function inspectionMetadataFingerprint(selection: ToolchainSelection): Pro
       for (const child of Object.values(value)) literalTargets(child, directory);
     }
   };
+  const addResolutionCandidates = async (importer: string, dependency: string) => {
+    for (const directory of createRequire(importer).resolve.paths(dependency) ?? []) {
+      if (!contained(root, directory)) continue;
+      const candidate = join(directory, dependency, "package.json"); add(candidate);
+      try {
+        const nested = JSON.parse(await readFile(candidate, "utf8"));
+        literalTargets(nested.exports, dirname(candidate));
+        if (typeof nested.main === "string") add(join(dirname(candidate), nested.main));
+        return;
+      } catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") return; }
+    }
+  };
   for (const name of [...LABS_PACKAGES.map(p => `@aztec-labs/${p}`), ...FOUNDATION_PACKAGES.map(p => `@aztec-foundation/${p}`)]) {
     const manifest = join(root, "node_modules", name, "package.json"); add(manifest);
     let pkg: any;
@@ -283,17 +294,7 @@ async function inspectionMetadataFingerprint(selection: ToolchainSelection): Pro
     if (typeof pkg.main === "string") add(join(dirname(manifest), pkg.main));
     const canonicalManifest = await realpath(manifest).catch(() => manifest);
     for (const dependency of Object.keys(pkg.dependencies ?? {}).filter(name => name.startsWith("@aztec-foundation/"))) {
-      for (const directory of createRequire(canonicalManifest).resolve.paths(dependency) ?? []) {
-        if (!contained(root, directory)) continue;
-        // Include absent nearer candidates: adding a nested dependency changes resolution.
-        const candidate = join(directory, dependency, "package.json"); add(candidate);
-        try {
-          const nested = JSON.parse(await readFile(candidate, "utf8"));
-          literalTargets(nested.exports, dirname(candidate));
-          if (typeof nested.main === "string") add(join(dirname(candidate), nested.main));
-          break;
-        } catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") break; }
-      }
+      await addResolutionCandidates(canonicalManifest, dependency);
     }
   }
   if (paths.size > 4096) return undefined;
@@ -312,7 +313,6 @@ async function inspectionMetadataFingerprint(selection: ToolchainSelection): Pro
   return { fingerprint: createHash("sha256").update(JSON.stringify(identities)).digest("hex"), resolvedPaths };
 }
 
-/** Bounded successful-preflight cache. Public environment inspection can remain uncached. */
 export function createCachedToolchainInspector(options: { maxEntries?: number } = {}): ToolchainInspector {
   const maxEntries = options.maxEntries ?? 4;
   if (!Number.isInteger(maxEntries) || maxEntries < 1 || maxEntries > 32) throw new Error("maxEntries must be an integer from 1 to 32.");

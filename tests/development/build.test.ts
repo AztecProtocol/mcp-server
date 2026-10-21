@@ -6,6 +6,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { BuildService } from "../../src/development/build.js";
 import type { ToolchainReport } from "../../src/development/toolchain.js";
+async function expectProcessNotRunning(pid: number): Promise<void> {
+  try {
+    expect((await readFile(`/proc/${pid}/stat`, "utf8")).split(" ")[2]).toBe("Z");
+  }
+  catch (error) {
+    expect(["ENOENT", "ESRCH"]).toContain((error as NodeJS.ErrnoException).code);
+  }
+}
 const dirs: string[] = [];
 const services: BuildService[] = [];
 afterEach(async () => { vi.restoreAllMocks(); await Promise.all(services.splice(0).map(s => s.jobs.close())); await Promise.all(dirs.splice(0).map(d => rm(d, { recursive: true, force: true }))); });
@@ -72,13 +80,7 @@ it("cancels the owned process group and keeps retrieved results readable", async
   service.jobs.cancel(job.id);
   expect((await service.jobs.wait(job.id)).status).toBe("cancelled");
   expect(service.jobs.get(job.id).status).toBe("cancelled");
-  // On Linux a reaped or zombie child is no longer executing; inspect state without signalling other processes.
-  try {
-    expect((await readFile(`/proc/${pid}/stat`, "utf8")).split(" ")[2]).toBe("Z");
-  }
-  catch (error) {
-    expect(["ENOENT", "ESRCH"]).toContain((error as NodeJS.ErrnoException).code);
-  }
+  await expectProcessNotRunning(pid);
 });
 it("refuses invalid package flags and rejects incompatible runtimes before spawn", async () => {
   const { service, args } = await fixture(`throw new Error('must not execute');`);

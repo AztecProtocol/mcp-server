@@ -1,5 +1,4 @@
-/** The Noir field used by the validated Aztec runtime (BN254 scalar field). */
-export const FIELD_MODULUS = 21888242871839275222246405745257275088548364400416034343698204186575808495617n;
+export const BN254_SCALAR_FIELD_MODULUS = 21888242871839275222246405745257275088548364400416034343698204186575808495617n;
 export interface AbiType {
   kind: string; width?: number; sign?: string; length?: number; type?: AbiType;
   path?: string; fields?: Array<{ name: string; type: AbiType }>;
@@ -23,14 +22,13 @@ function integer(value: unknown, path: string): bigint {
   if (typeof value !== "string" || value.length > 256 || !/^(?:-?(?:0|[1-9][0-9]*)|0x[0-9a-fA-F]+)$/.test(value)) invalid(path, "expected an integer, decimal string, or 0x hexadecimal string");
   return BigInt(value);
 }
-/** Validate before the SDK's permissive encoder can coerce booleans or round JSON numbers. */
 export function validateFunctionArguments(abi: Pick<FunctionAbi, "parameters">, values: unknown): { args: unknown[]; aztecAddresses: string[] } {
   if (!Array.isArray(values) || values.length !== abi.parameters.length) invalid("args", `expected exactly ${abi.parameters.length} arguments`);
   const aztecAddresses: string[] = []; let visited = 0;
   function normalize(type: AbiType, value: unknown, path: string, depth = 0): unknown {
     if (++visited > 16384 || depth > 32) invalid(path, "argument structure exceeds supported bounds");
     switch (type.kind) {
-      case "field": { const n = integer(value, path); if (n < 0n || n >= FIELD_MODULUS) invalid(path, "field must be between zero and the field modulus minus one"); return n; }
+      case "field": { const n = integer(value, path); if (n < 0n || n >= BN254_SCALAR_FIELD_MODULUS) invalid(path, "field must be between zero and the field modulus minus one"); return n; }
       case "integer": {
         if (!Number.isInteger(type.width) || type.width! < 1 || type.width! > 128 || !["signed", "unsigned"].includes(type.sign!)) invalid(path, "unsupported integer ABI");
         const n = integer(value, path); const signed = type.sign === "signed"; const bits = BigInt(type.width! - (signed ? 1 : 0));
@@ -50,7 +48,7 @@ export function validateFunctionArguments(abi: Pick<FunctionAbi, "parameters">, 
         if (aztec || eth) {
           const length = aztec ? 64 : 40;
           if (typeof value !== "string" || !new RegExp(`^0x[0-9a-fA-F]{${length}}$`).test(value)) invalid(path, `expected a ${length / 2}-byte hexadecimal address`);
-          const n = BigInt(value); if (n >= FIELD_MODULUS) invalid(path, "address exceeds the field modulus");
+          const n = BigInt(value); if (n >= BN254_SCALAR_FIELD_MODULUS) invalid(path, "address exceeds the field modulus");
           if (aztec) aztecAddresses.push(value);
           return { inner: n };
         }

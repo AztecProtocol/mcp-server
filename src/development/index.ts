@@ -16,8 +16,7 @@ export interface DevelopmentBoundary {
   callTool(name: string, args: Record<string, unknown> | undefined): Promise<CallToolResult>;
   shutdown?(): Promise<void>;
 }
-/** Validator injection is for code-owned integration harnesses, never MCP input or environment. */
-export interface DevelopmentOptions { validateRuntime?: RuntimeValidator }
+export interface IntegrationHarnessOptions { validateRuntime?: RuntimeValidator }
 interface ArgumentDefinition {
   schema: Record<string, unknown>;
   validate(value: unknown, name: string): void;
@@ -151,7 +150,7 @@ function result(value: unknown): CallToolResult {
   return { content: [{ type: "text", text: JSON.stringify(value, null, 2) }], structuredContent };
 }
 
-export function createDevelopmentBoundary(options: DevelopmentOptions = {}): DevelopmentBoundary {
+export function createDevelopmentBoundary(options: IntegrationHarnessOptions = {}): DevelopmentBoundary {
   const jobs = new Jobs();
   const builds = new BuildService(options.validateRuntime, jobs);
   const sessions = new SessionService(options.validateRuntime);

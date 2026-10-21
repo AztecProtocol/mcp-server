@@ -18,7 +18,6 @@ export const validateSupportedRuntime: RuntimeValidator = async selection => {
 };
 
 
-/** Integration-only dependency injection: never exposed as an MCP option or environment bypass. */
 export function createCandidateRuntimeValidator(expectedRuntimeIdentity: string): RuntimeValidator {
   if (!/^[a-f0-9]{64}$/.test(expectedRuntimeIdentity)) throw new Error("Supply the exact recorded candidate runtime identity.");
   const inspect = createCachedToolchainInspector();

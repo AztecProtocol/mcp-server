@@ -108,8 +108,8 @@ Development tools cover [tracked compilation and TXE tests](docs/development-bui
 Search tools still work on Node.js 18+ without an Aztec installation. Development
 tools use your local installation and do not require repository sync.
 
-`aztec_dev_release` writes a reviewed deploy script, checklist and manifest for a
-verified build. It never signs, submits or contacts a network; you run the script
+`aztec_dev_release` writes a deploy script, a checklist and a manifest for a
+verified build. It never signs, submits or contacts a network. You run the script
 with your own wallet.
 
 ### Why use `aztec_dev_build` instead of shell commands?

@@ -30,7 +30,6 @@ export interface SessionSnapshot {
   networkIdentity: string; network: NetworkIdentity; runtimeIdentity: string; runtime: ToolchainReport;
   proofMode: "fast" | "real"; proverEnabled: boolean; proving?: ValidatedProvingConfiguration; stateDirectory: string; openedAt: string; environment: EnvironmentStatus;
 }
-/** Extend only with named, structured operations implemented in the compiled worker. */
 export interface RuntimeOperations {
   status: { input: Record<string, never>; output: EnvironmentStatus };
   accounts: { input: Record<string, never>; output: SessionAccount[] };
@@ -86,7 +85,6 @@ class RuntimeWorker {
 }
 
 interface ActiveSession { snapshot: SessionSnapshot; worker: RuntimeWorker; lockPath: string; token: string; retainLock?: boolean }
-/** Owns exactly one wallet worker; every request, including lifecycle changes, is ordered. */
 export class SessionService {
   private active?: ActiveSession;
   private queue: Promise<unknown> = Promise.resolve();

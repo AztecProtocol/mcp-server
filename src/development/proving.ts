@@ -23,7 +23,6 @@ const CRS_FILES = [
   { name: "grumpkin_g1_v2.flat.dat", bytes: 2 ** 18 * 64 },
 ];
 
-/** Read-only validation: never creates a cache, downloads dependencies, or starts a backend. */
 export async function validateProvingConfiguration(installationRoot: string, value: unknown): Promise<ValidatedProvingConfiguration> {
   if (!value || typeof value !== "object" || Array.isArray(value)) fail("proving-configuration-required", "Real mode requires proving: { backend: 'NativeUnixSocket', crsPath: '/existing/crs', threads: 2 }.");
   const input = value as Record<string, unknown>;

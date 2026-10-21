@@ -31,13 +31,11 @@ export function classifyReceipt(txHash: unknown, receipt: unknown): ReceiptOutco
   return "invalid";
 }
 
-/** Inclusion needs matching transaction identity and concrete block evidence, not a state label. */
 export function hasIncludedReceipt(record: Pick<TransactionRecord, "txHash" | "receipt">): boolean {
   const outcome = classifyReceipt(record.txHash, record.receipt);
   return outcome === "included" || outcome === "reverted";
 }
 
-/** Shared by recovery and destructive lifecycle admission; malformed terminal evidence fails closed. */
 export function validateTransactionRecord(value: unknown): asserts value is TransactionRecord {
   if (!object(value) || value.schemaVersion !== 1 || !matches(UUID, value.jobId) ||
       !["deploy", "send"].includes(value.kind) || !STATES.has(value.state) ||
@@ -61,7 +59,6 @@ export function validateTransactionRecord(value: unknown): asserts value is Tran
   }
 }
 
-/** Call only after structural validation. Dropped/unknown receipts never prove non-submission. */
 export function hasUnresolvedSubmission(record: TransactionRecord): boolean {
   return record.submissionAttempted && record.submissionReached !== false && !hasIncludedReceipt(record);
 }

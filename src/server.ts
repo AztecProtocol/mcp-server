@@ -72,7 +72,6 @@ export interface ServerOptions {
   loadDevelopment?: () => Promise<DevelopmentBoundary>;
 }
 
-/** Build a server without opening a transport or running startup probes. */
 export async function createServer(options: ServerOptions = {}): Promise<Server> {
   const docsgptClient = options.docsgptClient ?? null;
   const upgradeBanner = options.upgradeBanner ?? "";

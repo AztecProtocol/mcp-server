@@ -35,7 +35,6 @@ interface RecordEntry {
 export class JobFailure extends Error {
   constructor(readonly code: string, message: string, readonly details?: unknown) { super(message); }
 }
-/** Process-local work registry. Completed results remain readable until bounded retention evicts them. */
 export class Jobs {
   private entries = new Map<string, RecordEntry>();
   constructor(private readonly maxLogBytes = 1024 * 1024, private readonly maxJobs = 100) { }
@@ -113,7 +112,6 @@ export class Jobs {
     if (!e.snapshot.finishedAt)
       e.controller.abort(); await Promise.all([...this.entries.values()].map(e => e.done)); }
 }
-/** Spawn an owned process group: only that group is signalled on timeout, cancel, or completion. */
 export async function runJobProcess(context: JobContext, command: string, args: string[], options: {
   cwd: string;
   env: NodeJS.ProcessEnv;
