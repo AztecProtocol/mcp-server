@@ -110,7 +110,7 @@ it("runs selected TXE tests through aztec test and reports their summary", async
   const { service, args } = await fixture(`console.log(JSON.stringify(process.argv.slice(2)));console.log('[fixture] Testing test_transfer ... ok');console.log('1 test passed');`);
   const result = await service.jobs.wait((await service.start({ ...args, operation: "test", package: "fixture", testFilter: "test_transfer" })).id);
   expect(result.status).toBe("completed");
-  expect(result.result).toMatchObject({ tests: { summaryStatus: "parsed", passed: 1, failed: 0, selection: { package: "fixture", filter: "test_transfer" } } });
+  expect(result.result).toMatchObject({ toolchain: { installationRoot: args.installationRoot, nodeExecutable: args.nodeExecutable }, tests: { summaryStatus: "parsed", passed: 1, failed: 0, selection: { package: "fixture", filter: "test_transfer" } } });
   expect(service.jobs.logs(result.id).text).toContain('["test","--package","fixture","test_transfer"]');
 });
 it("refuses an occupied oracle port and leaves its owner running", async () => {

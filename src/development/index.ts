@@ -1,6 +1,6 @@
 import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
-import { isAbsolute } from "node:path";
+import { isAbsolute, normalize, sep } from "node:path";
 import { inspectToolchain } from "./toolchain.js";
 import { BuildService, type BuildArguments } from "./build.js";
 import { Jobs } from "./jobs.js";
@@ -9,6 +9,7 @@ import type { RuntimeValidator } from "./policy.js";
 import { ContractService } from "./contracts.js";
 import { TransactionService } from "./transactions.js";
 import { RecoveryService } from "./recovery.js";
+import { ReleaseService, scriptSafe, type PackageInput } from "./release.js";
 
 export interface DevelopmentBoundary {
   listTools(): Tool[];
@@ -38,8 +39,36 @@ function integer(minimum: number, maximum?: number): ArgumentDefinition {
   );
 }
 const timeout = integer(1, 1800000);
-const packageName = parameter(string.schema, value => typeof value === "string" && /^[A-Za-z0-9_][A-Za-z0-9_-]*$/.test(value), "a package name");
+function pattern(regex: RegExp, expectation: string): ArgumentDefinition {
+  return parameter({ type: "string", pattern: regex.source }, value => typeof value === "string" && regex.test(value), expectation);
+}
+const packageName = pattern(/^[A-Za-z0-9_][A-Za-z0-9_-]*$/, "a package name");
 const testFilter = parameter(string.schema, value => typeof value === "string" && value.length > 0 && !value.startsWith("-"), "a test selection without flags");
+function isCanonicalPath(value: unknown): boolean {
+  if (typeof value !== "string" || !isAbsolute(value) || normalize(value) !== value) return false;
+  return value === sep || !value.endsWith(sep);
+}
+const canonicalPath = parameter(string.schema, isCanonicalPath, "an absolute normalized path");
+const hexAddress = pattern(/^0x[0-9a-fA-F]{64}$/, "a 0x hex address of 64 hex digits");
+const identifier = pattern(/^[A-Za-z_][A-Za-z0-9_]*$/, "an identifier");
+function isHttpUrl(value: unknown): boolean {
+  if (typeof value !== "string" || /[\x00-\x1f\x7f]/.test(value)) return false;
+  let url: URL;
+  try { url = new URL(value); } catch { return false; }
+  return ["http:", "https:"].includes(url.protocol) && url.username === "" && url.password === "";
+}
+const httpUrl = parameter({ type: "string", format: "uri" }, isHttpUrl, "an http: or https: URL without credentials or control characters");
+function isReleaseArgument(item: unknown): boolean {
+  if (typeof item === "string") return scriptSafe(item);
+  if (typeof item === "number") return Number.isSafeInteger(item) && item >= 0 && !Object.is(item, -0);
+  return typeof item === "boolean";
+}
+const releaseArguments = parameter({ type: "array", items: { type: ["string", "number", "boolean"] } }, value => Array.isArray(value) && value.every(isReleaseArgument),
+  "an array of constructor arguments that are strings not beginning with '-' and without control characters, non-negative safe integers or booleans");
+const plainName = parameter(string.schema, value => typeof value === "string" && value.length > 0 && scriptSafe(value), "a nonempty string that does not begin with '-' and has no control characters");
+const fee = refine(objectArguments({ method: parameter({ type: "string", enum: ["fee_juice", "fpc-sponsored"] }, value => value === "fee_juice" || value === "fpc-sponsored", '"fee_juice" or "fpc-sponsored"'), fpcAddress: hexAddress }, ["method"]), ({ method, fpcAddress }, name) => {
+  if ((method === "fpc-sponsored") !== (fpcAddress !== undefined)) invalid(`${name}.fpcAddress is required for "fpc-sponsored" and rejected for "fee_juice".`);
+});
 const selection = { installationRoot: path, nodeExecutable: path };
 const session = { sessionId: string };
 function objectArguments(fields: Fields, required = Object.keys(fields)): ArgumentDefinition {
@@ -57,6 +86,9 @@ function objectArguments(fields: Fields, required = Object.keys(fields)): Argume
 function operation(name: string, fields: Fields, required = Object.keys(fields)): ArgumentDefinition {
   const selector = parameter({ const: name, type: "string" }, value => value === name, `"${name}"`);
   return objectArguments({ operation: selector, ...fields }, ["operation", ...required]);
+}
+function refine(definition: ArgumentDefinition, check: (args: Record<string, unknown>, name: string) => void): ArgumentDefinition {
+  return { schema: definition.schema, validate(value, name) { definition.validate(value, name); check(value as Record<string, unknown>, name); } };
 }
 const callFields = { ...session, address: string, functionName: string, args: array, account: string, minimumBlock: integer(0) };
 const callRequired = ["sessionId", "address", "functionName", "args", "account"];
@@ -93,6 +125,14 @@ const operations: Record<string, Record<string, ArgumentDefinition>> = {
     "list-persisted": operation("list-persisted", session),
     recover: operation("recover", { ...session, jobId: string }),
   },
+  aztec_dev_release: {
+    package: refine(operation("package", {
+      buildJobId: string, artifactPath: path, ...selection, outputDirectory: canonicalPath, args: releaseArguments, initialize: boolean, initializerName: identifier,
+      account: plainName, fee, nodeUrl: httpUrl, contractAlias: plainName,
+    }, ["buildJobId", "artifactPath", ...Object.keys(selection), "outputDirectory", "args", "initialize", "account", "fee", "nodeUrl"]), (args, name) => {
+      if (args.initialize === false && Object.hasOwn(args, "initializerName")) invalid(`${name}.initializerName is rejected when ${name}.initialize is false.`);
+    }),
+  },
   aztec_dev_session: {
     open: operation("open", { projectPath: path, ...selection, nodeUrl: string, ...proofFields }, ["projectPath", ...Object.keys(selection), "nodeUrl"]),
     switch: operation("switch", { ...session, projectPath: path, ...selection, nodeUrl: string, ...proofFields }, ["sessionId", "projectPath", ...Object.keys(selection), "nodeUrl"]),
@@ -118,6 +158,7 @@ export function createDevelopmentBoundary(options: DevelopmentOptions = {}): Dev
   const contracts = new ContractService(sessions);
   const transactions = new TransactionService(sessions, jobs);
   const recovery = new RecoveryService(sessions, jobs);
+  const releases = new ReleaseService(options.validateRuntime, jobs);
   sessions.setLifecycleGuard(sessionId => { transactions.assertIdle(sessionId); recovery.assertIdle(sessionId); });
   const tools: Tool[] = [
     {
@@ -144,6 +185,11 @@ export function createDevelopmentBoundary(options: DevelopmentOptions = {}): Dev
       name: "aztec_dev_session",
       description: "Open, inspect, close, switch or reset one persistent local wallet. Close preserves accounts; reset explicitly discards this session's MCP-owned wallet state. Unresolved submissions block switching/resetting. The borrowed node is never stopped.",
       inputSchema: schema("aztec_dev_session"),
+    },
+    {
+      name: "aztec_dev_release",
+      description: "Write a deploy script, checklist and manifest for a verified local build so the user can deploy to a public Aztec network with their own wallet. Never signs, submits or contacts a network.",
+      inputSchema: schema("aztec_dev_release"),
     },
   ];
   return {
@@ -189,6 +235,10 @@ export function createDevelopmentBoundary(options: DevelopmentOptions = {}): Dev
         if (name === "aztec_dev_job" && ["status", "logs", "cancel"].includes(String(op))) {
           const id = args.jobId as string;
           return result(op === "logs" ? jobs.logs(id, { offset: args.offset as number | undefined }) : op === "cancel" ? jobs.cancel(id) : jobs.get(id));
+        }
+        if (name === "aztec_dev_release" && op === "package") {
+          const { operation: _operation, ...input } = args;
+          return result(await releases.package(input as unknown as PackageInput));
         }
         if (name === "aztec_dev_session") {
           if (op === "open" || op === "switch") {

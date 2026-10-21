@@ -143,7 +143,7 @@ export class BuildService {
         const artifacts = await collectArtifacts(project, provenanceHash, options.package);
         await mkdir(dirname(receiptPath), { recursive: true });
         await writeFile(receiptPath, JSON.stringify({ provenanceHash, artifacts: artifacts.map(({ path, contentHash }) => ({ path, contentHash })) }) + "\n");
-        return { projectPath: project, operation: args.operation, selection: options, provenanceHash, artifacts, quarantinedArtifacts, diagnostics, exitCode: result.exitCode, ...(tests ? { tests } : {}) };
+        return { projectPath: project, operation: args.operation, selection: options, toolchain: { installationRoot: runtime.installationRoot, nodeExecutable: runtime.runtimeNode.path }, provenanceHash, artifacts, quarantinedArtifacts, diagnostics, exitCode: result.exitCode, ...(tests ? { tests } : {}) };
       }
       finally {
         activeProjects.delete(project);

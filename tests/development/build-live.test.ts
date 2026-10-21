@@ -3,16 +3,9 @@ import { cp, mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { BuildService } from "../../src/development/build.js";
-import { inspectToolchain } from "../../src/development/toolchain.js";
-import { runtimeIdentity } from "../../src/development/policy.js";
-const recordPath = process.env.AZTEC_MCP_CANDIDATE_RECORD;
+import { loadCandidate, recordPath } from "./candidate.js";
 it.skipIf(!recordPath)("compiles a real contract and runs passing/failing TXE assertions", async () => {
-  const record = JSON.parse(await readFile(recordPath!, "utf8"));
-  expect(record.status).toBe("candidate-passed");
-  const selection = { installationRoot: record.installation.installationRoot, nodeExecutable: record.installation.runtimeNode.path };
-  const report = await inspectToolchain(selection);
-  expect(report.diagnostics.filter(d => d.code !== "unsupported-runtime")).toEqual([]);
-  expect(runtimeIdentity(report)).toBe(runtimeIdentity(record.installation));
+  const { selection, report } = await loadCandidate();
   const service = new BuildService(async () => report);
   const project = await mkdtemp(join(tmpdir(), "mcp-build-live-"));
   await cp(new URL("../fixtures/development/counter", import.meta.url), project, { recursive: true });

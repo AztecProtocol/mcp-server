@@ -101,11 +101,16 @@ Development tools cover [tracked compilation and TXE tests](docs/development-bui
 [contract registration and inspection](docs/development-contracts.md),
 [simulation and account-scoped views](docs/development-calls.md),
 [tracked deployments and transactions](docs/development-transactions.md),
-[interruption recovery](docs/development-recovery.md), and
-[explicit real proving](docs/development-proving.md).
+[interruption recovery](docs/development-recovery.md),
+[explicit real proving](docs/development-proving.md), and
+[release packaging for public networks](docs/development-release.md).
 
 Search tools still work on Node.js 18+ without an Aztec installation. Development
 tools use your local installation and do not require repository sync.
+
+`aztec_dev_release` writes a reviewed deploy script, checklist and manifest for a
+verified build. It never signs, submits or contacts a network; you run the script
+with your own wallet.
 
 ### Why use `aztec_dev_build` instead of shell commands?
 

@@ -66,3 +66,7 @@ it("rejects unknown tools, operations, and arguments with protocol errors", asyn
   await expect(boundary.callTool("aztec_dev_job", { operation: "status" })).rejects.toMatchObject({ code: -32602 });
   await expect(boundary.callTool("aztec_dev_job", { operation: "status", jobId: "job", offset: 0 })).rejects.toMatchObject({ code: -32602 });
 });
+
+it("lists the release tool with its no-signing boundary", () => {
+  expect(boundary.listTools().find(tool => tool.name === "aztec_dev_release")?.description).toContain("Never signs");
+});

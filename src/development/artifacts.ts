@@ -10,7 +10,7 @@ export interface ArtifactIdentity {
   provenanceHash: string;
   contractName?: string;
 }
-const hash = (data: string | Buffer) => createHash("sha256").update(data).digest("hex");
+export const hash = (data: string | Buffer) => createHash("sha256").update(data).digest("hex");
 /** Follow local manifest dependencies and hash source/manifest contents, never incremental output. */
 export async function projectProvenance(project: string, runtime: ToolchainReport, options: unknown, includeGitDependencies = true): Promise<string> {
   return (await fingerprintProject(project, runtime, options, includeGitDependencies)).hash;

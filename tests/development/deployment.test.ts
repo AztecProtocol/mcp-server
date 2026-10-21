@@ -16,7 +16,7 @@ async function fixture(){
  const path=join(project,"artifact.json");const artifact=JSON.stringify({name:"Fixture",functions:[]});await writeFile(path,artifact);
  const runtime:any={target:"fixture",installationRoot:project,supported:false,runtimeNode:{path:process.execPath,version:process.version},cli:{identity:"fixture"},compiler:{identity:"fixture"},packages:[],publicExports:[],provenance:{sourceIdentity:"unverified"},diagnostics:[]};
  const selection={operation:"compile"};const provenanceHash=await projectProvenance(project,runtime,selection);const contentHash=hash(artifact);
- const build=jobs.start("compile",async()=>({projectPath:project,operation:"compile",selection,provenanceHash,artifacts:[{path,contentHash,provenanceHash}]}));await jobs.wait(build.id);
+ const build=jobs.start("compile",async()=>({projectPath:project,operation:"compile",selection,toolchain:{installationRoot:project,nodeExecutable:process.execPath},provenanceHash,artifacts:[{path,contentHash,provenanceHash}]}));await jobs.wait(build.id);
  const stateDirectory=join(project,".aztec-mcp/sessions/fixture");await mkdir(stateDirectory,{recursive:true});
  const snapshot:any={sessionId:"session",projectPath:project,stateDirectory,runtime,proofMode:"fast",runtimeIdentity:"runtime",networkIdentity:"network"};
  const request=vi.fn(async(_id:string,operation:string,_input?:unknown)=>{

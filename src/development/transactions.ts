@@ -1,8 +1,7 @@
-import { createHash } from "node:crypto";
-import { readFile, realpath } from "node:fs/promises";
 import { isAbsolute } from "node:path";
+import { assertFreshArtifact } from "./freshness.js";
 import { Jobs, JobFailure, type JobSnapshot, type JobContext } from "./jobs.js";
-import { projectProvenance, type ArtifactIdentity } from "./artifacts.js";
+import type { ArtifactIdentity } from "./artifacts.js";
 import { validateCallInput, type ContractCallInput } from "./contracts.js";
 import { SessionError, type SessionService, type SessionSnapshot, type RuntimeProgress, type ProofTelemetry } from "./session.js";
 import { classifyReceipt, writeTransactionRecord } from "./transaction-journal.js";
@@ -258,19 +257,7 @@ export class TransactionService {
       if (!isAbsolute(input.artifactPath))
         throw new SessionError("invalid-artifact-path", "Select an absolute compiled artifact path.");
       const session = await this.sessions.status(input.sessionId);
-      const build = this.jobs.get(input.buildJobId);
-      const result = build.result as {
-        projectPath?: string;
-        selection?: unknown;
-        provenanceHash?: string;
-        artifacts?: ArtifactIdentity[];
-      } | undefined;
-      if (build.status !== "completed" || !["compile", "test"].includes(build.kind) || result?.projectPath !== session.projectPath)
-        throw new SessionError("invalid-build", "Select a successful build from this session's canonical project.");
-      const path = await realpath(input.artifactPath);
-      const artifact = result.artifacts?.find(a => a.path === path);
-      if (!artifact || createHash("sha256").update(await readFile(path)).digest("hex") !== artifact.contentHash || await projectProvenance(session.projectPath, session.runtime, result.selection) !== artifact.provenanceHash)
-        throw new SessionError("stale-artifact", "The selected artifact or its sources, dependencies, toolchain or options changed; compile again.");
+      const { artifact } = await assertFreshArtifact({ jobs: this.jobs, buildJobId: input.buildJobId, artifactPath: input.artifactPath, runtime: session.runtime, projectPath: session.projectPath });
       return this.start(session, {
         kind: "deploy", account: input.account, artifact, intent: { initialize: input.initialize, initializerName: input.initializerName },
         prepare: () => this.sessions.request(input.sessionId, "deployment-prepare", { artifactPath: artifact.path, expectedContentHash: artifact.contentHash, provenanceHash: artifact.provenanceHash, account: input.account, initializerName: input.initializerName, arguments: input.arguments, initialize: input.initialize }),
