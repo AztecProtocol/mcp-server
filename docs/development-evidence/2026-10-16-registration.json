@@ -1,0 +1,270 @@
+{
+  "checkedAt": "2026-10-16T15:31:15.674Z",
+  "productionSupported": false,
+  "fixture": {
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "deployTxHash": "0x0b094261381f9c3e7fa7746ee2d7472dc3d443706659c1c66b45c5711e83117b"
+  },
+  "projectPath": "/tmp/aztec-mcp-registration-pWmfuo",
+  "accounts": [
+    {
+      "address": "0x07848ac687a32ab934aa16d6f48daef87e91fc2c5333741159d1de7a76aeca55",
+      "alias": "test-2"
+    },
+    {
+      "address": "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b",
+      "alias": "test-0"
+    },
+    {
+      "address": "0x19a4d0c06016f73971b9fb8f2996475d2cb905c6aa4b86865b71c9de29316d0b",
+      "alias": "test-1"
+    }
+  ],
+  "initial": {
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "ready": false,
+    "problems": [
+      "missing-registration"
+    ],
+    "artifact": {
+      "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "localArtifact": {
+      "source": "filesystem",
+      "status": "available",
+      "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json"
+    },
+    "node": {
+      "source": "node",
+      "observedBlock": 6,
+      "blockPinned": true,
+      "published": true,
+      "currentClassId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "originalClassId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6"
+    },
+    "wallet": {
+      "source": "wallet-and-node",
+      "observedFromBlock": 6,
+      "observedThroughBlock": 6,
+      "instanceRegistered": false,
+      "artifactRegistered": false,
+      "classPublished": true,
+      "initializationStatus": "INITIALIZED"
+    }
+  },
+  "mismatch": "artifact-mismatch",
+  "first": {
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "registered": true,
+    "reused": false,
+    "artifact": {
+      "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "observedBlock": 6,
+    "source": "wallet",
+    "chainTransactionSubmitted": false
+  },
+  "repeated": {
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "registered": true,
+    "reused": true,
+    "artifact": {
+      "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "observedBlock": 6,
+    "source": "wallet",
+    "chainTransactionSubmitted": false
+  },
+  "inspected": {
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "ready": true,
+    "problems": [],
+    "association": {
+      "schemaVersion": 1,
+      "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+      "artifact": {
+        "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json",
+        "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+        "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+        "contractName": "Token"
+      },
+      "registeredAt": "2026-10-16T15:31:22.912Z",
+      "registeredAtBlock": 6
+    },
+    "artifact": {
+      "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "localArtifact": {
+      "source": "filesystem",
+      "status": "available",
+      "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json"
+    },
+    "node": {
+      "source": "node",
+      "observedBlock": 6,
+      "blockPinned": true,
+      "published": true,
+      "currentClassId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "originalClassId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6"
+    },
+    "wallet": {
+      "source": "wallet-and-node",
+      "observedFromBlock": 6,
+      "observedThroughBlock": 6,
+      "instanceRegistered": true,
+      "artifactRegistered": true,
+      "classPublished": true,
+      "initializationStatus": "INITIALIZED"
+    }
+  },
+  "unknown": {
+    "address": "0x15ae0879c0b2bc1f671486a1f991c15b27aaade02f1ca6730e0e9fc1b307c2cb",
+    "ready": false,
+    "problems": [
+      "unknown-deployment",
+      "missing-registration"
+    ],
+    "artifact": {
+      "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "localArtifact": {
+      "source": "filesystem",
+      "status": "available",
+      "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json"
+    },
+    "node": {
+      "source": "node",
+      "observedBlock": 6,
+      "blockPinned": true,
+      "published": false
+    },
+    "wallet": {
+      "source": "wallet-and-node",
+      "observedFromBlock": 6,
+      "observedThroughBlock": 6,
+      "instanceRegistered": false,
+      "artifactRegistered": false,
+      "classPublished": false,
+      "initializationStatus": "UNKNOWN"
+    }
+  },
+  "unknownRegistration": "unknown-deployment",
+  "unavailable": {
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "ready": false,
+    "problems": [
+      "artifact-unavailable"
+    ],
+    "association": {
+      "schemaVersion": 1,
+      "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+      "artifact": {
+        "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json",
+        "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+        "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+        "contractName": "Token"
+      },
+      "registeredAt": "2026-10-16T15:31:22.912Z",
+      "registeredAtBlock": 6
+    },
+    "localArtifact": {
+      "source": "filesystem",
+      "status": "unavailable",
+      "path": "/tmp/aztec-mcp-registration-pWmfuo/missing.json"
+    },
+    "node": {
+      "source": "node",
+      "observedBlock": 6,
+      "blockPinned": true,
+      "published": true,
+      "currentClassId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "originalClassId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6"
+    },
+    "wallet": {
+      "source": "wallet-and-node",
+      "observedFromBlock": 6,
+      "observedThroughBlock": 6,
+      "instanceRegistered": true,
+      "artifactRegistered": true,
+      "classPublished": true,
+      "initializationStatus": "INITIALIZED"
+    }
+  },
+  "changed": "artifact-changed",
+  "reopened": {
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "ready": true,
+    "problems": [],
+    "association": {
+      "schemaVersion": 1,
+      "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+      "artifact": {
+        "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json",
+        "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+        "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+        "contractName": "Token"
+      },
+      "registeredAt": "2026-10-16T15:31:22.912Z",
+      "registeredAtBlock": 6
+    },
+    "artifact": {
+      "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "localArtifact": {
+      "source": "filesystem",
+      "status": "available",
+      "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json"
+    },
+    "node": {
+      "source": "node",
+      "observedBlock": 6,
+      "blockPinned": true,
+      "published": true,
+      "currentClassId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "originalClassId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6"
+    },
+    "wallet": {
+      "source": "wallet-and-node",
+      "observedFromBlock": 6,
+      "observedThroughBlock": 6,
+      "instanceRegistered": true,
+      "artifactRegistered": true,
+      "classPublished": true,
+      "initializationStatus": "INITIALIZED"
+    }
+  },
+  "reopenedRegistration": {
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "registered": true,
+    "reused": true,
+    "artifact": {
+      "path": "/tmp/aztec-mcp-registration-pWmfuo/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "observedBlock": 6,
+    "source": "wallet",
+    "chainTransactionSubmitted": false
+  },
+  "staleSession": "stale-session",
+  "status": "passed"
+}

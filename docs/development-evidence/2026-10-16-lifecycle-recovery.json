@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-10-16T16:04:53.720Z",
+  "projectPath": "/tmp/mcp-live-build-W0t3k9",
+  "jobId": "85bb352a-e675-4375-9972-e0fb02e9d827",
+  "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+  "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+  "closeRefusedUntilReconciled": true,
+  "switchRefusedUntilReconciled": true,
+  "resetRefusedUntilReconciled": true,
+  "reconciliation": {
+    "sessionId": "4daacbbe-acf7-4203-81bb-cdf5f0c82d47",
+    "job": {
+      "jobId": "85bb352a-e675-4375-9972-e0fb02e9d827",
+      "kind": "send",
+      "state": "included",
+      "originalSessionId": "8cef51e8-215f-4464-b07e-b2c1eb895807",
+      "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+      "account": "0x07848ac687a32ab934aa16d6f48daef87e91fc2c5333741159d1de7a76aeca55",
+      "artifact": {
+        "path": "/tmp/mcp-live-build-W0t3k9/target/counter_contract-Counter.json",
+        "contentHash": "400a8ff732aeb8df37b840eb90dc7f34c5fe4ebbd14835a2568791aa8f0c445e",
+        "contractName": "Counter",
+        "classId": "0x0a251def692bcb3524e574503da26b7f6adf0cbe1e3f854f71bc0f7b33e50cc3"
+      },
+      "address": "0x28f62ea1e5b7d73d5b540e7f898e97d60a2ea14b1d34069084d6776caf714c9a",
+      "txHash": "0x2e82b1b475594d376d9155e2af8ac817c72c2ccc41881d0e497de389c960a820",
+      "registered": true,
+      "submissionAttempted": true,
+      "submissionReached": true,
+      "updatedAt": "2026-10-16T16:04:53.762Z"
+    },
+    "outcome": "included",
+    "resolved": true,
+    "receipt": {
+      "txHash": "0x2e82b1b475594d376d9155e2af8ac817c72c2ccc41881d0e497de389c960a820",
+      "status": "proven",
+      "executionResult": "success",
+      "blockNumber": 11,
+      "blockHash": "0x2aaf3487c8e8192da931d1bbe9614824be0e7c1711ab829f6ce78162b1a6ad13",
+      "transactionFee": "1228647900000000",
+      "observedAt": "2026-10-16T16:04:53.762Z",
+      "source": "node",
+      "scope": "public"
+    },
+    "observedAt": "2026-10-16T16:04:53.762Z",
+    "guidance": "The recorded transaction was included. Refresh any verification view through its inclusion block; fast-mode inclusion does not establish proof validity.",
+    "replayed": false,
+    "chainTransactionCancelled": false,
+    "proofMode": "fast",
+    "proofValidityEstablished": false
+  },
+  "closeAllowedAfterReconciliation": true
+}

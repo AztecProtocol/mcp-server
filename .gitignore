@@ -27,3 +27,6 @@ Thumbs.db
 
 # npm
 .npmrc
+
+# Skill-generated specs and plans (local working notes)
+docs/superpowers/

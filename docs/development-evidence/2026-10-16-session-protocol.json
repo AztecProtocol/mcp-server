@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-16T15:32:39.878Z",
+  "transport": "MCP in-memory client/server",
+  "productionSupported": false,
+  "sessionId": "3310306f-4f5d-4cd9-8f96-a0e941975cb2",
+  "workerReused": true,
+  "accounts": [
+    {
+      "address": "0x07848ac687a32ab934aa16d6f48daef87e91fc2c5333741159d1de7a76aeca55",
+      "alias": "test-2"
+    },
+    {
+      "address": "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b",
+      "alias": "test-0"
+    },
+    {
+      "address": "0x19a4d0c06016f73971b9fb8f2996475d2cb905c6aa4b86865b71c9de29316d0b",
+      "alias": "test-1"
+    }
+  ],
+  "closed": {
+    "sessionId": "3310306f-4f5d-4cd9-8f96-a0e941975cb2",
+    "closed": true,
+    "persisted": true
+  }
+}

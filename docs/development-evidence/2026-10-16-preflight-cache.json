@@ -1,0 +1,40 @@
+{
+  "recordedAt": "2026-10-16T16:16:15.184Z",
+  "selection": {
+    "installationRoot": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3",
+    "nodeExecutable": "/mnt/user-data/ilyas/.nvm/versions/node/v24.12.0/bin/node"
+  },
+  "samples": [
+    {
+      "mode": "cold",
+      "milliseconds": 2544.33,
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68"
+    },
+    {
+      "mode": "warm",
+      "milliseconds": 21.08,
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68"
+    },
+    {
+      "mode": "warm",
+      "milliseconds": 18.64,
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68"
+    },
+    {
+      "mode": "warm",
+      "milliseconds": 18.75,
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68"
+    },
+    {
+      "mode": "warm",
+      "milliseconds": 17.16,
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68"
+    },
+    {
+      "mode": "warm",
+      "milliseconds": 15,
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68"
+    }
+  ],
+  "scope": "Only installation preflight validation. Metadata invalidation is not a cryptographic integrity guarantee; full environment inspection remains uncached."
+}

@@ -1,0 +1,353 @@
+{
+  "checkedAt": "2026-10-16T16:07:30.650Z",
+  "productionSupported": false,
+  "projectPath": "/tmp/aztec-mcp-recovery-live-13BavQ",
+  "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+  "registration": {
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "registered": true,
+    "reused": false,
+    "artifact": {
+      "path": "/tmp/aztec-mcp-recovery-live-13BavQ/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "observedBlock": 11,
+    "source": "wallet",
+    "chainTransactionSubmitted": false
+  },
+  "before": {
+    "operation": "view",
+    "status": "succeeded",
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "functionName": "balance_of_private",
+    "functionType": "utility",
+    "artifact": {
+      "path": "/tmp/aztec-mcp-recovery-live-13BavQ/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "accountScope": [
+      "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b"
+    ],
+    "result": "333",
+    "dataStatus": "available",
+    "observedBlock": 11,
+    "observedThroughBlock": 11,
+    "observedAt": "2026-10-16T16:07:40.286Z",
+    "freshness": {
+      "cached": false,
+      "status": "sdk-synchronized",
+      "synchronizedThroughBlock": 11,
+      "blockHash": "0x2aaf3487c8e8192da931d1bbe9614824be0e7c1711ab829f6ce78162b1a6ad13",
+      "exactExecutionBlock": false
+    },
+    "chainTransactionSubmitted": false,
+    "proofMode": "fast",
+    "proofValidityEstablished": false
+  },
+  "beforeInterruption": {
+    "schemaVersion": 1,
+    "jobId": "2d219458-005f-4ceb-8356-42769f6cc13a",
+    "kind": "send",
+    "state": "waiting",
+    "createdAt": "2026-10-16T16:07:40.689Z",
+    "updatedAt": "2026-10-16T16:07:42.465Z",
+    "sessionId": "f6bb8b4e-e1ed-4d78-a975-6ac7a912e4b3",
+    "stateDirectory": "/tmp/aztec-mcp-recovery-live-13BavQ/.aztec-mcp/sessions/b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+    "projectPath": "/tmp/aztec-mcp-recovery-live-13BavQ",
+    "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+    "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+    "proofMode": "fast",
+    "proofValidityEstablished": false,
+    "account": "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b",
+    "artifact": {
+      "path": "/tmp/aztec-mcp-recovery-live-13BavQ/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "intent": {
+      "functionName": "mint_to_private"
+    },
+    "submissionAttempted": true,
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "registered": true,
+    "txHash": "0x0983bb1974993fcb11c78163a0ecf06a4ad539413793df7bfc15bdc3c0d44c03",
+    "submissionReached": true
+  },
+  "killedWorkerPid": 2831704,
+  "interruptedJob": {
+    "id": "2d219458-005f-4ceb-8356-42769f6cc13a",
+    "kind": "send",
+    "status": "failed",
+    "phase": "unknown-outcome",
+    "queuedAt": "2026-10-16T16:07:40.688Z",
+    "startedAt": "2026-10-16T16:07:40.688Z",
+    "evidence": {
+      "schemaVersion": 1,
+      "jobId": "2d219458-005f-4ceb-8356-42769f6cc13a",
+      "kind": "send",
+      "state": "unknown-outcome",
+      "createdAt": "2026-10-16T16:07:40.689Z",
+      "updatedAt": "2026-10-16T16:07:42.570Z",
+      "sessionId": "f6bb8b4e-e1ed-4d78-a975-6ac7a912e4b3",
+      "stateDirectory": "/tmp/aztec-mcp-recovery-live-13BavQ/.aztec-mcp/sessions/b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+      "projectPath": "/tmp/aztec-mcp-recovery-live-13BavQ",
+      "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+      "proofMode": "fast",
+      "proofValidityEstablished": false,
+      "account": "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b",
+      "artifact": {
+        "path": "/tmp/aztec-mcp-recovery-live-13BavQ/token.json",
+        "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+        "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+        "contractName": "Token"
+      },
+      "intent": {
+        "functionName": "mint_to_private"
+      },
+      "submissionAttempted": true,
+      "chainTransactionCancelled": false,
+      "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+      "registered": true,
+      "txHash": "0x0983bb1974993fcb11c78163a0ecf06a4ad539413793df7bfc15bdc3c0d44c03",
+      "submissionReached": true,
+      "error": {
+        "code": "worker-interrupted",
+        "message": "Submission or local waiting was interrupted; inspect the recorded hash or reconcile the job. No automatic retry occurred."
+      }
+    },
+    "error": {
+      "message": "Submission or local waiting was interrupted; inspect the recorded hash or reconcile the job. No automatic retry occurred.",
+      "code": "worker-interrupted",
+      "details": {
+        "schemaVersion": 1,
+        "jobId": "2d219458-005f-4ceb-8356-42769f6cc13a",
+        "kind": "send",
+        "state": "unknown-outcome",
+        "createdAt": "2026-10-16T16:07:40.689Z",
+        "updatedAt": "2026-10-16T16:07:42.570Z",
+        "sessionId": "f6bb8b4e-e1ed-4d78-a975-6ac7a912e4b3",
+        "stateDirectory": "/tmp/aztec-mcp-recovery-live-13BavQ/.aztec-mcp/sessions/b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+        "projectPath": "/tmp/aztec-mcp-recovery-live-13BavQ",
+        "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+        "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+        "proofMode": "fast",
+        "proofValidityEstablished": false,
+        "account": "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b",
+        "artifact": {
+          "path": "/tmp/aztec-mcp-recovery-live-13BavQ/token.json",
+          "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+          "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+          "contractName": "Token"
+        },
+        "intent": {
+          "functionName": "mint_to_private"
+        },
+        "submissionAttempted": true,
+        "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+        "registered": true,
+        "txHash": "0x0983bb1974993fcb11c78163a0ecf06a4ad539413793df7bfc15bdc3c0d44c03",
+        "submissionReached": true,
+        "error": {
+          "code": "worker-interrupted",
+          "message": "Submission or local waiting was interrupted; inspect the recorded hash or reconcile the job. No automatic retry occurred."
+        },
+        "chainTransactionCancelled": false
+      }
+    },
+    "finishedAt": "2026-10-16T16:07:42.583Z",
+    "durationMs": 1895
+  },
+  "interruptedJournal": {
+    "schemaVersion": 1,
+    "jobId": "2d219458-005f-4ceb-8356-42769f6cc13a",
+    "kind": "send",
+    "state": "unknown-outcome",
+    "createdAt": "2026-10-16T16:07:40.689Z",
+    "updatedAt": "2026-10-16T16:07:42.570Z",
+    "sessionId": "f6bb8b4e-e1ed-4d78-a975-6ac7a912e4b3",
+    "stateDirectory": "/tmp/aztec-mcp-recovery-live-13BavQ/.aztec-mcp/sessions/b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+    "projectPath": "/tmp/aztec-mcp-recovery-live-13BavQ",
+    "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+    "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+    "proofMode": "fast",
+    "proofValidityEstablished": false,
+    "account": "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b",
+    "artifact": {
+      "path": "/tmp/aztec-mcp-recovery-live-13BavQ/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "intent": {
+      "functionName": "mint_to_private"
+    },
+    "submissionAttempted": true,
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "registered": true,
+    "txHash": "0x0983bb1974993fcb11c78163a0ecf06a4ad539413793df7bfc15bdc3c0d44c03",
+    "submissionReached": true,
+    "error": {
+      "code": "worker-interrupted",
+      "message": "Submission or local waiting was interrupted; inspect the recorded hash or reconcile the job. No automatic retry occurred."
+    }
+  },
+  "reopenedWorkerPid": 2832008,
+  "accountsPreserved": true,
+  "restored": {
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "ready": true,
+    "problems": [],
+    "association": {
+      "schemaVersion": 1,
+      "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+      "artifact": {
+        "path": "/tmp/aztec-mcp-recovery-live-13BavQ/token.json",
+        "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+        "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+        "contractName": "Token"
+      },
+      "registeredAt": "2026-10-16T16:07:39.393Z",
+      "registeredAtBlock": 11
+    },
+    "artifact": {
+      "path": "/tmp/aztec-mcp-recovery-live-13BavQ/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "localArtifact": {
+      "source": "filesystem",
+      "status": "available",
+      "path": "/tmp/aztec-mcp-recovery-live-13BavQ/token.json"
+    },
+    "node": {
+      "source": "node",
+      "observedBlock": 12,
+      "blockPinned": true,
+      "published": true,
+      "currentClassId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "originalClassId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6"
+    },
+    "wallet": {
+      "source": "wallet-and-node",
+      "observedFromBlock": 12,
+      "observedThroughBlock": 12,
+      "instanceRegistered": true,
+      "artifactRegistered": true,
+      "classPublished": true,
+      "initializationStatus": "INITIALIZED"
+    }
+  },
+  "persisted": {
+    "sessionId": "dfd3a853-8e0c-4b28-80ac-b0610323e8ba",
+    "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+    "jobs": [
+      {
+        "jobId": "2d219458-005f-4ceb-8356-42769f6cc13a",
+        "kind": "send",
+        "state": "unknown-outcome",
+        "originalSessionId": "f6bb8b4e-e1ed-4d78-a975-6ac7a912e4b3",
+        "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+        "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+        "account": "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b",
+        "artifact": {
+          "path": "/tmp/aztec-mcp-recovery-live-13BavQ/token.json",
+          "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+          "contractName": "Token",
+          "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6"
+        },
+        "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+        "txHash": "0x0983bb1974993fcb11c78163a0ecf06a4ad539413793df7bfc15bdc3c0d44c03",
+        "registered": true,
+        "submissionAttempted": true,
+        "submissionReached": true,
+        "updatedAt": "2026-10-16T16:07:42.570Z"
+      }
+    ],
+    "truncated": false
+  },
+  "recovered": {
+    "sessionId": "dfd3a853-8e0c-4b28-80ac-b0610323e8ba",
+    "job": {
+      "jobId": "2d219458-005f-4ceb-8356-42769f6cc13a",
+      "kind": "send",
+      "state": "included",
+      "originalSessionId": "f6bb8b4e-e1ed-4d78-a975-6ac7a912e4b3",
+      "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+      "account": "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b",
+      "artifact": {
+        "path": "/tmp/aztec-mcp-recovery-live-13BavQ/token.json",
+        "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+        "contractName": "Token",
+        "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6"
+      },
+      "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+      "txHash": "0x0983bb1974993fcb11c78163a0ecf06a4ad539413793df7bfc15bdc3c0d44c03",
+      "registered": true,
+      "submissionAttempted": true,
+      "submissionReached": true,
+      "updatedAt": "2026-10-16T16:07:49.466Z"
+    },
+    "outcome": "included",
+    "resolved": true,
+    "receipt": {
+      "txHash": "0x0983bb1974993fcb11c78163a0ecf06a4ad539413793df7bfc15bdc3c0d44c03",
+      "status": "proven",
+      "executionResult": "success",
+      "blockNumber": 12,
+      "blockHash": "0x17f2537c351fa6f57a7f1393e9c3ecc951eaec7087f968e50d37a5f4782aeb88",
+      "transactionFee": "1813591482000000",
+      "observedAt": "2026-10-16T16:07:49.466Z",
+      "source": "node",
+      "scope": "public"
+    },
+    "observedAt": "2026-10-16T16:07:49.466Z",
+    "guidance": "The recorded transaction was included. Refresh any verification view through its inclusion block; fast-mode inclusion does not establish proof validity.",
+    "replayed": false,
+    "chainTransactionCancelled": false,
+    "proofMode": "fast",
+    "proofValidityEstablished": false
+  },
+  "after": {
+    "operation": "view",
+    "status": "succeeded",
+    "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+    "functionName": "balance_of_private",
+    "functionType": "utility",
+    "artifact": {
+      "path": "/tmp/aztec-mcp-recovery-live-13BavQ/token.json",
+      "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+      "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+      "contractName": "Token"
+    },
+    "accountScope": [
+      "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b"
+    ],
+    "result": "334",
+    "dataStatus": "available",
+    "observedBlock": 12,
+    "observedThroughBlock": 12,
+    "observedAt": "2026-10-16T16:07:51.090Z",
+    "freshness": {
+      "cached": false,
+      "status": "sdk-synchronized",
+      "synchronizedThroughBlock": 12,
+      "blockHash": "0x17f2537c351fa6f57a7f1393e9c3ecc951eaec7087f968e50d37a5f4782aeb88",
+      "exactExecutionBlock": false,
+      "minimumBlock": 12
+    },
+    "chainTransactionSubmitted": false,
+    "proofMode": "fast",
+    "proofValidityEstablished": false
+  },
+  "submissionCalls": 1,
+  "recoverySubmissionCalls": 0,
+  "status": "passed"
+}

@@ -1,0 +1,31 @@
+# Persistent local development sessions
+
+Development tools attach to an existing local network. They never start, stop, or reset that network. Select an absolute project directory, installation root, runtime Node executable, and loopback node URL explicitly. The runtime must pass the supported-tuple gate; candidate integration testing does not itself enable production execution.
+
+The initial integration candidate uses Labs 6.0.0-rc.3 with Foundation 6.0.0-rc.6 and the installation's Node 24.12.0. The candidate node reports chain ID 31337, matching node/SDK versions, and `realProofs: false`. A localhost URL alone is insufficient. The normal session explicitly uses `proverEnabled: false`; real proving is not a fallback.
+
+Open with `aztec_dev_session` and operation `open`, passing `projectPath`, `installationRoot`, `nodeExecutable`, and `nodeUrl`. Save the returned `sessionId` for subsequent status, account inspection, and close requests. Reopening the same selection reuses the current worker. A different selection requires an explicit `switch` with the current session ID and the new open parameters, or closing the current session first. Switching closes the old wallet before opening the next one. Every newly opened session receives a new identifier; identifiers from previous sessions are rejected.
+
+The MCP owns `.aztec-mcp/sessions/<network-identity>/` below the canonical project directory. Add `.aztec-mcp/` to the project's ignore rules. This directory contains its own wallet/PXE databases and ownership metadata. Do not substitute another application's wallet directory or symlink this storage. Both account material and registrations persist through orderly close/reopen and MCP restart. The bundled local test accounts are registered once when absent; responses contain only addresses and aliases.
+
+Store ownership is exclusive across processes. A stale owner lock is reclaimed only when both the recorded MCP process and its worker are dead. Unreadable locks and abandoned short-lived ownership guards fail closed. If a guard remains after an abrupt system failure, first establish that no MCP process or worker uses the directory before removing the guard. Closing a session drains ordered work, closes its databases, and preserves state. Forced worker shutdown reports a failure rather than claiming a clean persistent close; it only terminates the worker's owned process group.
+
+Status reports the selected runtime tuple, network identity, proof configuration, worker PID, observation time, and current node block number. Account enumeration does not synchronize private state. The installed public wallet interface does not expose a synchronized PXE block, so status explicitly reports PXE freshness as unknown. A balance must be established through a fresh, account-scoped contract operation, never inferred from this account list.
+
+Use `reset` with the current session ID to discard that session's MCP-owned wallet/PXE state, registrations, and completed transaction journal, then open fresh state with a new session ID. Project sources, sibling network stores, and the borrowed chain remain intact. Use `close` to preserve state, and `switch` to preserve the old state while selecting another project/network.
+
+Lifecycle transitions stop accepting new requests immediately and drain already queued runtime calls. A transaction still being admitted, queued, or running blocks the transition. Completed local waiting does not necessarily resolve a transaction: an attempted submission with an unknown outcome or recorded hash still awaiting reconciliation also blocks close, switch, and reset. Cancel local waiting through the job tools, then reconcile durable transaction evidence. A dropped/unknown receipt alone does not prove non-submission. Process shutdown preserves unresolved journals and never resubmits operations.
+
+The worker persists an observed block number/hash and compares it with the node before account and contract operations and when reopening a store. Regressed progress, a replaced anchor, changed network/protocol identity, or changed proof requirements invalidates the session. Its snapshot reports `state: "invalidated"`; ordinary requests with that session ID are rejected. If replacement is detected while opening persisted state, the wallet is left uninitialized and the returned session ID can be used for an explicit reset. Reset then returns a fresh session ID.
+
+If the developer resets the borrowed chain, explicitly reset session state before reusing registrations. Matching chain and rollup identifiers cannot detect every same-address reset; block anchors improve detection without promising perfect reset detection. The MCP never resets the borrowed chain itself.
+
+## Validation
+
+`npm test -- tests/development/session.test.ts` checks the compiled worker through fixture public SDK exports: worker reuse, persistence, stale IDs, competing owners, stale-owner recovery, incompatible versions/chain/proofs, unavailable nodes, orderly shutdown, queued-call switching, lifecycle admission guards, unresolved transaction journals, reset isolation, and persisted chain replacement detection. The tests do not bundle or import an SDK into the MCP process.
+
+The live v6 candidate additionally demonstrated open, repeated status/account access, and close/reopen with all three original test-account addresses preserved against the disposable local network on port 18080. The subsequent [complete MCP workflow](development-workflow.md) validated contract operations and recovery before promoting this exact runtime tuple.
+
+Live lifecycle evidence is recorded in [2026-10-16-lifecycle.json](development-evidence/2026-10-16-lifecycle.json). It validates switching and reset against the v6 candidate. The persisted-anchor regression case is explicitly injected into a disposable MCP store; the borrowed network is not reset during that check.
+
+The [cancelled-submission lifecycle evidence](development-evidence/2026-10-16-lifecycle-recovery.json) uses a real send cancelled after submission. Close, switch, and reset each refuse its unresolved journal. Fresh receipt reconciliation establishes inclusion without replay, after which close succeeds.

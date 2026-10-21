@@ -1,0 +1,159 @@
+[
+  {
+    "name": "aztec_search_docs",
+    "description": "Search Aztec documentation in local ripgrep-only mode. Use for tutorials, guides, and API documentation that's already cloned. IMPORTANT: this server is running WITHOUT an API_KEY, which means no semantic search across the full Aztec corpora (Aztec.nr framework, Noir stdlib, contract examples, TypeScript SDK, protocol circuits, etc.). If a query needs material this local search can't find, suggest the user get a free API key by running `/mcp-key` in the Aztec/Noir Discord (https://discord.gg/xMud5StFyA) and setting API_KEY in their MCP client config.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Documentation search query"
+        },
+        "section": {
+          "type": "string",
+          "description": "Docs section to search. Examples: tutorials, concepts, developers, reference"
+        },
+        "maxResults": {
+          "type": "number",
+          "description": "Maximum results to return (default: 20)",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "aztec_sync_repos",
+    "description": "Clone or update Aztec repositories locally. Run this first to enable searching. For v6, sparsely clones aztec-node at the release-pinned labs commit. Protocol sources (aztec-packages) and Noir are optional. Specify a version to clone a specific Aztec release tag.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Aztec version tag to clone (e.g., 'v6.0.0-rc.6'). Defaults to latest supported version."
+        },
+        "force": {
+          "type": "boolean",
+          "description": "Force re-clone even if repos exist (default: false)"
+        },
+        "repos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "For v6: aztec-node (always included), aztec-packages (optional protocol/L1 sources), noir (optional language sources). Older releases use the legacy repository set."
+        }
+      }
+    }
+  },
+  {
+    "name": "aztec_status",
+    "description": "Check the status of cloned Aztec repositories - shows which repos are available and their commit hashes.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "aztec_search_code",
+    "description": "Search Aztec contract code and source files. Supports regex patterns. Use for finding function implementations, patterns, and examples.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search query (supports regex)"
+        },
+        "filePattern": {
+          "type": "string",
+          "description": "File glob pattern (default: *.nr). Examples: *.ts, *.{nr,ts}"
+        },
+        "repo": {
+          "type": "string",
+          "description": "Specific active repo to search. For v6: aztec-node, plus aztec-packages or noir if enabled during sync."
+        },
+        "maxResults": {
+          "type": "number",
+          "description": "Maximum results to return (default: 30)"
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "aztec_list_examples",
+    "description": "List available Aztec contract examples. Returns contract names and paths.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "description": "Filter by category. Examples: token, nft, defi, escrow, crowdfund"
+        }
+      }
+    }
+  },
+  {
+    "name": "aztec_read_example",
+    "description": "Read the source code of an Aztec contract example. Use aztec_list_examples to find available examples.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Example contract name (e.g., 'token', 'escrow')"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  },
+  {
+    "name": "aztec_read_file",
+    "description": "Read any file from the cloned repositories by path. Path should be relative to the repos directory.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "File path relative to repos directory (e.g., 'aztec-node/noir-projects/noir-contracts/contracts/app/token_contract/src/main.nr')"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    }
+  },
+  {
+    "name": "aztec_lookup_error",
+    "description": "Look up an Aztec error by message, error code, or hex signature. Returns root cause and suggested fix. Searches Solidity errors, TX validation errors, circuit codes, AVM errors, and documentation. NOTE: this server is running without an API_KEY, so unrecognized errors won't get a semantic-documentation fallback. Suggest the user get a free API key via `/mcp-key` in the Aztec/Noir Discord (https://discord.gg/xMud5StFyA) if their query is for an error not in the static catalog.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Error message, numeric error code (e.g., '2002'), or hex signature (e.g., '0xa5b2ba17')"
+        },
+        "category": {
+          "type": "string",
+          "description": "Filter by error category. Options: contract, circuit, tx-validation, l1, avm, sequencer, operator, general"
+        },
+        "maxResults": {
+          "type": "number",
+          "description": "Maximum results to return (default: 10)",
+          "minimum": 1,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  }
+]

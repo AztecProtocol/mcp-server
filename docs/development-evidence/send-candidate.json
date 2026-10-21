@@ -1,0 +1,927 @@
+{
+  "checkedAt": "2026-10-16T16:02:59.567Z",
+  "projectPath": "/tmp/mcp-live-build-W0t3k9",
+  "productionSupported": false,
+  "runtime": {
+    "target": "6.0.0-rc.6",
+    "installationRoot": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3",
+    "supported": false,
+    "runtimeNode": {
+      "path": "/mnt/user-data/ilyas/.nvm/versions/node/v24.12.0/bin/node",
+      "requiredVersion": "24.12.0",
+      "version": "v24.12.0"
+    },
+    "cli": {
+      "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/bin/aztec",
+      "identity": "6.0.0-rc.3"
+    },
+    "compiler": {
+      "expectedVersion": "1.0.0-rc.3",
+      "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/internal-bin/nargo",
+      "identity": "nargo version = 1.0.0-rc.3\nnoirc version = 1.0.0-rc.3+5a7ee9bf5ed8973076df7bb0d2b723024db09ae7\n(git version hash: 5a7ee9bf5ed8973076df7bb0d2b723024db09ae7, is dirty: false)"
+    },
+    "packages": [
+      {
+        "name": "@aztec-labs/aztec",
+        "version": "6.0.0-rc.3",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/aztec/package.json",
+        "engines": {
+          "node": ">=20.10"
+        },
+        "foundationDependencies": {
+          "@aztec-foundation/bb.js": "6.0.0-rc.6"
+        },
+        "resolvedFoundationDependencies": {
+          "@aztec-foundation/bb.js": {
+            "version": "6.0.0-rc.6",
+            "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/bb.js/package.json"
+          }
+        }
+      },
+      {
+        "name": "@aztec-labs/cli",
+        "version": "6.0.0-rc.3",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/cli/package.json",
+        "engines": {
+          "node": ">=20.10"
+        },
+        "foundationDependencies": {
+          "@aztec-foundation/l1-artifacts": "6.0.0-rc.6"
+        },
+        "resolvedFoundationDependencies": {
+          "@aztec-foundation/l1-artifacts": {
+            "version": "6.0.0-rc.6",
+            "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/l1-artifacts/package.json"
+          }
+        }
+      },
+      {
+        "name": "@aztec-labs/aztec.js",
+        "version": "6.0.0-rc.3",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/aztec.js/package.json",
+        "engines": {
+          "node": ">=20.10"
+        },
+        "foundationDependencies": {
+          "@aztec-foundation/l1-artifacts": "6.0.0-rc.6"
+        },
+        "resolvedFoundationDependencies": {
+          "@aztec-foundation/l1-artifacts": {
+            "version": "6.0.0-rc.6",
+            "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/l1-artifacts/package.json"
+          }
+        }
+      },
+      {
+        "name": "@aztec-labs/wallets",
+        "version": "6.0.0-rc.3",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/wallets/package.json",
+        "engines": {
+          "node": ">=20.10"
+        },
+        "foundationDependencies": {},
+        "resolvedFoundationDependencies": {}
+      },
+      {
+        "name": "@aztec-labs/accounts",
+        "version": "6.0.0-rc.3",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/accounts/package.json",
+        "engines": {
+          "node": ">=20.10"
+        },
+        "foundationDependencies": {},
+        "resolvedFoundationDependencies": {}
+      },
+      {
+        "name": "@aztec-labs/pxe",
+        "version": "6.0.0-rc.3",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/pxe/package.json",
+        "engines": {
+          "node": ">=20.10"
+        },
+        "foundationDependencies": {
+          "@aztec-foundation/bb.js": "6.0.0-rc.6",
+          "@aztec-foundation/noir-acvm_js": "6.0.0-rc.6",
+          "@aztec-foundation/noir-noirc_abi": "6.0.0-rc.6",
+          "@aztec-foundation/noir-types": "6.0.0-rc.6"
+        },
+        "resolvedFoundationDependencies": {
+          "@aztec-foundation/bb.js": {
+            "version": "6.0.0-rc.6",
+            "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/bb.js/package.json"
+          },
+          "@aztec-foundation/noir-acvm_js": {
+            "version": "6.0.0-rc.6",
+            "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-acvm_js/package.json"
+          },
+          "@aztec-foundation/noir-noirc_abi": {
+            "version": "6.0.0-rc.6",
+            "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-noirc_abi/package.json"
+          },
+          "@aztec-foundation/noir-types": {
+            "version": "6.0.0-rc.6",
+            "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-types/package.json"
+          }
+        }
+      },
+      {
+        "name": "@aztec-foundation/bb.js",
+        "version": "6.0.0-rc.6",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/bb.js/package.json",
+        "foundationDependencies": {},
+        "resolvedFoundationDependencies": {}
+      },
+      {
+        "name": "@aztec-foundation/noir-types",
+        "version": "6.0.0-rc.6",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-types/package.json",
+        "foundationDependencies": {},
+        "resolvedFoundationDependencies": {}
+      },
+      {
+        "name": "@aztec-foundation/noir-acvm_js",
+        "version": "6.0.0-rc.6",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-acvm_js/package.json",
+        "foundationDependencies": {},
+        "resolvedFoundationDependencies": {}
+      },
+      {
+        "name": "@aztec-foundation/noir-noirc_abi",
+        "version": "6.0.0-rc.6",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-noirc_abi/package.json",
+        "foundationDependencies": {
+          "@aztec-foundation/noir-types": "6.0.0-rc.6"
+        },
+        "resolvedFoundationDependencies": {
+          "@aztec-foundation/noir-types": {
+            "version": "6.0.0-rc.6",
+            "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-types/package.json"
+          }
+        }
+      },
+      {
+        "name": "@aztec-foundation/l1-artifacts",
+        "version": "6.0.0-rc.6",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/l1-artifacts/package.json",
+        "foundationDependencies": {},
+        "resolvedFoundationDependencies": {}
+      }
+    ],
+    "publicExports": [
+      {
+        "specifier": "@aztec-labs/aztec.js/node",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/aztec.js/dest/api/node.js"
+      },
+      {
+        "specifier": "@aztec-labs/aztec.js/contracts",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/aztec.js/dest/api/contract.js"
+      },
+      {
+        "specifier": "@aztec-labs/wallets/embedded",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/wallets/dest/embedded/entrypoints/node.js"
+      },
+      {
+        "specifier": "@aztec-labs/accounts/testing",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/accounts/dest/testing/index.js"
+      },
+      {
+        "specifier": "@aztec-labs/pxe/config",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/pxe/dest/config/index.js"
+      }
+    ],
+    "provenance": {
+      "sourceIdentity": "unverified",
+      "versionsManifest": "noir: 1.0.0-rc.3\nfoundry: 1.4.1\nnode: 24.12.0\n",
+      "lockfileSha256": "bf345c13655ac36e3a9fbeab3a597b78a7c29eeffea0fcfa68cac4fd4b898cd6"
+    },
+    "diagnostics": [
+      {
+        "code": "unsupported-runtime",
+        "component": "compatibility",
+        "message": "No component tuple has completed the live acceptance milestone yet.",
+        "guidance": "Use the candidate-validation harness for integration evidence. Production execution remains disabled until ticket 13 validates and promotes the exact tuple."
+      }
+    ]
+  },
+  "session": {
+    "state": "ready",
+    "sessionId": "8cef51e8-215f-4464-b07e-b2c1eb895807",
+    "projectPath": "/tmp/mcp-live-build-W0t3k9",
+    "installationRoot": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3",
+    "nodeExecutable": "/mnt/user-data/ilyas/.nvm/versions/node/v24.12.0/bin/node",
+    "nodeUrl": "http://127.0.0.1:18080/",
+    "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+    "network": {
+      "nodeVersion": "6.0.0-rc.3",
+      "l1ChainId": 31337,
+      "rollupVersion": 2267645166,
+      "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+      "realProofs": false,
+      "l2ProtocolContractsHash": "0x0f54271c52865841a77aaa66036eed901aff22fdce9f08e123ec8b205c9854d7",
+      "l2CircuitsVkTreeRoot": "0x13eeb174d4119b221a22721853261759f57a65a57e864ad78b840b23cde69e02"
+    },
+    "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+    "runtime": {
+      "target": "6.0.0-rc.6",
+      "installationRoot": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3",
+      "supported": false,
+      "runtimeNode": {
+        "path": "/mnt/user-data/ilyas/.nvm/versions/node/v24.12.0/bin/node",
+        "requiredVersion": "24.12.0",
+        "version": "v24.12.0"
+      },
+      "cli": {
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/bin/aztec",
+        "identity": "6.0.0-rc.3"
+      },
+      "compiler": {
+        "expectedVersion": "1.0.0-rc.3",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/internal-bin/nargo",
+        "identity": "nargo version = 1.0.0-rc.3\nnoirc version = 1.0.0-rc.3+5a7ee9bf5ed8973076df7bb0d2b723024db09ae7\n(git version hash: 5a7ee9bf5ed8973076df7bb0d2b723024db09ae7, is dirty: false)"
+      },
+      "packages": [
+        {
+          "name": "@aztec-labs/aztec",
+          "version": "6.0.0-rc.3",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/aztec/package.json",
+          "engines": {
+            "node": ">=20.10"
+          },
+          "foundationDependencies": {
+            "@aztec-foundation/bb.js": "6.0.0-rc.6"
+          },
+          "resolvedFoundationDependencies": {
+            "@aztec-foundation/bb.js": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/bb.js/package.json"
+            }
+          }
+        },
+        {
+          "name": "@aztec-labs/cli",
+          "version": "6.0.0-rc.3",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/cli/package.json",
+          "engines": {
+            "node": ">=20.10"
+          },
+          "foundationDependencies": {
+            "@aztec-foundation/l1-artifacts": "6.0.0-rc.6"
+          },
+          "resolvedFoundationDependencies": {
+            "@aztec-foundation/l1-artifacts": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/l1-artifacts/package.json"
+            }
+          }
+        },
+        {
+          "name": "@aztec-labs/aztec.js",
+          "version": "6.0.0-rc.3",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/aztec.js/package.json",
+          "engines": {
+            "node": ">=20.10"
+          },
+          "foundationDependencies": {
+            "@aztec-foundation/l1-artifacts": "6.0.0-rc.6"
+          },
+          "resolvedFoundationDependencies": {
+            "@aztec-foundation/l1-artifacts": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/l1-artifacts/package.json"
+            }
+          }
+        },
+        {
+          "name": "@aztec-labs/wallets",
+          "version": "6.0.0-rc.3",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/wallets/package.json",
+          "engines": {
+            "node": ">=20.10"
+          },
+          "foundationDependencies": {},
+          "resolvedFoundationDependencies": {}
+        },
+        {
+          "name": "@aztec-labs/accounts",
+          "version": "6.0.0-rc.3",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/accounts/package.json",
+          "engines": {
+            "node": ">=20.10"
+          },
+          "foundationDependencies": {},
+          "resolvedFoundationDependencies": {}
+        },
+        {
+          "name": "@aztec-labs/pxe",
+          "version": "6.0.0-rc.3",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/pxe/package.json",
+          "engines": {
+            "node": ">=20.10"
+          },
+          "foundationDependencies": {
+            "@aztec-foundation/bb.js": "6.0.0-rc.6",
+            "@aztec-foundation/noir-acvm_js": "6.0.0-rc.6",
+            "@aztec-foundation/noir-noirc_abi": "6.0.0-rc.6",
+            "@aztec-foundation/noir-types": "6.0.0-rc.6"
+          },
+          "resolvedFoundationDependencies": {
+            "@aztec-foundation/bb.js": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/bb.js/package.json"
+            },
+            "@aztec-foundation/noir-acvm_js": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-acvm_js/package.json"
+            },
+            "@aztec-foundation/noir-noirc_abi": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-noirc_abi/package.json"
+            },
+            "@aztec-foundation/noir-types": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-types/package.json"
+            }
+          }
+        },
+        {
+          "name": "@aztec-foundation/bb.js",
+          "version": "6.0.0-rc.6",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/bb.js/package.json",
+          "foundationDependencies": {},
+          "resolvedFoundationDependencies": {}
+        },
+        {
+          "name": "@aztec-foundation/noir-types",
+          "version": "6.0.0-rc.6",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-types/package.json",
+          "foundationDependencies": {},
+          "resolvedFoundationDependencies": {}
+        },
+        {
+          "name": "@aztec-foundation/noir-acvm_js",
+          "version": "6.0.0-rc.6",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-acvm_js/package.json",
+          "foundationDependencies": {},
+          "resolvedFoundationDependencies": {}
+        },
+        {
+          "name": "@aztec-foundation/noir-noirc_abi",
+          "version": "6.0.0-rc.6",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-noirc_abi/package.json",
+          "foundationDependencies": {
+            "@aztec-foundation/noir-types": "6.0.0-rc.6"
+          },
+          "resolvedFoundationDependencies": {
+            "@aztec-foundation/noir-types": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-types/package.json"
+            }
+          }
+        },
+        {
+          "name": "@aztec-foundation/l1-artifacts",
+          "version": "6.0.0-rc.6",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/l1-artifacts/package.json",
+          "foundationDependencies": {},
+          "resolvedFoundationDependencies": {}
+        }
+      ],
+      "publicExports": [
+        {
+          "specifier": "@aztec-labs/aztec.js/node",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/aztec.js/dest/api/node.js"
+        },
+        {
+          "specifier": "@aztec-labs/aztec.js/contracts",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/aztec.js/dest/api/contract.js"
+        },
+        {
+          "specifier": "@aztec-labs/wallets/embedded",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/wallets/dest/embedded/entrypoints/node.js"
+        },
+        {
+          "specifier": "@aztec-labs/accounts/testing",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/accounts/dest/testing/index.js"
+        },
+        {
+          "specifier": "@aztec-labs/pxe/config",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/pxe/dest/config/index.js"
+        }
+      ],
+      "provenance": {
+        "sourceIdentity": "unverified",
+        "versionsManifest": "noir: 1.0.0-rc.3\nfoundry: 1.4.1\nnode: 24.12.0\n",
+        "lockfileSha256": "bf345c13655ac36e3a9fbeab3a597b78a7c29eeffea0fcfa68cac4fd4b898cd6"
+      },
+      "diagnostics": [
+        {
+          "code": "unsupported-runtime",
+          "component": "compatibility",
+          "message": "No component tuple has completed the live acceptance milestone yet.",
+          "guidance": "Use the candidate-validation harness for integration evidence. Production execution remains disabled until ticket 13 validates and promotes the exact tuple."
+        }
+      ]
+    },
+    "proofMode": "fast",
+    "proverEnabled": false,
+    "stateDirectory": "/tmp/mcp-live-build-W0t3k9/.aztec-mcp/sessions/b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+    "openedAt": "2026-10-16T16:03:08.668Z",
+    "environment": {
+      "chain": {
+        "status": "current",
+        "anchor": {
+          "blockNumber": 9,
+          "blockHash": "0x0a2972d9d1506b148dc84b74ed39bfcdd38f369950a5744fc19309706f21af74"
+        }
+      },
+      "network": {
+        "nodeVersion": "6.0.0-rc.3",
+        "l1ChainId": 31337,
+        "rollupVersion": 2267645166,
+        "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+        "realProofs": false,
+        "l2ProtocolContractsHash": "0x0f54271c52865841a77aaa66036eed901aff22fdce9f08e123ec8b205c9854d7",
+        "l2CircuitsVkTreeRoot": "0x13eeb174d4119b221a22721853261759f57a65a57e864ad78b840b23cde69e02"
+      },
+      "observedAt": "2026-10-16T16:03:08.657Z",
+      "blockNumber": 9,
+      "cached": false,
+      "proofTelemetry": {
+        "guardInstalled": true,
+        "realProofRequests": 0,
+        "realProofCompletions": 0,
+        "blockedRealProofRequests": 0,
+        "realProofDurationMs": 0
+      },
+      "pxe": {
+        "freshness": "unknown",
+        "reason": "Wallet public API does not expose a synchronized block; account listing does not synchronize private state."
+      },
+      "workerPid": 2823810,
+      "walletInitializations": 1
+    }
+  },
+  "before": {
+    "operation": "view",
+    "status": "succeeded",
+    "address": "0x28f62ea1e5b7d73d5b540e7f898e97d60a2ea14b1d34069084d6776caf714c9a",
+    "functionName": "get_counter",
+    "functionType": "utility",
+    "artifact": {
+      "path": "/tmp/mcp-live-build-W0t3k9/target/counter_contract-Counter.json",
+      "contentHash": "400a8ff732aeb8df37b840eb90dc7f34c5fe4ebbd14835a2568791aa8f0c445e",
+      "classId": "0x0a251def692bcb3524e574503da26b7f6adf0cbe1e3f854f71bc0f7b33e50cc3",
+      "contractName": "Counter"
+    },
+    "accountScope": [
+      "0x07848ac687a32ab934aa16d6f48daef87e91fc2c5333741159d1de7a76aeca55"
+    ],
+    "result": "6",
+    "dataStatus": "available",
+    "observedBlock": 9,
+    "observedThroughBlock": 9,
+    "observedAt": "2026-10-16T16:03:09.758Z",
+    "freshness": {
+      "cached": false,
+      "status": "sdk-synchronized",
+      "synchronizedThroughBlock": 9,
+      "blockHash": "0x0a2972d9d1506b148dc84b74ed39bfcdd38f369950a5744fc19309706f21af74",
+      "exactExecutionBlock": false
+    },
+    "chainTransactionSubmitted": false,
+    "proofMode": "fast",
+    "proofValidityEstablished": false
+  },
+  "sent": {
+    "id": "baf7674a-daf3-425f-9e9a-83eaa44cafce",
+    "kind": "send",
+    "status": "completed",
+    "phase": "included",
+    "queuedAt": "2026-10-16T16:03:09.934Z",
+    "startedAt": "2026-10-16T16:03:09.934Z",
+    "evidence": {
+      "schemaVersion": 1,
+      "jobId": "baf7674a-daf3-425f-9e9a-83eaa44cafce",
+      "kind": "send",
+      "state": "included",
+      "createdAt": "2026-10-16T16:03:09.935Z",
+      "updatedAt": "2026-10-16T16:03:14.418Z",
+      "sessionId": "8cef51e8-215f-4464-b07e-b2c1eb895807",
+      "stateDirectory": "/tmp/mcp-live-build-W0t3k9/.aztec-mcp/sessions/b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+      "projectPath": "/tmp/mcp-live-build-W0t3k9",
+      "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+      "proofMode": "fast",
+      "proofValidityEstablished": false,
+      "account": "0x07848ac687a32ab934aa16d6f48daef87e91fc2c5333741159d1de7a76aeca55",
+      "artifact": {
+        "path": "/tmp/mcp-live-build-W0t3k9/target/counter_contract-Counter.json",
+        "contentHash": "400a8ff732aeb8df37b840eb90dc7f34c5fe4ebbd14835a2568791aa8f0c445e",
+        "classId": "0x0a251def692bcb3524e574503da26b7f6adf0cbe1e3f854f71bc0f7b33e50cc3",
+        "contractName": "Counter"
+      },
+      "intent": {
+        "functionName": "increment"
+      },
+      "submissionAttempted": true,
+      "chainTransactionCancelled": false,
+      "address": "0x28f62ea1e5b7d73d5b540e7f898e97d60a2ea14b1d34069084d6776caf714c9a",
+      "registered": true,
+      "txHash": "0x2183460545336bb28c0d2f3b9ef9395c5bd4f05cfe4d2b41a226dd9cc11bd2cb",
+      "submissionReached": true,
+      "receipt": {
+        "txHash": "0x2183460545336bb28c0d2f3b9ef9395c5bd4f05cfe4d2b41a226dd9cc11bd2cb",
+        "status": "proposed",
+        "executionResult": "success",
+        "blockNumber": 10,
+        "blockHash": "0x17c6956123b4239ee7be61c2e484c46129c612cae4370c2c0c3fcc45bffcdec5",
+        "transactionFee": "1228647900000000",
+        "observedAt": "2026-10-16T16:03:14.407Z",
+        "network": {
+          "nodeVersion": "6.0.0-rc.3",
+          "l1ChainId": 31337,
+          "rollupVersion": 2267645166,
+          "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+          "realProofs": false,
+          "l2ProtocolContractsHash": "0x0f54271c52865841a77aaa66036eed901aff22fdce9f08e123ec8b205c9854d7",
+          "l2CircuitsVkTreeRoot": "0x13eeb174d4119b221a22721853261759f57a65a57e864ad78b840b23cde69e02"
+        },
+        "source": "node",
+        "scope": "public"
+      }
+    },
+    "result": {
+      "address": "0x28f62ea1e5b7d73d5b540e7f898e97d60a2ea14b1d34069084d6776caf714c9a",
+      "registered": true,
+      "functionName": "increment",
+      "txHash": "0x2183460545336bb28c0d2f3b9ef9395c5bd4f05cfe4d2b41a226dd9cc11bd2cb",
+      "artifact": {
+        "path": "/tmp/mcp-live-build-W0t3k9/target/counter_contract-Counter.json",
+        "contentHash": "400a8ff732aeb8df37b840eb90dc7f34c5fe4ebbd14835a2568791aa8f0c445e",
+        "classId": "0x0a251def692bcb3524e574503da26b7f6adf0cbe1e3f854f71bc0f7b33e50cc3",
+        "contractName": "Counter"
+      },
+      "receipt": {
+        "txHash": "0x2183460545336bb28c0d2f3b9ef9395c5bd4f05cfe4d2b41a226dd9cc11bd2cb",
+        "status": "proposed",
+        "executionResult": "success",
+        "blockNumber": 10,
+        "blockHash": "0x17c6956123b4239ee7be61c2e484c46129c612cae4370c2c0c3fcc45bffcdec5",
+        "transactionFee": "1228647900000000",
+        "observedAt": "2026-10-16T16:03:14.407Z",
+        "network": {
+          "nodeVersion": "6.0.0-rc.3",
+          "l1ChainId": 31337,
+          "rollupVersion": 2267645166,
+          "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+          "realProofs": false,
+          "l2ProtocolContractsHash": "0x0f54271c52865841a77aaa66036eed901aff22fdce9f08e123ec8b205c9854d7",
+          "l2CircuitsVkTreeRoot": "0x13eeb174d4119b221a22721853261759f57a65a57e864ad78b840b23cde69e02"
+        },
+        "source": "node",
+        "scope": "public"
+      },
+      "included": true,
+      "submitted": true,
+      "accountScope": [
+        "0x07848ac687a32ab934aa16d6f48daef87e91fc2c5333741159d1de7a76aeca55"
+      ],
+      "proofMode": "fast",
+      "proofValidityEstablished": false,
+      "chainTransactionCancelled": false
+    },
+    "finishedAt": "2026-10-16T16:03:14.720Z",
+    "durationMs": 4786
+  },
+  "sendMs": 4960.055163999999,
+  "inspected": {
+    "txHash": "0x2183460545336bb28c0d2f3b9ef9395c5bd4f05cfe4d2b41a226dd9cc11bd2cb",
+    "status": "proposed",
+    "executionResult": "success",
+    "blockNumber": 10,
+    "blockHash": "0x17c6956123b4239ee7be61c2e484c46129c612cae4370c2c0c3fcc45bffcdec5",
+    "transactionFee": "1228647900000000",
+    "observedAt": "2026-10-16T16:03:14.776Z",
+    "network": {
+      "nodeVersion": "6.0.0-rc.3",
+      "l1ChainId": 31337,
+      "rollupVersion": 2267645166,
+      "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+      "realProofs": false,
+      "l2ProtocolContractsHash": "0x0f54271c52865841a77aaa66036eed901aff22fdce9f08e123ec8b205c9854d7",
+      "l2CircuitsVkTreeRoot": "0x13eeb174d4119b221a22721853261759f57a65a57e864ad78b840b23cde69e02"
+    },
+    "effects": {
+      "noteHashes": [
+        "0x2bcc2e2ee9a5a3e8771f93088096373057086950c6df7fa4099a38bd7db7f470"
+      ],
+      "nullifiers": [
+        "0x17977fe85222f42153adc5ec1a1ad1c8a204e6dea731afe2c4ec1924e71c83be"
+      ],
+      "l2ToL1Messages": [],
+      "publicDataWrites": [
+        {
+          "slot": "0x064c3100fa4b606989a5bbfb4156861fa0b857e3e4513f36de8233d3a6cb722f",
+          "value": "0x00000000000000000000000000000000000000000000021e1901cac2a30eb080"
+        }
+      ],
+      "privateLogCount": 1,
+      "contractClassLogCount": 0,
+      "source": "node",
+      "scope": "public",
+      "truncated": false
+    },
+    "events": {
+      "public": [],
+      "scope": "public",
+      "decoded": false,
+      "privateEvents": "not-enumerated",
+      "truncated": false
+    },
+    "source": "node",
+    "scope": "public"
+  },
+  "after": {
+    "operation": "view",
+    "status": "succeeded",
+    "address": "0x28f62ea1e5b7d73d5b540e7f898e97d60a2ea14b1d34069084d6776caf714c9a",
+    "functionName": "get_counter",
+    "functionType": "utility",
+    "artifact": {
+      "path": "/tmp/mcp-live-build-W0t3k9/target/counter_contract-Counter.json",
+      "contentHash": "400a8ff732aeb8df37b840eb90dc7f34c5fe4ebbd14835a2568791aa8f0c445e",
+      "classId": "0x0a251def692bcb3524e574503da26b7f6adf0cbe1e3f854f71bc0f7b33e50cc3",
+      "contractName": "Counter"
+    },
+    "accountScope": [
+      "0x07848ac687a32ab934aa16d6f48daef87e91fc2c5333741159d1de7a76aeca55"
+    ],
+    "result": "7",
+    "dataStatus": "available",
+    "observedBlock": 10,
+    "observedThroughBlock": 10,
+    "observedAt": "2026-10-16T16:03:15.689Z",
+    "freshness": {
+      "cached": false,
+      "status": "sdk-synchronized",
+      "synchronizedThroughBlock": 10,
+      "blockHash": "0x17c6956123b4239ee7be61c2e484c46129c612cae4370c2c0c3fcc45bffcdec5",
+      "exactExecutionBlock": false,
+      "minimumBlock": 10
+    },
+    "chainTransactionSubmitted": false,
+    "proofMode": "fast",
+    "proofValidityEstablished": false
+  },
+  "failed": {
+    "id": "e5667aba-d803-42b1-bf8f-ffe6fa2414b6",
+    "kind": "send",
+    "status": "failed",
+    "phase": "failed",
+    "queuedAt": "2026-10-16T16:03:17.355Z",
+    "startedAt": "2026-10-16T16:03:17.355Z",
+    "evidence": {
+      "schemaVersion": 1,
+      "jobId": "e5667aba-d803-42b1-bf8f-ffe6fa2414b6",
+      "kind": "send",
+      "state": "failed",
+      "createdAt": "2026-10-16T16:03:17.355Z",
+      "updatedAt": "2026-10-16T16:03:18.810Z",
+      "sessionId": "8cef51e8-215f-4464-b07e-b2c1eb895807",
+      "stateDirectory": "/tmp/mcp-live-build-W0t3k9/.aztec-mcp/sessions/b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+      "projectPath": "/tmp/mcp-live-build-W0t3k9",
+      "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+      "proofMode": "fast",
+      "proofValidityEstablished": false,
+      "account": "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b",
+      "artifact": {
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/noir-contracts.js/artifacts/token_contract-Token.json",
+        "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+        "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+        "contractName": "Token"
+      },
+      "intent": {
+        "functionName": "transfer"
+      },
+      "submissionAttempted": true,
+      "chainTransactionCancelled": false,
+      "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+      "registered": true,
+      "submissionReached": false,
+      "error": {
+        "code": "simulation-failed",
+        "message": "Contract assertion failed: Balance too low"
+      }
+    },
+    "error": {
+      "message": "Contract assertion failed: Balance too low",
+      "code": "simulation-failed",
+      "details": {
+        "schemaVersion": 1,
+        "jobId": "e5667aba-d803-42b1-bf8f-ffe6fa2414b6",
+        "kind": "send",
+        "state": "failed",
+        "createdAt": "2026-10-16T16:03:17.355Z",
+        "updatedAt": "2026-10-16T16:03:18.810Z",
+        "sessionId": "8cef51e8-215f-4464-b07e-b2c1eb895807",
+        "stateDirectory": "/tmp/mcp-live-build-W0t3k9/.aztec-mcp/sessions/b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+        "projectPath": "/tmp/mcp-live-build-W0t3k9",
+        "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+        "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+        "proofMode": "fast",
+        "proofValidityEstablished": false,
+        "account": "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b",
+        "artifact": {
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/noir-contracts.js/artifacts/token_contract-Token.json",
+          "contentHash": "46f77895ee96bced492a46b6dbd1d3b16063f15eb85e4cbbd2b90064d50f3e02",
+          "classId": "0x2001f8a15f9fbea4462c7b476f94ee0b96789c69a2d06280bdd1edd1138059e6",
+          "contractName": "Token"
+        },
+        "intent": {
+          "functionName": "transfer"
+        },
+        "submissionAttempted": true,
+        "address": "0x164149c40bbbd281dd204bf32648cc91550e034a9116d2510841f485c166f606",
+        "registered": true,
+        "submissionReached": false,
+        "error": {
+          "code": "simulation-failed",
+          "message": "Contract assertion failed: Balance too low"
+        },
+        "chainTransactionCancelled": false
+      }
+    },
+    "finishedAt": "2026-10-16T16:03:18.837Z",
+    "durationMs": 1482
+  },
+  "cancelled": {
+    "id": "85bb352a-e675-4375-9972-e0fb02e9d827",
+    "kind": "send",
+    "status": "cancelled",
+    "phase": "cancelled-waiting",
+    "queuedAt": "2026-10-16T16:03:18.956Z",
+    "startedAt": "2026-10-16T16:03:18.956Z",
+    "evidence": {
+      "schemaVersion": 1,
+      "jobId": "85bb352a-e675-4375-9972-e0fb02e9d827",
+      "kind": "send",
+      "state": "cancelled-waiting",
+      "createdAt": "2026-10-16T16:03:18.956Z",
+      "updatedAt": "2026-10-16T16:03:20.766Z",
+      "sessionId": "8cef51e8-215f-4464-b07e-b2c1eb895807",
+      "stateDirectory": "/tmp/mcp-live-build-W0t3k9/.aztec-mcp/sessions/b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+      "projectPath": "/tmp/mcp-live-build-W0t3k9",
+      "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+      "proofMode": "fast",
+      "proofValidityEstablished": false,
+      "account": "0x07848ac687a32ab934aa16d6f48daef87e91fc2c5333741159d1de7a76aeca55",
+      "artifact": {
+        "path": "/tmp/mcp-live-build-W0t3k9/target/counter_contract-Counter.json",
+        "contentHash": "400a8ff732aeb8df37b840eb90dc7f34c5fe4ebbd14835a2568791aa8f0c445e",
+        "classId": "0x0a251def692bcb3524e574503da26b7f6adf0cbe1e3f854f71bc0f7b33e50cc3",
+        "contractName": "Counter"
+      },
+      "intent": {
+        "functionName": "increment"
+      },
+      "submissionAttempted": true,
+      "chainTransactionCancelled": false,
+      "address": "0x28f62ea1e5b7d73d5b540e7f898e97d60a2ea14b1d34069084d6776caf714c9a",
+      "registered": true,
+      "txHash": "0x2e82b1b475594d376d9155e2af8ac817c72c2ccc41881d0e497de389c960a820",
+      "submissionReached": true
+    },
+    "result": {
+      "address": "0x28f62ea1e5b7d73d5b540e7f898e97d60a2ea14b1d34069084d6776caf714c9a",
+      "txHash": "0x2e82b1b475594d376d9155e2af8ac817c72c2ccc41881d0e497de389c960a820",
+      "submitted": true,
+      "included": false,
+      "registered": true,
+      "cancelledWaiting": true,
+      "proofValidityEstablished": false,
+      "chainTransactionCancelled": false
+    },
+    "error": {
+      "message": "This operation was aborted"
+    },
+    "finishedAt": "2026-10-16T16:03:20.807Z",
+    "durationMs": 1851
+  },
+  "cancelledReceipt": {
+    "txHash": "0x2e82b1b475594d376d9155e2af8ac817c72c2ccc41881d0e497de389c960a820",
+    "status": "proposed",
+    "executionResult": "success",
+    "blockNumber": 11,
+    "blockHash": "0x2aaf3487c8e8192da931d1bbe9614824be0e7c1711ab829f6ce78162b1a6ad13",
+    "transactionFee": "1228647900000000",
+    "observedAt": "2026-10-16T16:03:23.325Z",
+    "network": {
+      "nodeVersion": "6.0.0-rc.3",
+      "l1ChainId": 31337,
+      "rollupVersion": 2267645166,
+      "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+      "realProofs": false,
+      "l2ProtocolContractsHash": "0x0f54271c52865841a77aaa66036eed901aff22fdce9f08e123ec8b205c9854d7",
+      "l2CircuitsVkTreeRoot": "0x13eeb174d4119b221a22721853261759f57a65a57e864ad78b840b23cde69e02"
+    },
+    "effects": {
+      "noteHashes": [
+        "0x0d2c1fa58d97d03028518983d50457bb744a7aebb82353af0e2fc4cff56b0059"
+      ],
+      "nullifiers": [
+        "0x2055dd7e21089e710840db521b831c68febc41d1b1acbd04e725755a660f0d91"
+      ],
+      "l2ToL1Messages": [],
+      "publicDataWrites": [
+        {
+          "slot": "0x064c3100fa4b606989a5bbfb4156861fa0b857e3e4513f36de8233d3a6cb722f",
+          "value": "0x00000000000000000000000000000000000000000000021e18fd6d4fc16c8180"
+        }
+      ],
+      "privateLogCount": 1,
+      "contractClassLogCount": 0,
+      "source": "node",
+      "scope": "public",
+      "truncated": false
+    },
+    "events": {
+      "public": [],
+      "scope": "public",
+      "decoded": false,
+      "privateEvents": "not-enumerated",
+      "truncated": false
+    },
+    "source": "node",
+    "scope": "public"
+  },
+  "afterCancelled": {
+    "operation": "view",
+    "status": "succeeded",
+    "address": "0x28f62ea1e5b7d73d5b540e7f898e97d60a2ea14b1d34069084d6776caf714c9a",
+    "functionName": "get_counter",
+    "functionType": "utility",
+    "artifact": {
+      "path": "/tmp/mcp-live-build-W0t3k9/target/counter_contract-Counter.json",
+      "contentHash": "400a8ff732aeb8df37b840eb90dc7f34c5fe4ebbd14835a2568791aa8f0c445e",
+      "classId": "0x0a251def692bcb3524e574503da26b7f6adf0cbe1e3f854f71bc0f7b33e50cc3",
+      "contractName": "Counter"
+    },
+    "accountScope": [
+      "0x07848ac687a32ab934aa16d6f48daef87e91fc2c5333741159d1de7a76aeca55"
+    ],
+    "result": "8",
+    "dataStatus": "available",
+    "observedBlock": 11,
+    "observedThroughBlock": 11,
+    "observedAt": "2026-10-16T16:03:24.186Z",
+    "freshness": {
+      "cached": false,
+      "status": "sdk-synchronized",
+      "synchronizedThroughBlock": 11,
+      "blockHash": "0x2aaf3487c8e8192da931d1bbe9614824be0e7c1711ab829f6ce78162b1a6ad13",
+      "exactExecutionBlock": false,
+      "minimumBlock": 11
+    },
+    "chainTransactionSubmitted": false,
+    "proofMode": "fast",
+    "proofValidityEstablished": false
+  },
+  "submissionCalls": 3,
+  "environment": {
+    "chain": {
+      "status": "current",
+      "anchor": {
+        "blockNumber": 11,
+        "blockHash": "0x2aaf3487c8e8192da931d1bbe9614824be0e7c1711ab829f6ce78162b1a6ad13"
+      }
+    },
+    "network": {
+      "nodeVersion": "6.0.0-rc.3",
+      "l1ChainId": 31337,
+      "rollupVersion": 2267645166,
+      "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+      "realProofs": false,
+      "l2ProtocolContractsHash": "0x0f54271c52865841a77aaa66036eed901aff22fdce9f08e123ec8b205c9854d7",
+      "l2CircuitsVkTreeRoot": "0x13eeb174d4119b221a22721853261759f57a65a57e864ad78b840b23cde69e02"
+    },
+    "observedAt": "2026-10-16T16:03:24.223Z",
+    "blockNumber": 11,
+    "cached": false,
+    "proofTelemetry": {
+      "guardInstalled": true,
+      "realProofRequests": 0,
+      "realProofCompletions": 0,
+      "blockedRealProofRequests": 0,
+      "realProofDurationMs": 0
+    },
+    "pxe": {
+      "freshness": "unknown",
+      "reason": "Wallet public API does not expose a synchronized block; account listing does not synchronize private state."
+    },
+    "workerPid": 2823810,
+    "walletInitializations": 1
+  },
+  "status": "passed"
+}

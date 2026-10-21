@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-16T15:59:19.286Z",
+  "projectPath": "/tmp/aztec-mcp-lifecycle-4pgIzK",
+  "otherProjectPath": "/tmp/aztec-mcp-lifecycle-other-uHW0OY",
+  "network": {
+    "nodeVersion": "6.0.0-rc.3",
+    "l1ChainId": 31337,
+    "rollupVersion": 2267645166,
+    "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+    "realProofs": false,
+    "l2ProtocolContractsHash": "0x0f54271c52865841a77aaa66036eed901aff22fdce9f08e123ec8b205c9854d7",
+    "l2CircuitsVkTreeRoot": "0x13eeb174d4119b221a22721853261759f57a65a57e864ad78b840b23cde69e02"
+  },
+  "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+  "queuedAccountsDrained": true,
+  "switchHasFreshId": true,
+  "registrationPreservedAcrossSwitch": true,
+  "resetHasFreshId": true,
+  "registrationDiscarded": true,
+  "sourcePreserved": true,
+  "otherNetworkPreserved": true,
+  "injectedPersistedAnchorDetected": true,
+  "invalidatedWalletNotInitialized": true,
+  "explicitResetRecovered": true,
+  "borrowedNodeStillAvailable": true
+}

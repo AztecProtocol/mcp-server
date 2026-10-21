@@ -1,0 +1,445 @@
+{
+  "check": "explicit-real-proving",
+  "startedAt": "2026-10-16T16:22:09.380Z",
+  "candidateHarness": true,
+  "phases": [
+    "queued",
+    "preparing",
+    "submitting",
+    "proving",
+    "proof-generated",
+    "waiting",
+    "included"
+  ],
+  "missingConfigurationRejected": true,
+  "session": {
+    "state": "ready",
+    "sessionId": "1581d26a-72fd-4219-9410-484cc90741d8",
+    "projectPath": "/tmp/aztec-mcp-real-proving-wm6gl07n",
+    "installationRoot": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3",
+    "nodeExecutable": "/mnt/user-data/ilyas/.nvm/versions/node/v24.12.0/bin/node",
+    "nodeUrl": "http://127.0.0.1:18080/",
+    "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+    "network": {
+      "nodeVersion": "6.0.0-rc.3",
+      "l1ChainId": 31337,
+      "rollupVersion": 2267645166,
+      "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+      "realProofs": false,
+      "l2ProtocolContractsHash": "0x0f54271c52865841a77aaa66036eed901aff22fdce9f08e123ec8b205c9854d7",
+      "l2CircuitsVkTreeRoot": "0x13eeb174d4119b221a22721853261759f57a65a57e864ad78b840b23cde69e02"
+    },
+    "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+    "runtime": {
+      "target": "6.0.0-rc.6",
+      "installationRoot": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3",
+      "supported": false,
+      "runtimeNode": {
+        "path": "/mnt/user-data/ilyas/.nvm/versions/node/v24.12.0/bin/node",
+        "requiredVersion": "24.12.0",
+        "version": "v24.12.0"
+      },
+      "cli": {
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/bin/aztec",
+        "identity": "6.0.0-rc.3"
+      },
+      "compiler": {
+        "expectedVersion": "1.0.0-rc.3",
+        "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/internal-bin/nargo",
+        "identity": "nargo version = 1.0.0-rc.3\nnoirc version = 1.0.0-rc.3+5a7ee9bf5ed8973076df7bb0d2b723024db09ae7\n(git version hash: 5a7ee9bf5ed8973076df7bb0d2b723024db09ae7, is dirty: false)"
+      },
+      "packages": [
+        {
+          "name": "@aztec-labs/aztec",
+          "version": "6.0.0-rc.3",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/aztec/package.json",
+          "engines": {
+            "node": ">=20.10"
+          },
+          "foundationDependencies": {
+            "@aztec-foundation/bb.js": "6.0.0-rc.6"
+          },
+          "resolvedFoundationDependencies": {
+            "@aztec-foundation/bb.js": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/bb.js/package.json"
+            }
+          }
+        },
+        {
+          "name": "@aztec-labs/cli",
+          "version": "6.0.0-rc.3",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/cli/package.json",
+          "engines": {
+            "node": ">=20.10"
+          },
+          "foundationDependencies": {
+            "@aztec-foundation/l1-artifacts": "6.0.0-rc.6"
+          },
+          "resolvedFoundationDependencies": {
+            "@aztec-foundation/l1-artifacts": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/l1-artifacts/package.json"
+            }
+          }
+        },
+        {
+          "name": "@aztec-labs/aztec.js",
+          "version": "6.0.0-rc.3",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/aztec.js/package.json",
+          "engines": {
+            "node": ">=20.10"
+          },
+          "foundationDependencies": {
+            "@aztec-foundation/l1-artifacts": "6.0.0-rc.6"
+          },
+          "resolvedFoundationDependencies": {
+            "@aztec-foundation/l1-artifacts": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/l1-artifacts/package.json"
+            }
+          }
+        },
+        {
+          "name": "@aztec-labs/wallets",
+          "version": "6.0.0-rc.3",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/wallets/package.json",
+          "engines": {
+            "node": ">=20.10"
+          },
+          "foundationDependencies": {},
+          "resolvedFoundationDependencies": {}
+        },
+        {
+          "name": "@aztec-labs/accounts",
+          "version": "6.0.0-rc.3",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/accounts/package.json",
+          "engines": {
+            "node": ">=20.10"
+          },
+          "foundationDependencies": {},
+          "resolvedFoundationDependencies": {}
+        },
+        {
+          "name": "@aztec-labs/pxe",
+          "version": "6.0.0-rc.3",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/pxe/package.json",
+          "engines": {
+            "node": ">=20.10"
+          },
+          "foundationDependencies": {
+            "@aztec-foundation/bb.js": "6.0.0-rc.6",
+            "@aztec-foundation/noir-acvm_js": "6.0.0-rc.6",
+            "@aztec-foundation/noir-noirc_abi": "6.0.0-rc.6",
+            "@aztec-foundation/noir-types": "6.0.0-rc.6"
+          },
+          "resolvedFoundationDependencies": {
+            "@aztec-foundation/bb.js": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/bb.js/package.json"
+            },
+            "@aztec-foundation/noir-acvm_js": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-acvm_js/package.json"
+            },
+            "@aztec-foundation/noir-noirc_abi": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-noirc_abi/package.json"
+            },
+            "@aztec-foundation/noir-types": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-types/package.json"
+            }
+          }
+        },
+        {
+          "name": "@aztec-foundation/bb.js",
+          "version": "6.0.0-rc.6",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/bb.js/package.json",
+          "foundationDependencies": {},
+          "resolvedFoundationDependencies": {}
+        },
+        {
+          "name": "@aztec-foundation/noir-types",
+          "version": "6.0.0-rc.6",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-types/package.json",
+          "foundationDependencies": {},
+          "resolvedFoundationDependencies": {}
+        },
+        {
+          "name": "@aztec-foundation/noir-acvm_js",
+          "version": "6.0.0-rc.6",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-acvm_js/package.json",
+          "foundationDependencies": {},
+          "resolvedFoundationDependencies": {}
+        },
+        {
+          "name": "@aztec-foundation/noir-noirc_abi",
+          "version": "6.0.0-rc.6",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-noirc_abi/package.json",
+          "foundationDependencies": {
+            "@aztec-foundation/noir-types": "6.0.0-rc.6"
+          },
+          "resolvedFoundationDependencies": {
+            "@aztec-foundation/noir-types": {
+              "version": "6.0.0-rc.6",
+              "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/noir-types/package.json"
+            }
+          }
+        },
+        {
+          "name": "@aztec-foundation/l1-artifacts",
+          "version": "6.0.0-rc.6",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/l1-artifacts/package.json",
+          "foundationDependencies": {},
+          "resolvedFoundationDependencies": {}
+        }
+      ],
+      "publicExports": [
+        {
+          "specifier": "@aztec-labs/aztec.js/node",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/aztec.js/dest/api/node.js"
+        },
+        {
+          "specifier": "@aztec-labs/aztec.js/contracts",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/aztec.js/dest/api/contract.js"
+        },
+        {
+          "specifier": "@aztec-labs/wallets/embedded",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/wallets/dest/embedded/entrypoints/node.js"
+        },
+        {
+          "specifier": "@aztec-labs/accounts/testing",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/accounts/dest/testing/index.js"
+        },
+        {
+          "specifier": "@aztec-labs/pxe/config",
+          "path": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-labs/pxe/dest/config/index.js"
+        }
+      ],
+      "provenance": {
+        "sourceIdentity": "unverified",
+        "versionsManifest": "noir: 1.0.0-rc.3\nfoundry: 1.4.1\nnode: 24.12.0\n",
+        "lockfileSha256": "bf345c13655ac36e3a9fbeab3a597b78a7c29eeffea0fcfa68cac4fd4b898cd6"
+      },
+      "diagnostics": [
+        {
+          "code": "unsupported-runtime",
+          "component": "compatibility",
+          "message": "No component tuple has completed the live acceptance milestone yet.",
+          "guidance": "Use the candidate-validation harness for integration evidence. Production execution remains disabled until ticket 13 validates and promotes the exact tuple."
+        }
+      ]
+    },
+    "proofMode": "real",
+    "proverEnabled": true,
+    "proving": {
+      "backend": "NativeUnixSocket",
+      "crsPath": "/mnt/user-data/ilyas/.bb-crs",
+      "threads": 2,
+      "bbPath": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3/node_modules/@aztec-foundation/bb.js/build/amd64-linux/bb",
+      "binarySha256": "fa4b12adaefd5684b53b802346b9fe839ab3d6a4a829a5ea4efd6bd200e0829f",
+      "version": "6.0.0-rc.6",
+      "crsFiles": [
+        {
+          "name": "bn254_g1.dat",
+          "bytes": 2147483712
+        },
+        {
+          "name": "bn254_g2.dat",
+          "bytes": 128
+        },
+        {
+          "name": "grumpkin_g1_v2.flat.dat",
+          "bytes": 16777216
+        }
+      ],
+      "respawn": false
+    },
+    "stateDirectory": "/tmp/aztec-mcp-real-proving-wm6gl07n/.aztec-mcp/sessions/b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+    "openedAt": "2026-10-16T16:22:14.897Z",
+    "environment": {
+      "chain": {
+        "status": "current",
+        "anchor": {
+          "blockNumber": 21,
+          "blockHash": "0x1e000626c69f47433b012437ab9276567499e42fc10d8557967af115b43774f3"
+        }
+      },
+      "network": {
+        "nodeVersion": "6.0.0-rc.3",
+        "l1ChainId": 31337,
+        "rollupVersion": 2267645166,
+        "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+        "realProofs": false,
+        "l2ProtocolContractsHash": "0x0f54271c52865841a77aaa66036eed901aff22fdce9f08e123ec8b205c9854d7",
+        "l2CircuitsVkTreeRoot": "0x13eeb174d4119b221a22721853261759f57a65a57e864ad78b840b23cde69e02"
+      },
+      "observedAt": "2026-10-16T16:22:14.884Z",
+      "blockNumber": 21,
+      "cached": false,
+      "proofTelemetry": {
+        "guardInstalled": true,
+        "realProofRequests": 0,
+        "realProofCompletions": 0,
+        "blockedRealProofRequests": 0,
+        "realProofDurationMs": 0,
+        "asyncBackendRequests": 1,
+        "asyncBackendInitializations": 1,
+        "srsInitializationRequests": 0
+      },
+      "pxe": {
+        "freshness": "unknown",
+        "reason": "Wallet public API does not expose a synchronized block; account listing does not synchronize private state."
+      },
+      "workerPid": 2882290,
+      "walletInitializations": 1
+    }
+  },
+  "inPlaceModeChangeRejected": true,
+  "jobDurationMs": 15259.601938999998,
+  "job": {
+    "id": "ebb36acd-8a7a-4b28-914c-c90d672c7b36",
+    "kind": "send",
+    "status": "completed",
+    "phase": "included",
+    "queuedAt": "2026-10-16T16:22:15.165Z",
+    "startedAt": "2026-10-16T16:22:15.166Z",
+    "evidence": {
+      "schemaVersion": 1,
+      "jobId": "ebb36acd-8a7a-4b28-914c-c90d672c7b36",
+      "kind": "send",
+      "state": "included",
+      "createdAt": "2026-10-16T16:22:15.167Z",
+      "updatedAt": "2026-10-16T16:22:29.888Z",
+      "sessionId": "1581d26a-72fd-4219-9410-484cc90741d8",
+      "stateDirectory": "/tmp/aztec-mcp-real-proving-wm6gl07n/.aztec-mcp/sessions/b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+      "projectPath": "/tmp/aztec-mcp-real-proving-wm6gl07n",
+      "networkIdentity": "b0ad182799a8c7c170b95108dac3fa72195efc734f3cfb9f31c49bb77d1b11fd",
+      "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+      "proofMode": "real",
+      "proofValidityEstablished": false,
+      "proofTelemetry": {
+        "guardInstalled": true,
+        "realProofRequests": 1,
+        "realProofCompletions": 1,
+        "blockedRealProofRequests": 0,
+        "realProofDurationMs": 9693.070726,
+        "asyncBackendRequests": 1,
+        "asyncBackendInitializations": 1,
+        "srsInitializationRequests": 0
+      },
+      "account": "0x19a4d0c06016f73971b9fb8f2996475d2cb905c6aa4b86865b71c9de29316d0b",
+      "artifact": {
+        "path": "/tmp/mcp-live-build-W0t3k9/target/counter_contract-Counter.json",
+        "contentHash": "400a8ff732aeb8df37b840eb90dc7f34c5fe4ebbd14835a2568791aa8f0c445e",
+        "classId": "0x0a251def692bcb3524e574503da26b7f6adf0cbe1e3f854f71bc0f7b33e50cc3",
+        "contractName": "Counter"
+      },
+      "intent": {
+        "functionName": "increment"
+      },
+      "submissionAttempted": true,
+      "chainTransactionCancelled": false,
+      "address": "0x27d95af501d1aa0de0aa50f0e438a40eb74fba73c58cc9bc7e632bda42c0a06d",
+      "registered": true,
+      "txHash": "0x20012d8b1dd30dc62e28cfd4f958d4f82eda22b5037ccf01d010ade9b1c379c7",
+      "submissionReached": true,
+      "receipt": {
+        "txHash": "0x20012d8b1dd30dc62e28cfd4f958d4f82eda22b5037ccf01d010ade9b1c379c7",
+        "status": "proposed",
+        "executionResult": "success",
+        "blockNumber": 22,
+        "blockHash": "0x188fb123a84f32f94bdce2b12bb78982f89e4a8a40f43624a4d7066b386d3ce5",
+        "transactionFee": "91715970000000",
+        "observedAt": "2026-10-16T16:22:29.879Z",
+        "network": {
+          "nodeVersion": "6.0.0-rc.3",
+          "l1ChainId": 31337,
+          "rollupVersion": 2267645166,
+          "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+          "realProofs": false,
+          "l2ProtocolContractsHash": "0x0f54271c52865841a77aaa66036eed901aff22fdce9f08e123ec8b205c9854d7",
+          "l2CircuitsVkTreeRoot": "0x13eeb174d4119b221a22721853261759f57a65a57e864ad78b840b23cde69e02"
+        },
+        "source": "node",
+        "scope": "public"
+      }
+    },
+    "result": {
+      "address": "0x27d95af501d1aa0de0aa50f0e438a40eb74fba73c58cc9bc7e632bda42c0a06d",
+      "registered": true,
+      "functionName": "increment",
+      "txHash": "0x20012d8b1dd30dc62e28cfd4f958d4f82eda22b5037ccf01d010ade9b1c379c7",
+      "artifact": {
+        "path": "/tmp/mcp-live-build-W0t3k9/target/counter_contract-Counter.json",
+        "contentHash": "400a8ff732aeb8df37b840eb90dc7f34c5fe4ebbd14835a2568791aa8f0c445e",
+        "classId": "0x0a251def692bcb3524e574503da26b7f6adf0cbe1e3f854f71bc0f7b33e50cc3",
+        "contractName": "Counter"
+      },
+      "receipt": {
+        "txHash": "0x20012d8b1dd30dc62e28cfd4f958d4f82eda22b5037ccf01d010ade9b1c379c7",
+        "status": "proposed",
+        "executionResult": "success",
+        "blockNumber": 22,
+        "blockHash": "0x188fb123a84f32f94bdce2b12bb78982f89e4a8a40f43624a4d7066b386d3ce5",
+        "transactionFee": "91715970000000",
+        "observedAt": "2026-10-16T16:22:29.879Z",
+        "network": {
+          "nodeVersion": "6.0.0-rc.3",
+          "l1ChainId": 31337,
+          "rollupVersion": 2267645166,
+          "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+          "realProofs": false,
+          "l2ProtocolContractsHash": "0x0f54271c52865841a77aaa66036eed901aff22fdce9f08e123ec8b205c9854d7",
+          "l2CircuitsVkTreeRoot": "0x13eeb174d4119b221a22721853261759f57a65a57e864ad78b840b23cde69e02"
+        },
+        "source": "node",
+        "scope": "public"
+      },
+      "included": true,
+      "submitted": true,
+      "accountScope": [
+        "0x19a4d0c06016f73971b9fb8f2996475d2cb905c6aa4b86865b71c9de29316d0b"
+      ],
+      "proofMode": "real",
+      "proofTelemetry": {
+        "guardInstalled": true,
+        "realProofRequests": 1,
+        "realProofCompletions": 1,
+        "blockedRealProofRequests": 0,
+        "realProofDurationMs": 9693.070726,
+        "asyncBackendRequests": 1,
+        "asyncBackendInitializations": 1,
+        "srsInitializationRequests": 0
+      },
+      "proofValidityEstablished": false,
+      "chainTransactionCancelled": false
+    },
+    "finishedAt": "2026-10-16T16:22:30.295Z",
+    "durationMs": 15129
+  },
+  "realTelemetry": {
+    "guardInstalled": true,
+    "realProofRequests": 1,
+    "realProofCompletions": 1,
+    "blockedRealProofRequests": 0,
+    "realProofDurationMs": 9693.070726,
+    "asyncBackendRequests": 1,
+    "asyncBackendInitializations": 1,
+    "srsInitializationRequests": 0
+  },
+  "fastTelemetry": {
+    "guardInstalled": true,
+    "realProofRequests": 0,
+    "realProofCompletions": 0,
+    "blockedRealProofRequests": 0,
+    "realProofDurationMs": 0,
+    "asyncBackendRequests": 1,
+    "asyncBackendInitializations": 1,
+    "srsInitializationRequests": 0
+  },
+  "fastModeRestoredThroughLifecycle": true,
+  "status": "passed",
+  "finishedAt": "2026-10-16T16:22:36.789Z"
+}

@@ -1,0 +1,704 @@
+{
+  "project": "/tmp/mcp-artifact-refresh-47i3B2",
+  "selection": {
+    "operation": "compile",
+    "projectPath": "/tmp/mcp-artifact-refresh-47i3B2",
+    "package": "counter_contract",
+    "installationRoot": "/mnt/user-data/ilyas/.aztec/versions/6.0.0-rc.3",
+    "nodeExecutable": "/mnt/user-data/ilyas/.nvm/versions/node/v24.12.0/bin/node"
+  },
+  "runs": [
+    {
+      "result": {
+        "id": "b4977e09-a687-4f48-8d92-f1016adba0fc",
+        "kind": "compile",
+        "status": "completed",
+        "phase": "artifacts",
+        "queuedAt": "2026-10-16T16:27:50.368Z",
+        "startedAt": "2026-10-16T16:27:50.368Z",
+        "result": {
+          "projectPath": "/tmp/mcp-artifact-refresh-47i3B2",
+          "operation": "compile",
+          "selection": {
+            "operation": "compile",
+            "package": "counter_contract"
+          },
+          "provenanceHash": "d5918a80968fb090f2e73985113e8a8460e2d7f7c01def565674f5ec8d6f2399",
+          "artifacts": [
+            {
+              "path": "/tmp/mcp-artifact-refresh-47i3B2/target/counter_contract-Counter.json",
+              "contentHash": "58008b2efbab01d43998e70f98309e27aa27f65a8550d95c850ece23dfea20c4",
+              "provenanceHash": "d5918a80968fb090f2e73985113e8a8460e2d7f7c01def565674f5ec8d6f2399",
+              "contractName": "Counter"
+            }
+          ],
+          "quarantinedArtifacts": [],
+          "diagnostics": [
+            {
+              "message": "bug: Brillig function call isn't properly covered by a manual constraint"
+            },
+            {
+              "message": "   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:88:18",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr",
+              "line": 88,
+              "column": 18
+            },
+            {
+              "message": "             at counter_contract/src/main.nr:29:9",
+              "file": "counter_contract/src/main.nr",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 145,
+              "column": 13
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 55,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 82,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 81,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 122,
+              "column": 19
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 30,
+              "column": 18
+            },
+            {
+              "message": "             at std/option.nr:94:13",
+              "file": "std/option.nr",
+              "line": 94,
+              "column": 13
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 31,
+              "column": 12
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 45,
+              "column": 5
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:88:18",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr",
+              "line": 88,
+              "column": 18
+            },
+            {
+              "message": "bug: Brillig function call isn't properly covered by a manual constraint"
+            },
+            {
+              "message": "   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/oracle/get_contract_instance.nr:18:29",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/oracle/get_contract_instance.nr",
+              "line": 18,
+              "column": 29
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/internals_functions_generation/external/private.nr:86:17",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/internals_functions_generation/external/private.nr",
+              "line": 86,
+              "column": 17
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/functions/initialization_utils.nr:172:20",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/functions/initialization_utils.nr",
+              "line": 172,
+              "column": 20
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/oracle/get_contract_instance.nr:18:29",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/oracle/get_contract_instance.nr",
+              "line": 18,
+              "column": 29
+            },
+            {
+              "message": "bug: Brillig function call isn't properly covered by a manual constraint"
+            },
+            {
+              "message": "   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr:19:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr",
+              "line": 19,
+              "column": 13
+            },
+            {
+              "message": "             at counter_contract/src/main.nr:29:9",
+              "file": "counter_contract/src/main.nr",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 145,
+              "column": 13
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 55,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 82,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 81,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:117:22",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 117,
+              "column": 22
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr:19:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr",
+              "line": 19,
+              "column": 13
+            },
+            {
+              "message": "bug: Brillig function call isn't properly covered by a manual constraint"
+            },
+            {
+              "message": "   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:52:37",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 52,
+              "column": 37
+            },
+            {
+              "message": "             at counter_contract/src/main.nr:29:9",
+              "file": "counter_contract/src/main.nr",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 145,
+              "column": 13
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 55,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 82,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 81,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 122,
+              "column": 19
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 30,
+              "column": 18
+            },
+            {
+              "message": "             at std/option.nr:94:13",
+              "file": "std/option.nr",
+              "line": 94,
+              "column": 13
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 31,
+              "column": 12
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 45,
+              "column": 5
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:89:5",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr",
+              "line": 89,
+              "column": 5
+            },
+            {
+              "message": "             at std/option.nr:94:13",
+              "file": "std/option.nr",
+              "line": 94,
+              "column": 13
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:52:37",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 52,
+              "column": 37
+            },
+            {
+              "message": "bug: Brillig function call isn't properly covered by a manual constraint"
+            },
+            {
+              "message": "     ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1189:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr",
+              "line": 1189,
+              "column": 13
+            },
+            {
+              "message": "               at counter_contract/src/main.nr:29:9",
+              "file": "counter_contract/src/main.nr",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 145,
+              "column": 13
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 55,
+              "column": 9
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 82,
+              "column": 9
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 81,
+              "column": 9
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 122,
+              "column": 19
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 30,
+              "column": 18
+            },
+            {
+              "message": "               at std/option.nr:94:13",
+              "file": "std/option.nr",
+              "line": 94,
+              "column": 13
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 31,
+              "column": 12
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 45,
+              "column": 5
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:89:5",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr",
+              "line": 89,
+              "column": 5
+            },
+            {
+              "message": "               at std/option.nr:94:13",
+              "file": "std/option.nr",
+              "line": 94,
+              "column": 13
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:53:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 53,
+              "column": 13
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/resolved_tagging_strategy.nr:45:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/resolved_tagging_strategy.nr",
+              "line": 45,
+              "column": 13
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_secret_source.nr:37:23",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_secret_source.nr",
+              "line": 37,
+              "column": 23
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/handshake.nr:151:5",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/handshake.nr",
+              "line": 151,
+              "column": 5
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1087:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr",
+              "line": 1087,
+              "column": 9
+            },
+            {
+              "message": "               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1189:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr",
+              "line": 1189,
+              "column": 13
+            },
+            {
+              "message": "bug: Brillig function call isn't properly covered by a manual constraint"
+            },
+            {
+              "message": "    ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:150:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 150,
+              "column": 13
+            },
+            {
+              "message": "              at counter_contract/src/main.nr:29:9",
+              "file": "counter_contract/src/main.nr",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "message": "              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 145,
+              "column": 13
+            },
+            {
+              "message": "              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 55,
+              "column": 9
+            },
+            {
+              "message": "              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 82,
+              "column": 9
+            },
+            {
+              "message": "              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 81,
+              "column": 9
+            },
+            {
+              "message": "              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:113:18",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 113,
+              "column": 18
+            },
+            {
+              "message": "              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:149:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 149,
+              "column": 9
+            },
+            {
+              "message": "              at std/option.nr:61:13",
+              "file": "std/option.nr",
+              "line": 61,
+              "column": 13
+            },
+            {
+              "message": "              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:150:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 150,
+              "column": 13
+            },
+            {
+              "message": "bug: Brillig function call isn't properly covered by a manual constraint"
+            },
+            {
+              "message": "   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:69:26",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 69,
+              "column": 26
+            },
+            {
+              "message": "             at counter_contract/src/main.nr:29:9",
+              "file": "counter_contract/src/main.nr",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 145,
+              "column": 13
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 55,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 82,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 81,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 122,
+              "column": 19
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:34:5",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 34,
+              "column": 5
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:69:26",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr",
+              "line": 69,
+              "column": 26
+            },
+            {
+              "message": "bug: Brillig function call isn't properly covered by a manual constraint"
+            },
+            {
+              "message": "   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/lifecycle.nr:58:33",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/lifecycle.nr",
+              "line": 58,
+              "column": 33
+            },
+            {
+              "message": "             at counter_contract/src/main.nr:29:9",
+              "file": "counter_contract/src/main.nr",
+              "line": 29,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/balance-set/src/balance_set.nr:56:26",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/balance-set/src/balance_set.nr",
+              "line": 56,
+              "column": 26
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/state_vars/private_set.nr:159:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/state_vars/private_set.nr",
+              "line": 159,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/lifecycle.nr:58:33",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/lifecycle.nr",
+              "line": 58,
+              "column": 33
+            },
+            {
+              "message": "bug: Brillig function call isn't properly covered by a manual constraint"
+            },
+            {
+              "message": "   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr:19:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr",
+              "line": 19,
+              "column": 13
+            },
+            {
+              "message": "             at counter_contract/src/main.nr:37:9",
+              "file": "counter_contract/src/main.nr",
+              "line": 37,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 145,
+              "column": 13
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 55,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr",
+              "line": 82,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 81,
+              "column": 9
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:117:22",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr",
+              "line": 117,
+              "column": 22
+            },
+            {
+              "message": "             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr:19:13",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr",
+              "line": 19,
+              "column": 13
+            },
+            {
+              "message": "bug: Brillig function call isn't properly covered by a manual constraint"
+            },
+            {
+              "message": "   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/nullifier/utils.nr:18:52",
+              "file": "/mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/nullifier/utils.nr",
+              "line": 18,
+              "column": 52
+            }
+          ],
+          "exitCode": 0
+        },
+        "finishedAt": "2026-10-16T16:28:27.905Z",
+        "durationMs": 37537
+      },
+      "logs": {
+        "text": "bug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:88:18\n   │\n88 │         unsafe { get_existing_app_siloed_handshake_secrets(STANDARD_HANDSHAKE_REGISTRY_ADDRESS, sender, recipient) };\n   │                  ------------------------------------------------------------------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n      1: Counter::constructor\n             at counter_contract/src/main.nr:29:9\n      2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n      3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n      4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n      5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n      6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n      7: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18\n      8: Option<T>::map_or_else\n             at std/option.nr:94:13\n      9: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12\n     10: default_tag_secret_source\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5\n     11: existing_handshake_secrets_or_else\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:88:18\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/oracle/get_contract_instance.nr:18:29\n   │\n18 │     let instance = unsafe { get_contract_instance_internal(address) };\n   │                             --------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: generate_private_external\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/internals_functions_generation/external/private.nr:86:17\n     2: assert_initialization_matches_address_preimage_private\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/functions/initialization_utils.nr:172:20\n     3: get_contract_instance\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/oracle/get_contract_instance.nr:18:29\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr:19:13\n   │\n19 │             remove_constraints(f)\n   │             --------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: Counter::constructor\n             at counter_contract/src/main.nr:29:9\n     2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n     3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n     4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n     5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n     6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:117:22\n     7: remove_constraints_if\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr:19:13\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:52:37\n   │\n52 │             let strategy = unsafe { resolve_tagging_strategy(sender, recipient, mode) };\n   │                                     ------------------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n      1: Counter::constructor\n             at counter_contract/src/main.nr:29:9\n      2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n      3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n      4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n      5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n      6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n      7: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18\n      8: Option<T>::map_or_else\n             at std/option.nr:94:13\n      9: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12\n     10: default_tag_secret_source\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5\n     11: existing_handshake_secrets_or_else\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:89:5\n     12: Option<T>::map_or_else\n             at std/option.nr:94:13\n     13: default_tag_secret_source\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:52:37\n\nbug: Brillig function call isn't properly covered by a manual constraint\n     ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1189:13\n     │  \n1189 │ ╭             call_private_function_internal(\n1190 │ │                 contract_address,\n1191 │ │                 function_selector,\n1192 │ │                 args_hash,\n1193 │ │                 start_side_effect_counter,\n1194 │ │                 is_static_call,\n1195 │ │             )\n     │ ╰─────────────' This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n     │  \n     = Call stack:\n        1: Counter::constructor\n               at counter_contract/src/main.nr:29:9\n        2: MaybeNoteMessage<Note>::deliver\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n        3: NoteMessage<Note>::deliver\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n        4: NoteMessage<Note>::deliver_to\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n        5: do_private_message_delivery\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n        6: do_onchain_private_message_delivery\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n        7: derive_log_tag\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18\n        8: Option<T>::map_or_else\n               at std/option.nr:94:13\n        9: derive_log_tag\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12\n       10: default_tag_secret_source\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5\n       11: existing_handshake_secrets_or_else\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:89:5\n       12: Option<T>::map_or_else\n               at std/option.nr:94:13\n       13: default_tag_secret_source\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:53:13\n       14: ResolvedTaggingStrategy::into_tag_secret_source\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/resolved_tagging_strategy.nr:45:13\n       15: TagSecretSource::new_non_interactive_handshake\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_secret_source.nr:37:23\n       16: create_non_interactive_handshake\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/handshake.nr:151:5\n       17: PrivateContext::call_private_function\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1087:9\n       18: PrivateContext::call_private_function_with_args_hash\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1189:13\n\nbug: Brillig function call isn't properly covered by a manual constraint\n    ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:150:13\n    │\n150 │             get_sender_for_tags().expect(\n    │             --------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n    │\n    = Call stack:\n       1: Counter::constructor\n              at counter_contract/src/main.nr:29:9\n       2: MaybeNoteMessage<Note>::deliver\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n       3: NoteMessage<Note>::deliver\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n       4: NoteMessage<Note>::deliver_to\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n       5: do_private_message_delivery\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n       6: do_onchain_private_message_delivery\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:113:18\n       7: resolve_sender\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:149:9\n       8: Option<T>::unwrap_or_else\n              at std/option.nr:61:13\n       9: resolve_sender\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:150:13\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:69:26\n   │\n69 │     let index = unsafe { get_next_tagging_index(secret, mode) };\n   │                          ------------------------------------ This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: Counter::constructor\n             at counter_contract/src/main.nr:29:9\n     2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n     3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n     4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n     5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n     6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n     7: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:34:5\n     8: tag_with\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:69:26\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/lifecycle.nr:58:33\n   │\n58 │     let random_value = unsafe { random() };\n   │                                 -------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: Counter::constructor\n             at counter_contract/src/main.nr:29:9\n     2: BalanceSet<&mut PrivateContext>::add\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/balance-set/src/balance_set.nr:56:26\n     3: PrivateSet<Note, &mut PrivateContext>::insert\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/state_vars/private_set.nr:159:9\n     4: create_note\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/lifecycle.nr:58:33\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr:19:13\n   │\n19 │             remove_constraints(f)\n   │             --------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: Counter::increment\n             at counter_contract/src/main.nr:37:9\n     2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n     3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n     4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n     5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n     6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:117:22\n     7: remove_constraints_if\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr:19:13\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/nullifier/utils.nr:18:52\n   │\n18 │     let should_use_pending_read_request = unsafe { is_nullifier_pending(unsiloed_nullifier, contract_address) };\n   │                                                    ---------------------------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: generate_private_external\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/internals_functions_generation/external/private.nr:96:17\n     2: assert_is_initialized_private\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/functions/initialization_utils.nr:121:39\n     3: compute_nullifier_existence_request\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/nullifier/utils.nr:18:52\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:52:37\n   │\n52 │             let strategy = unsafe { resolve_tagging_strategy(sender, recipient, mode) };\n   │                                     ------------------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n      1: Counter::increment\n             at counter_contract/src/main.nr:37:9\n      2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n      3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n      4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n      5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n      6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n      7: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18\n      8: Option<T>::map_or_else\n             at std/option.nr:94:13\n      9: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12\n     10: default_tag_secret_source\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5\n     11: existing_handshake_secrets_or_else\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:89:5\n     12: Option<T>::map_or_else\n             at std/option.nr:94:13\n     13: default_tag_secret_source\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:52:37\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/lifecycle.nr:58:33\n   │\n58 │     let random_value = unsafe { random() };\n   │                                 -------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: Counter::increment\n             at counter_contract/src/main.nr:37:9\n     2: BalanceSet<&mut PrivateContext>::add\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/balance-set/src/balance_set.nr:56:26\n     3: PrivateSet<Note, &mut PrivateContext>::insert\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/state_vars/private_set.nr:159:9\n     4: create_note\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/lifecycle.nr:58:33\n\nbug: Brillig function call isn't properly covered by a manual constraint\n     ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1189:13\n     │  \n1189 │ ╭             call_private_function_internal(\n1190 │ │                 contract_address,\n1191 │ │                 function_selector,\n1192 │ │                 args_hash,\n1193 │ │                 start_side_effect_counter,\n1194 │ │                 is_static_call,\n1195 │ │             )\n     │ ╰─────────────' This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n     │  \n     = Call stack:\n        1: Counter::increment\n               at counter_contract/src/main.nr:37:9\n        2: MaybeNoteMessage<Note>::deliver\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n        3: NoteMessage<Note>::deliver\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n        4: NoteMessage<Note>::deliver_to\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n        5: do_private_message_delivery\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n        6: do_onchain_private_message_delivery\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n        7: derive_log_tag\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18\n        8: Option<T>::map_or_else\n               at std/option.nr:94:13\n        9: derive_log_tag\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12\n       10: default_tag_secret_source\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5\n       11: existing_handshake_secrets_or_else\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:89:5\n       12: Option<T>::map_or_else\n               at std/option.nr:94:13\n       13: default_tag_secret_source\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:53:13\n       14: ResolvedTaggingStrategy::into_tag_secret_source\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/resolved_tagging_strategy.nr:45:13\n       15: TagSecretSource::new_non_interactive_handshake\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_secret_source.nr:37:23\n       16: create_non_interactive_handshake\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/handshake.nr:151:5\n       17: PrivateContext::call_private_function\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1087:9\n       18: PrivateContext::call_private_function_with_args_hash\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1189:13\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:69:26\n   │\n69 │     let index = unsafe { get_next_tagging_index(secret, mode) };\n   │                          ------------------------------------ This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: Counter::increment\n             at counter_contract/src/main.nr:37:9\n     2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n     3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n     4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n     5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n     6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n     7: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:34:5\n     8: tag_with\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:69:26\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/oracle/get_contract_instance.nr:18:29\n   │\n18 │     let instance = unsafe { get_contract_instance_internal(address) };\n   │                             --------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: generate_private_external\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/internals_functions_generation/external/private.nr:96:17\n     2: assert_is_initialized_private\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/functions/initialization_utils.nr:119:20\n     3: get_contract_instance\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/oracle/get_contract_instance.nr:18:29\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:88:18\n   │\n88 │         unsafe { get_existing_app_siloed_handshake_secrets(STANDARD_HANDSHAKE_REGISTRY_ADDRESS, sender, recipient) };\n   │                  ------------------------------------------------------------------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n      1: Counter::increment\n             at counter_contract/src/main.nr:37:9\n      2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n      3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n      4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n      5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n      6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n      7: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18\n      8: Option<T>::map_or_else\n             at std/option.nr:94:13\n      9: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12\n     10: default_tag_secret_source\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5\n     11: existing_handshake_secrets_or_else\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:88:18\n\nPostprocessing contracts...\nScheme is: ultra_honk, num threads: 32 (mem: 22.96 MiB)\nTranspiling: target/counter_contract-Counter.json -> target/counter_contract-Counter.json (mem: 22.96 MiB)\nTranspiled: target/counter_contract-Counter.json -> target/counter_contract-Counter.json (mem: 22.96 MiB)\nGenerating verification keys for functions in counter_contract-Counter.json (mem: 22.96 MiB)\nCache directory: /mnt/user-data/ilyas/.bb/6.0.0-rc.6/vk_cache (mem: 22.96 MiB)\nVerification key already in cache: a2d4b4acc4864a2111b3a6d35e7837b0d69143235d39a9d407d7e0dc15dd4808 (mem: 22.96 MiB)\nVerification key already in cache: 939e72d7bd9bdcd63e8a546d44925c5a41edf2105ba0ae23e509025fccfa577f (mem: 22.96 MiB)\nSuccessfully processed: target/counter_contract-Counter.json -> target/counter_contract-Counter.json (mem: 22.96 MiB)\nCompilation complete!\n",
+        "offset": 0,
+        "nextOffset": 31603,
+        "truncated": false
+      }
+    },
+    {
+      "result": {
+        "id": "3afc88c4-9c7b-429b-af59-89bfa1c9cc20",
+        "kind": "compile",
+        "status": "completed",
+        "phase": "artifacts",
+        "queuedAt": "2026-10-16T16:28:27.941Z",
+        "startedAt": "2026-10-16T16:28:27.941Z",
+        "result": {
+          "projectPath": "/tmp/mcp-artifact-refresh-47i3B2",
+          "operation": "compile",
+          "selection": {
+            "operation": "compile",
+            "package": "counter_contract"
+          },
+          "provenanceHash": "d55e44868eed98bf3b2a25c781997920b83599a9b0cde634c4ebe5a0c868e4eb",
+          "artifacts": [
+            {
+              "path": "/tmp/mcp-artifact-refresh-47i3B2/target/counter_contract-RenamedCounter.json",
+              "contentHash": "7f7fd573f2a917e7a893fb7b7e867de2d213b4cd71c10ad2e61f20664ae4e872",
+              "provenanceHash": "d55e44868eed98bf3b2a25c781997920b83599a9b0cde634c4ebe5a0c868e4eb",
+              "contractName": "RenamedCounter"
+            }
+          ],
+          "quarantinedArtifacts": [
+            {
+              "originalPath": "/tmp/mcp-artifact-refresh-47i3B2/target/counter_contract-Counter.json",
+              "path": "/tmp/mcp-artifact-refresh-47i3B2/.aztec-mcp/build-artifacts/3dad48ad-f35f-4d54-afdc-1f173a3e06dc/counter_contract-Counter.json",
+              "contentHash": "58008b2efbab01d43998e70f98309e27aa27f65a8550d95c850ece23dfea20c4"
+            }
+          ],
+          "diagnostics": [],
+          "exitCode": 0
+        },
+        "finishedAt": "2026-10-16T16:28:45.254Z",
+        "durationMs": 17314
+      },
+      "logs": {
+        "text": "Preserved previous artifact at /tmp/mcp-artifact-refresh-47i3B2/.aztec-mcp/build-artifacts/3dad48ad-f35f-4d54-afdc-1f173a3e06dc/counter_contract-Counter.json\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:88:18\n   │\n88 │         unsafe { get_existing_app_siloed_handshake_secrets(STANDARD_HANDSHAKE_REGISTRY_ADDRESS, sender, recipient) };\n   │                  ------------------------------------------------------------------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n      1: RenamedCounter::constructor\n             at counter_contract/src/main.nr:29:9\n      2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n      3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n      4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n      5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n      6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n      7: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18\n      8: Option<T>::map_or_else\n             at std/option.nr:94:13\n      9: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12\n     10: default_tag_secret_source\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5\n     11: existing_handshake_secrets_or_else\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:88:18\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:69:26\n   │\n69 │     let index = unsafe { get_next_tagging_index(secret, mode) };\n   │                          ------------------------------------ This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: RenamedCounter::constructor\n             at counter_contract/src/main.nr:29:9\n     2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n     3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n     4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n     5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n     6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n     7: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:34:5\n     8: tag_with\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:69:26\n\nbug: Brillig function call isn't properly covered by a manual constraint\n    ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:150:13\n    │\n150 │             get_sender_for_tags().expect(\n    │             --------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n    │\n    = Call stack:\n       1: RenamedCounter::constructor\n              at counter_contract/src/main.nr:29:9\n       2: MaybeNoteMessage<Note>::deliver\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n       3: NoteMessage<Note>::deliver\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n       4: NoteMessage<Note>::deliver_to\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n       5: do_private_message_delivery\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n       6: do_onchain_private_message_delivery\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:113:18\n       7: resolve_sender\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:149:9\n       8: Option<T>::unwrap_or_else\n              at std/option.nr:61:13\n       9: resolve_sender\n              at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:150:13\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:52:37\n   │\n52 │             let strategy = unsafe { resolve_tagging_strategy(sender, recipient, mode) };\n   │                                     ------------------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n      1: RenamedCounter::constructor\n             at counter_contract/src/main.nr:29:9\n      2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n      3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n      4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n      5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n      6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n      7: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18\n      8: Option<T>::map_or_else\n             at std/option.nr:94:13\n      9: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12\n     10: default_tag_secret_source\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5\n     11: existing_handshake_secrets_or_else\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:89:5\n     12: Option<T>::map_or_else\n             at std/option.nr:94:13\n     13: default_tag_secret_source\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:52:37\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr:19:13\n   │\n19 │             remove_constraints(f)\n   │             --------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: RenamedCounter::constructor\n             at counter_contract/src/main.nr:29:9\n     2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n     3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n     4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n     5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n     6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:117:22\n     7: remove_constraints_if\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr:19:13\n\nbug: Brillig function call isn't properly covered by a manual constraint\n     ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1189:13\n     │  \n1189 │ ╭             call_private_function_internal(\n1190 │ │                 contract_address,\n1191 │ │                 function_selector,\n1192 │ │                 args_hash,\n1193 │ │                 start_side_effect_counter,\n1194 │ │                 is_static_call,\n1195 │ │             )\n     │ ╰─────────────' This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n     │  \n     = Call stack:\n        1: RenamedCounter::constructor\n               at counter_contract/src/main.nr:29:9\n        2: MaybeNoteMessage<Note>::deliver\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n        3: NoteMessage<Note>::deliver\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n        4: NoteMessage<Note>::deliver_to\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n        5: do_private_message_delivery\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n        6: do_onchain_private_message_delivery\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n        7: derive_log_tag\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18\n        8: Option<T>::map_or_else\n               at std/option.nr:94:13\n        9: derive_log_tag\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12\n       10: default_tag_secret_source\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5\n       11: existing_handshake_secrets_or_else\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:89:5\n       12: Option<T>::map_or_else\n               at std/option.nr:94:13\n       13: default_tag_secret_source\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:53:13\n       14: ResolvedTaggingStrategy::into_tag_secret_source\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/resolved_tagging_strategy.nr:45:13\n       15: TagSecretSource::new_non_interactive_handshake\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_secret_source.nr:37:23\n       16: create_non_interactive_handshake\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/handshake.nr:151:5\n       17: PrivateContext::call_private_function\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1087:9\n       18: PrivateContext::call_private_function_with_args_hash\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1189:13\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/oracle/get_contract_instance.nr:18:29\n   │\n18 │     let instance = unsafe { get_contract_instance_internal(address) };\n   │                             --------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: generate_private_external\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/internals_functions_generation/external/private.nr:86:17\n     2: assert_initialization_matches_address_preimage_private\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/functions/initialization_utils.nr:172:20\n     3: get_contract_instance\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/oracle/get_contract_instance.nr:18:29\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/lifecycle.nr:58:33\n   │\n58 │     let random_value = unsafe { random() };\n   │                                 -------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: RenamedCounter::constructor\n             at counter_contract/src/main.nr:29:9\n     2: BalanceSet<&mut PrivateContext>::add\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/balance-set/src/balance_set.nr:56:26\n     3: PrivateSet<Note, &mut PrivateContext>::insert\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/state_vars/private_set.nr:159:9\n     4: create_note\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/lifecycle.nr:58:33\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:88:18\n   │\n88 │         unsafe { get_existing_app_siloed_handshake_secrets(STANDARD_HANDSHAKE_REGISTRY_ADDRESS, sender, recipient) };\n   │                  ------------------------------------------------------------------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n      1: RenamedCounter::increment\n             at counter_contract/src/main.nr:37:9\n      2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n      3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n      4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n      5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n      6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n      7: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18\n      8: Option<T>::map_or_else\n             at std/option.nr:94:13\n      9: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12\n     10: default_tag_secret_source\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5\n     11: existing_handshake_secrets_or_else\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:88:18\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:52:37\n   │\n52 │             let strategy = unsafe { resolve_tagging_strategy(sender, recipient, mode) };\n   │                                     ------------------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n      1: RenamedCounter::increment\n             at counter_contract/src/main.nr:37:9\n      2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n      3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n      4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n      5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n      6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n      7: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18\n      8: Option<T>::map_or_else\n             at std/option.nr:94:13\n      9: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12\n     10: default_tag_secret_source\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5\n     11: existing_handshake_secrets_or_else\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:89:5\n     12: Option<T>::map_or_else\n             at std/option.nr:94:13\n     13: default_tag_secret_source\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:52:37\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/nullifier/utils.nr:18:52\n   │\n18 │     let should_use_pending_read_request = unsafe { is_nullifier_pending(unsiloed_nullifier, contract_address) };\n   │                                                    ---------------------------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: generate_private_external\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/internals_functions_generation/external/private.nr:96:17\n     2: assert_is_initialized_private\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/functions/initialization_utils.nr:121:39\n     3: compute_nullifier_existence_request\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/nullifier/utils.nr:18:52\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:69:26\n   │\n69 │     let index = unsafe { get_next_tagging_index(secret, mode) };\n   │                          ------------------------------------ This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: RenamedCounter::increment\n             at counter_contract/src/main.nr:37:9\n     2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n     3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n     4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n     5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n     6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n     7: derive_log_tag\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:34:5\n     8: tag_with\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:69:26\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/oracle/get_contract_instance.nr:18:29\n   │\n18 │     let instance = unsafe { get_contract_instance_internal(address) };\n   │                             --------------------------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: generate_private_external\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/internals_functions_generation/external/private.nr:96:17\n     2: assert_is_initialized_private\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/macros/functions/initialization_utils.nr:119:20\n     3: get_contract_instance\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/oracle/get_contract_instance.nr:18:29\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/lifecycle.nr:58:33\n   │\n58 │     let random_value = unsafe { random() };\n   │                                 -------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: RenamedCounter::increment\n             at counter_contract/src/main.nr:37:9\n     2: BalanceSet<&mut PrivateContext>::add\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/balance-set/src/balance_set.nr:56:26\n     3: PrivateSet<Note, &mut PrivateContext>::insert\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/state_vars/private_set.nr:159:9\n     4: create_note\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/lifecycle.nr:58:33\n\nbug: Brillig function call isn't properly covered by a manual constraint\n     ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1189:13\n     │  \n1189 │ ╭             call_private_function_internal(\n1190 │ │                 contract_address,\n1191 │ │                 function_selector,\n1192 │ │                 args_hash,\n1193 │ │                 start_side_effect_counter,\n1194 │ │                 is_static_call,\n1195 │ │             )\n     │ ╰─────────────' This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n     │  \n     = Call stack:\n        1: RenamedCounter::increment\n               at counter_contract/src/main.nr:37:9\n        2: MaybeNoteMessage<Note>::deliver\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n        3: NoteMessage<Note>::deliver\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n        4: NoteMessage<Note>::deliver_to\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n        5: do_private_message_delivery\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n        6: do_onchain_private_message_delivery\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:122:19\n        7: derive_log_tag\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:30:18\n        8: Option<T>::map_or_else\n               at std/option.nr:94:13\n        9: derive_log_tag\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:31:12\n       10: default_tag_secret_source\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:45:5\n       11: existing_handshake_secrets_or_else\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_derivation.nr:89:5\n       12: Option<T>::map_or_else\n               at std/option.nr:94:13\n       13: default_tag_secret_source\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag.nr:53:13\n       14: ResolvedTaggingStrategy::into_tag_secret_source\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/resolved_tagging_strategy.nr:45:13\n       15: TagSecretSource::new_non_interactive_handshake\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/tag_secret_source.nr:37:23\n       16: create_non_interactive_handshake\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/handshake.nr:151:5\n       17: PrivateContext::call_private_function\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1087:9\n       18: PrivateContext::call_private_function_with_args_hash\n               at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/context/private_context.nr:1189:13\n\nbug: Brillig function call isn't properly covered by a manual constraint\n   ┌─ /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr:19:13\n   │\n19 │             remove_constraints(f)\n   │             --------------------- This Brillig call's inputs and its return values haven't been sufficiently constrained. This should be done to prevent potential soundness vulnerabilities\n   │\n   = Call stack:\n     1: RenamedCounter::increment\n             at counter_contract/src/main.nr:37:9\n     2: MaybeNoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:145:13\n     3: NoteMessage<Note>::deliver\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:55:9\n     4: NoteMessage<Note>::deliver_to\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/note/note_message.nr:82:9\n     5: do_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:81:9\n     6: do_onchain_private_message_delivery\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/messages/delivery/mod.nr:117:22\n     7: remove_constraints_if\n             at /mnt/user-data/ilyas/nargo/github.com/aztec-labs-eng/aztec-nr/v6.0.0-rc.3/aztec/src/utils/remove_constraints.nr:19:13\n\nPostprocessing contracts...\nScheme is: ultra_honk, num threads: 32 (mem: 16.80 MiB)\nTranspiling: target/counter_contract-RenamedCounter.json -> target/counter_contract-RenamedCounter.json (mem: 16.80 MiB)\nTranspiled: target/counter_contract-RenamedCounter.json -> target/counter_contract-RenamedCounter.json (mem: 22.60 MiB)\nGenerating verification keys for functions in counter_contract-RenamedCounter.json (mem: 22.60 MiB)\nCache directory: /mnt/user-data/ilyas/.bb/6.0.0-rc.6/vk_cache (mem: 22.60 MiB)\nVerification key already in cache: 939e72d7bd9bdcd63e8a546d44925c5a41edf2105ba0ae23e509025fccfa577f (mem: 24.16 MiB)\nVerification key already in cache: a2d4b4acc4864a2111b3a6d35e7837b0d69143235d39a9d407d7e0dc15dd4808 (mem: 24.16 MiB)\nSuccessfully processed: target/counter_contract-RenamedCounter.json -> target/counter_contract-RenamedCounter.json (mem: 24.16 MiB)\nCompilation complete!\n",
+        "offset": 0,
+        "nextOffset": 31901,
+        "truncated": false
+      }
+    },
+    {
+      "result": {
+        "id": "3991e25e-3ca5-4aff-99a4-d287413e01e1",
+        "kind": "compile",
+        "status": "completed",
+        "phase": "artifacts",
+        "queuedAt": "2026-10-16T16:28:45.346Z",
+        "startedAt": "2026-10-16T16:28:45.346Z",
+        "result": {
+          "projectPath": "/tmp/mcp-artifact-refresh-47i3B2",
+          "operation": "compile",
+          "selection": {
+            "operation": "compile",
+            "package": "counter_contract"
+          },
+          "provenanceHash": "d55e44868eed98bf3b2a25c781997920b83599a9b0cde634c4ebe5a0c868e4eb",
+          "artifacts": [
+            {
+              "path": "/tmp/mcp-artifact-refresh-47i3B2/target/counter_contract-RenamedCounter.json",
+              "contentHash": "7f7fd573f2a917e7a893fb7b7e867de2d213b4cd71c10ad2e61f20664ae4e872",
+              "provenanceHash": "d55e44868eed98bf3b2a25c781997920b83599a9b0cde634c4ebe5a0c868e4eb",
+              "contractName": "RenamedCounter"
+            }
+          ],
+          "quarantinedArtifacts": [],
+          "diagnostics": [],
+          "exitCode": 0
+        },
+        "finishedAt": "2026-10-16T16:28:48.477Z",
+        "durationMs": 3131
+      },
+      "logs": {
+        "text": "No source changes detected, skipping compilation.\n",
+        "offset": 0,
+        "nextOffset": 50,
+        "truncated": false
+      }
+    }
+  ],
+  "status": "passed"
+}

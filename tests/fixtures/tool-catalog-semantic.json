@@ -1,0 +1,177 @@
+[
+  {
+    "name": "aztec_search_docs",
+    "description": "Search Aztec documentation, guides, patterns, and API reference. Uses semantic search to find relevant content from developer docs, Aztec.nr framework docs, example contracts, and more.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Natural language search query about Aztec development"
+        },
+        "section": {
+          "type": "string",
+          "description": "Docs section filter (applies to local fallback search only). Examples: tutorials, concepts, developers, reference"
+        },
+        "maxResults": {
+          "type": "number",
+          "description": "Maximum results to return (default: 5 for semantic search, 1-20)",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "chunks": {
+          "type": "number",
+          "description": "Number of result chunks for semantic search (default: 5, 1-20). If omitted, maxResults is used.",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "useLocalFallback": {
+          "type": "boolean",
+          "description": "If the semantic search backend fails, fall back to ripgrep over local cloned docs. Default false: failures are surfaced so the user sees backend/auth issues instead of silently degrading to (potentially stale) local results."
+        },
+        "allowVersionMismatch": {
+          "type": "boolean",
+          "description": "Override the version-sync gate. By default the search refuses to run when the local release version differs from the corpus version the DocsGPT backend has indexed. Set true to query anyway (results reflect the corpus version, not your local clone)."
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "aztec_sync_repos",
+    "description": "Clone or update Aztec repositories locally. Run this first to enable searching. For v6, sparsely clones aztec-node at the release-pinned labs commit. Protocol sources (aztec-packages) and Noir are optional. Specify a version to clone a specific Aztec release tag.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Aztec version tag to clone (e.g., 'v6.0.0-rc.6'). Defaults to latest supported version."
+        },
+        "force": {
+          "type": "boolean",
+          "description": "Force re-clone even if repos exist (default: false)"
+        },
+        "repos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "For v6: aztec-node (always included), aztec-packages (optional protocol/L1 sources), noir (optional language sources). Older releases use the legacy repository set."
+        }
+      }
+    }
+  },
+  {
+    "name": "aztec_status",
+    "description": "Check the status of cloned Aztec repositories - shows which repos are available and their commit hashes.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  {
+    "name": "aztec_search_code",
+    "description": "Search Aztec contract code and source files. Supports regex patterns. Use for finding function implementations, patterns, and examples.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search query (supports regex)"
+        },
+        "filePattern": {
+          "type": "string",
+          "description": "File glob pattern (default: *.nr). Examples: *.ts, *.{nr,ts}"
+        },
+        "repo": {
+          "type": "string",
+          "description": "Specific active repo to search. For v6: aztec-node, plus aztec-packages or noir if enabled during sync."
+        },
+        "maxResults": {
+          "type": "number",
+          "description": "Maximum results to return (default: 30)"
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "aztec_list_examples",
+    "description": "List available Aztec contract examples. Returns contract names and paths.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "description": "Filter by category. Examples: token, nft, defi, escrow, crowdfund"
+        }
+      }
+    }
+  },
+  {
+    "name": "aztec_read_example",
+    "description": "Read the source code of an Aztec contract example. Use aztec_list_examples to find available examples.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Example contract name (e.g., 'token', 'escrow')"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  },
+  {
+    "name": "aztec_read_file",
+    "description": "Read any file from the cloned repositories by path. Path should be relative to the repos directory.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "File path relative to repos directory (e.g., 'aztec-node/noir-projects/noir-contracts/contracts/app/token_contract/src/main.nr')"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    }
+  },
+  {
+    "name": "aztec_lookup_error",
+    "description": "Look up an Aztec error by message, error code, or hex signature. Returns root cause and suggested fix. Searches Solidity errors, TX validation errors, circuit codes, AVM errors, and documentation. Falls back to semantic documentation search when no exact match is found.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Error message, numeric error code (e.g., '2002'), or hex signature (e.g., '0xa5b2ba17')"
+        },
+        "category": {
+          "type": "string",
+          "description": "Filter by error category. Options: contract, circuit, tx-validation, l1, avm, sequencer, operator, general"
+        },
+        "maxResults": {
+          "type": "number",
+          "description": "Maximum results to return (default: 10)",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "allowVersionMismatch": {
+          "type": "boolean",
+          "description": "Override the version-sync gate for the semantic-fallback documentation search. Has no effect when the static error catalog already matched."
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  }
+]

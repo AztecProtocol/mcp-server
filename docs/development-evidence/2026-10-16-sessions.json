@@ -1,0 +1,34 @@
+{
+  "checkedAt": "2026-10-16T15:23:19.313Z",
+  "runtimeIdentity": "a37420cea954f5b910d9c6315b6e14a7870bc636f6f5d6dfe90002d7fc36fb68",
+  "network": {
+    "nodeVersion": "6.0.0-rc.3",
+    "l1ChainId": 31337,
+    "rollupVersion": 2267645166,
+    "rollupAddress": "0xa85233c63b9ee964add6f2cffe00fd84eb32338f",
+    "realProofs": false
+  },
+  "projectPath": "/tmp/aztec-mcp-session-evidence-gXRbWD",
+  "openedMs": 4980.851718999999,
+  "warmStatusMs": 13.793891999999687,
+  "reopenMs": 3422.767328,
+  "accounts": [
+    {
+      "address": "0x07848ac687a32ab934aa16d6f48daef87e91fc2c5333741159d1de7a76aeca55",
+      "alias": "test-2"
+    },
+    {
+      "address": "0x1332ddba39e2ebdff7b7153838f3d0f29b41f0c8757f110bd7d4bfd0ce155b7b",
+      "alias": "test-0"
+    },
+    {
+      "address": "0x19a4d0c06016f73971b9fb8f2996475d2cb905c6aa4b86865b71c9de29316d0b",
+      "alias": "test-1"
+    }
+  ],
+  "workerReused": true,
+  "competingStoreRejected": true,
+  "accountsPersisted": true,
+  "newSessionId": true,
+  "cleanClose": true
+}

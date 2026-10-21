@@ -75,12 +75,67 @@ Add to your `.mcp.json`. The minimal config is just the command; add `env.API_KE
 | `REQUEST_TIMEOUT`     | `60000`                              | Semantic-search request timeout (ms).                                                                               |
 | `AZTEC_DEFAULT_VERSION` | `v6.0.0`                             | Default version tag for `aztec_sync_repos`.                                                                         |
 | `AZTEC_MCP_REPOS_DIR` | `~/.aztec-mcp/repos/`                | Where local clones live.                                                                                            |
+| `AZTEC_MCP_DEV` | unset (disabled) | Set to `true` to enable local development tools. |
+
+### Optional development mode
+
+Set `AZTEC_MCP_DEV=true` in your MCP client environment to enable local development
+tools. Check your installed Aztec and Node versions with:
+
+```js
+aztec_dev_inspect({
+  operation: "environment",
+  installationRoot: "/absolute/path/to/.aztec/versions/6.0.0-rc.3",
+  nodeExecutable: "/absolute/path/to/node"
+})
+```
+
+The supported combination is Labs `6.0.0-rc.3`, Foundation `6.0.0-rc.6`, Noir
+`1.0.0-rc.3`, and Node `24.12.0`. Sessions also check the local node's protocol
+configuration. See the [compatibility guide](docs/development-candidate.md) for
+the exact requirements and the [private-token walkthrough](docs/development-workflow.md)
+for setup and usage.
+
+Development tools cover [tracked compilation and TXE tests](docs/development-build.md),
+[persistent local sessions](docs/development-sessions.md),
+[contract registration and inspection](docs/development-contracts.md),
+[simulation and account-scoped views](docs/development-calls.md),
+[tracked deployments and transactions](docs/development-transactions.md),
+[interruption recovery](docs/development-recovery.md), and
+[explicit real proving](docs/development-proving.md).
+
+Search tools still work on Node.js 18+ without an Aztec installation. Development
+tools use your local installation and do not require repository sync.
+
+### Why use `aztec_dev_build` instead of shell commands?
+
+`aztec_dev_build` runs your installed Aztec compiler and TXE tests. It returns a
+job ID for progress and logs, plus artifact identities that deployment can verify.
+
+| Task | Agent using shell commands | Agent using `aztec_dev_build` |
+| --- | --- | --- |
+| Select tooling | Sets commands and environment variables. | Selects explicit paths; compatibility is checked before execution. |
+| Follow progress | Reads terminal output and exit codes. | Queries job status, diagnostics, and bounded logs. |
+| Identify outputs | Finds the relevant files in `target`. | Gets artifact paths and hashes of their contents and build inputs. |
+| Detect mid-build edits | Must check whether inputs changed. | Rejects builds if local sources or previously cached dependencies changed. |
+| Stop work | Handles timeouts and child-process cleanup. | Cancels or times out the job and cleans up its process group. |
+| Deploy | Chooses an artifact file. | Supplies a build job ID and artifact path; deployment rejects changed artifacts or inputs. |
+
+For “edit, compile, deploy,” this catches stale artifacts before deployment.
+Unchanged builds reuse incremental outputs. Builds and TXE tests need no wallet
+session or running rollup node. See the [build guide](docs/development-build.md).
+
+The checks cost time: median warm compilation was **3.51 s through MCP versus
+1.69 s through the CLI** across three samples on a shared host. These measurements
+exclude server startup and stdio transport; see the
+[benchmark conditions](docs/development-workflow.md#recorded-acceptance-and-timings-2026-10-16).
 
 ## Available Tools
 
 ### `aztec_sync_repos`
 
-Clone or update Aztec repositories locally. **Run this first** to enable other tools.
+Clone or update Aztec repositories locally. **Run this first** for tools that search
+or browse local repositories. Development tools do not require repository sync.
 
 ```
 Default for v6:
@@ -229,21 +284,17 @@ Set the default Aztec version with the `AZTEC_DEFAULT_VERSION` environment varia
 ## Development
 
 ```bash
-# Clone the repo
 git clone https://github.com/aztecprotocol/mcp-server
 cd mcp-server
 
-# Install dependencies
 npm install
 
-# Build
 npm run build
 
 npm test
 
 node test.mjs
 
-# Run locally
 node dist/index.js
 ```
 
