@@ -33,7 +33,7 @@ export interface RepoConfig {
 }
 
 /** Default Aztec version (tag) to use - can be overridden via AZTEC_DEFAULT_VERSION env var */
-export const DEFAULT_AZTEC_VERSION = process.env.AZTEC_DEFAULT_VERSION || "v6.0.0-rc.6";
+export const DEFAULT_AZTEC_VERSION = process.env.AZTEC_DEFAULT_VERSION || "v6.0.0";
 
 /**
  * Base Aztec repository configurations (without version)
@@ -136,7 +136,7 @@ const BASE_REPOS: Omit<RepoConfig, "tag">[] = [
 
 /**
  * Get Aztec repositories configured for a specific version
- * @param version - The Aztec version tag (e.g., "v6.0.0-rc.6")
+ * @param version - The Aztec version tag (e.g., "v6.0.0")
  */
 export function getAztecRepos(version?: string): RepoConfig[] {
   const tag = version || DEFAULT_AZTEC_VERSION;

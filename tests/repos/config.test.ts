@@ -3,7 +3,7 @@ import { AZTEC_REPOS, getAztecRepos, getRepoConfig, getRepoNames, DEFAULT_AZTEC_
 
 describe("v6 repositories", () => {
   it("defaults to just aztec-node, with protocol and Noir sources optional", () => {
-    expect(DEFAULT_AZTEC_VERSION).toBe("v6.0.0-rc.6");
+    expect(DEFAULT_AZTEC_VERSION).toBe("v6.0.0");
     expect(AZTEC_REPOS.filter((repo) => !repo.optional).map((repo) => repo.name)).toEqual(["aztec-node"]);
     expect(getRepoNames()).toEqual(["aztec-node", "aztec-packages", "noir"]);
     expect(getRepoConfig("unknown")).toBeUndefined();
@@ -15,13 +15,13 @@ describe("v6 repositories", () => {
     expect(node.tag).toBeUndefined();
     expect(node.branch).toBeUndefined();
     expect(node.sparse).toContain("noir-projects/noir-contracts");
-    expect(node.sparse).toContain("docs/developer_versioned_docs/version-v6.0.0-rc.6");
+    expect(node.sparse).toContain("docs/developer_versioned_docs/version-v6.0.0");
     expect(node.sparsePathOverrides).toBeUndefined();
   });
 
   it("accepts tags without a v prefix while using canonical documentation paths", () => {
-    const node = getAztecRepos("6.0.0-rc.6")[0];
-    expect(node.sparse).toContain("docs/developer_versioned_docs/version-v6.0.0-rc.6");
+    const node = getAztecRepos("6.0.0")[0];
+    expect(node.sparse).toContain("docs/developer_versioned_docs/version-v6.0.0");
   });
 
   it("uses the split protocol layout for optional aztec-packages sources", () => {
