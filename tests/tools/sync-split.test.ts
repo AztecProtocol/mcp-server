@@ -17,7 +17,7 @@ import { cloneRepo, getRepoCommit } from "../../src/utils/git.js";
 import { resolveReleaseCommits } from "../../src/utils/release.js";
 import { beginVersionSync, readSyncMetadata, writeSyncMetadata } from "../../src/utils/sync-metadata.js";
 
-const version = "v6.0.0-rc.6";
+const version = "v6.0.0";
 const commits = { packagesCommit: "a".repeat(40), nodeCommit: "b".repeat(40), noirCommit: "c".repeat(40) };
 beforeEach(() => {
   vi.resetAllMocks();
@@ -38,7 +38,7 @@ describe("lightweight v6 sync", () => {
     expect(writeSyncMetadata).toHaveBeenCalledWith(version, { "aztec-node": commits.nodeCommit });
     expect(result.success).toBe(true);
     expect(result.metadataSafe).toBe(true);
-    expect(result.message).toContain("No exact v6.0.0-rc.6 documentation snapshot");
+    expect(result.message).toContain("No exact v6.0.0 documentation snapshot");
   });
 
   it("adds optional protocol and Noir sources at the same release's commits", async () => {

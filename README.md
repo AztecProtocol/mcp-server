@@ -4,7 +4,7 @@ An MCP (Model Context Protocol) server that provides local access to Aztec docum
 
 ## Features
 
-- **Version Support**: Clone specific Aztec release tags (e.g., `v6.0.0-rc.6`)
+- **Version Support**: Clone specific Aztec release tags (e.g., `v6.0.0`)
 - **Lightweight v6 Sync**: Clones only selected paths from `aztec-node`, pinned to the `labs` commit recorded in the requested `aztec-packages` release. Protocol and Noir sources are optional.
 - **Fast Code Search**: Search Noir contracts and TypeScript files using ripgrep (with fallback)
 - **Documentation Search**: Search Aztec documentation locally; with an API key, semantic vector search across the full corpora (framework docs, examples, Noir stdlib, TypeScript SDK, protocol circuits)
@@ -73,7 +73,7 @@ Add to your `.mcp.json`. The minimal config is just the command; add `env.API_KE
 | `API_KEY`             | unset                                | Personal API key from `/mcp-key` in the Noir Discord (<https://discord.gg/xMud5StFyA>). Unset → local-only mode. |
 | `API_URL`             | `https://aztec.adjacentpossible.dev` | DocsGPT backend the semantic search hits. Override to point at a self-hosted instance.                              |
 | `REQUEST_TIMEOUT`     | `60000`                              | Semantic-search request timeout (ms).                                                                               |
-| `AZTEC_DEFAULT_VERSION` | `v6.0.0-rc.6`                             | Default version tag for `aztec_sync_repos`.                                                                         |
+| `AZTEC_DEFAULT_VERSION` | `v6.0.0`                             | Default version tag for `aztec_sync_repos`.                                                                         |
 | `AZTEC_MCP_REPOS_DIR` | `~/.aztec-mcp/repos/`                | Where local clones live.                                                                                            |
 
 ## Available Tools
@@ -93,14 +93,14 @@ Optional:
 
 **Parameters:**
 
-- `version` (string): Aztec version tag to clone (e.g., `v6.0.0-rc.6`). Defaults to latest supported version.
+- `version` (string): Aztec version tag to clone (e.g., `v6.0.0`). Defaults to latest supported version.
 - `force` (boolean): Force re-clone even if repos exist
 - `repos` (string[]): For v6, select optional `aztec-packages` and/or `noir` sources. `aztec-node` is always included to keep SDK and documentation aligned with the release. Older versions retain their legacy repository configuration.
 
 **Example - Clone specific version:**
 
 ```
-aztec_sync_repos({ version: "v6.0.0-rc.6" })
+aztec_sync_repos({ version: "v6.0.0" })
 ```
 
 The default sync uses a temporary, shallow, blob-filtered Git fetch to read the release's `labs` and Noir gitlinks. It then removes that temporary Git data and makes one persistent shallow, partial, sparse checkout of `https://github.com/aztec-labs-eng/aztec-node` at the pinned commit.
@@ -108,10 +108,10 @@ The default sync uses a temporary, shallow, blob-filtered Git fetch to read the 
 To include protocol/L1 and Noir sources:
 
 ```
-aztec_sync_repos({ version: "v6.0.0-rc.6", repos: ["aztec-packages", "noir"] })
+aztec_sync_repos({ version: "v6.0.0", repos: ["aztec-packages", "noir"] })
 ```
 
-The `v6.0.0-rc.6` release pins `aztec-node` at `1b6de149f4fe1cde3c5fb876d3822289f490cd2a`. That checkout has no exact `rc.6` documentation snapshot, so local documentation search uses its unversioned docs and reports the commit as provenance. It does not substitute an older snapshot.
+The `v6.0.0` release pins `aztec-node` at `1b6de149f4fe1cde3c5fb876d3822289f490cd2a`. That checkout has no exact `v6.0.0` documentation snapshot, so local documentation search uses its unversioned docs and reports the commit as provenance. It does not substitute an older snapshot.
 
 Sync metadata records the release and active checkout commits. Searches exclude leftover repositories from previous releases. Optional sources remain active on a same-version resync if their commits still match; when changing versions, specify the optional sources again. Interrupted v6 syncs block version-sensitive searches until sync succeeds, and retries preserve the requested optional repositories. Downgrading to a legacy release requires a full sync (omit `repos`) to avoid mixing releases. Existing installs should run `aztec_sync_repos` with the version above to migrate.
 
@@ -219,7 +219,7 @@ Set the default Aztec version with the `AZTEC_DEFAULT_VERSION` environment varia
       "command": "npx",
       "args": ["-y", "@aztec/mcp-server@latest"],
       "env": {
-        "AZTEC_DEFAULT_VERSION": "v6.0.0-rc.6"
+        "AZTEC_DEFAULT_VERSION": "v6.0.0"
       }
     }
   }
