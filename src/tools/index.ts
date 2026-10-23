@@ -13,3 +13,8 @@ export {
   type SemanticSearchToolResult,
 } from "./search.js";
 export { lookupAztecError } from "./error-lookup.js";
+export {
+  checkNetworkStatus,
+  formatNetworkStatus,
+  type NetworkStatusResult,
+} from "./network-status.js";
