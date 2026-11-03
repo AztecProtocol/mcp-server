@@ -97,16 +97,17 @@ describe("searchCode", () => {
 
       const results = searchCode("main");
       expect(results).toHaveLength(2);
+      // Same priority, so ordered by file path.
       expect(results[0]).toEqual({
-        file: "aztec-packages/src/main.nr",
-        line: 10,
-        content: "fn main() {",
-        repo: "aztec-packages",
-      });
-      expect(results[1]).toEqual({
         file: "aztec-packages/src/lib.nr",
         line: 20,
         content: "use dep::aztec;",
+        repo: "aztec-packages",
+      });
+      expect(results[1]).toEqual({
+        file: "aztec-packages/src/main.nr",
+        line: 10,
+        content: "fn main() {",
         repo: "aztec-packages",
       });
     });
@@ -499,8 +500,35 @@ describe("search result sorting", () => {
     expect(results[1].file).toContain("noir-contracts");
     expect(results[2].repo).toBe("noir");
     expect(results[2].file).toContain("noir_stdlib");
-    expect(results[3].repo).toBe("gregoswap");
-    expect(results[4].repo).toBe("aztec-examples");
+    // Both priority 5, so ordered by file path.
+    expect(results[3].repo).toBe("aztec-examples");
+    expect(results[4].repo).toBe("gregoswap");
+  });
+
+  it("returns the same results regardless of ripgrep output order", () => {
+    // rg walks files in parallel, so the same search can print matches in a
+    // different order each run. The truncated top-N must not depend on it.
+    const lines = [
+      "/fake/repos/aztec-packages/yarn-project/pxe/src/b.ts:7:deploy",
+      "/fake/repos/aztec-packages/yarn-project/aztec.js/src/a.ts:12:deploy",
+      "/fake/repos/aztec-packages/yarn-project/aztec.js/src/a.ts:3:deploy",
+      "/fake/repos/aztec-packages/noir-projects/noir-contracts/x/src/main.nr:1:deploy",
+      "/fake/repos/aztec-packages/yarn-project/cli/src/c.ts:9:deploy",
+    ];
+    mockExistsSync.mockReturnValue(true);
+
+    mockExecFileSync.mockReturnValue(lines.join("\n") + "\n");
+    const first = searchCode("deploy", { filePattern: "*.ts", maxResults: 3 });
+
+    mockExecFileSync.mockReturnValue([...lines].reverse().join("\n") + "\n");
+    const second = searchCode("deploy", { filePattern: "*.ts", maxResults: 3 });
+
+    expect(second).toEqual(first);
+    expect(first.map((r) => `${r.file}:${r.line}`)).toEqual([
+      "aztec-packages/yarn-project/aztec.js/src/a.ts:3",
+      "aztec-packages/yarn-project/aztec.js/src/a.ts:12",
+      "aztec-packages/yarn-project/cli/src/c.ts:9",
+    ]);
   });
 
   it("sorts manual search results by source priority", () => {

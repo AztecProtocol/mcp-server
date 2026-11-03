@@ -41,7 +41,7 @@ export function searchCode(
   if (active && repo && !active.includes(repo.split("/")[0])) return [];
   if (active && !repo) {
     return active.flatMap((name) => searchCode(query, { ...options, repo: name }))
-      .sort((a, b) => getResultPriority(a) - getResultPriority(b)).slice(0, maxResults);
+      .sort(compareResults).slice(0, maxResults);
   }
   const searchPath = repo ? getRepoPath(repo) : REPOS_DIR;
 
@@ -230,6 +230,19 @@ export function getResultPriority(result: SearchResult): number {
   return 5;
 }
 
+/**
+ * Order search results by source priority, then by file path and line.
+ * ripgrep searches files in parallel, so its output order changes from run
+ * to run; without the path/line tie-break the same query could return a
+ * different top-N each time once results are truncated to maxResults.
+ */
+function compareResults(a: SearchResult, b: SearchResult): number {
+  const byPriority = getResultPriority(a) - getResultPriority(b);
+  if (byPriority !== 0) return byPriority;
+  if (a.file !== b.file) return a.file < b.file ? -1 : 1;
+  return (a.line ?? 0) - (b.line ?? 0);
+}
+
 // --- Helper functions ---
 
 function parseRgOutput(output: string, maxResults: number): SearchResult[] {
@@ -253,7 +266,7 @@ function parseRgOutput(output: string, maxResults: number): SearchResult[] {
     }
   }
 
-  results.sort((a, b) => getResultPriority(a) - getResultPriority(b));
+  results.sort(compareResults);
   return results.slice(0, maxResults);
 }
 
@@ -310,7 +323,7 @@ function manualSearch(
     // Globby error, return empty
   }
 
-  results.sort((a, b) => getResultPriority(a) - getResultPriority(b));
+  results.sort(compareResults);
   return results.slice(0, maxResults);
 }
 
